@@ -118,6 +118,7 @@ export function AddressInput({
                 value={address.contactInfo?.name || ''}
                 onChange={(e) => updateContactInfo('name', e.target.value)}
                 placeholder="Enter contact name"
+                autoComplete="name"
                 className={errors.name ? 'border-red-500' : ''}
               />
               {errors.name && (
@@ -131,6 +132,7 @@ export function AddressInput({
                 value={address.contactInfo?.company || ''}
                 onChange={(e) => updateContactInfo('company', e.target.value)}
                 placeholder="Enter company name"
+                autoComplete="organization"
               />
             </div>
           </div>
@@ -142,7 +144,8 @@ export function AddressInput({
                 type="tel"
                 value={address.contactInfo?.phone || ''}
                 onChange={(e) => updateContactInfo('phone', e.target.value)}
-                placeholder="(555) 123-4567"
+                placeholder="6144773222 or (614) 477-3222"
+                autoComplete="tel"
                 className={errors.phone ? 'border-red-500' : ''}
               />
               {errors.phone && (
@@ -157,6 +160,7 @@ export function AddressInput({
                 value={address.contactInfo?.email || ''}
                 onChange={(e) => updateContactInfo('email', e.target.value)}
                 placeholder="contact@company.com"
+                autoComplete="email"
               />
             </div>
           </div>
@@ -173,6 +177,7 @@ export function AddressInput({
                 value={address.address || ''}
                 onChange={(e) => updateField('address', e.target.value)}
                 placeholder="Enter street address"
+                autoComplete="street-address"
                 className={errors.address ? 'border-red-500' : ''}
               />
               {errors.address && (
@@ -186,6 +191,7 @@ export function AddressInput({
                 value={address.suite || ''}
                 onChange={(e) => updateField('suite', e.target.value)}
                 placeholder="Suite, unit, building, floor, etc."
+                autoComplete="address-line2"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -196,6 +202,7 @@ export function AddressInput({
                   value={address.city || ''}
                   onChange={(e) => updateField('city', e.target.value)}
                   placeholder="Enter city"
+                  autoComplete="address-level2"
                   className={errors.city ? 'border-red-500' : ''}
                 />
                 {errors.city && (
@@ -204,21 +211,20 @@ export function AddressInput({
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`${title.toLowerCase()}-state`}>State *</Label>
-                <Select 
-                  value={address.state || ''} 
-                  onValueChange={(value) => updateField('state', value)}
+                <select
+                  id={`${title.toLowerCase()}-state`}
+                  value={address.state || ''}
+                  onChange={(e) => updateField('state', e.target.value)}
+                  autoComplete="address-level1"
+                  className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.state ? 'border-red-500' : ''}`}
                 >
-                  <SelectTrigger className={errors.state ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {US_STATES.map((state) => (
-                      <SelectItem key={state.code} value={state.code}>
-                        {state.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">Select state</option>
+                  {US_STATES.map((state) => (
+                    <option key={state.code} value={state.code}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
                 {errors.state && (
                   <p className="text-sm text-red-600">{errors.state}</p>
                 )}
@@ -231,6 +237,7 @@ export function AddressInput({
                   onChange={(e) => updateField('zip', e.target.value)}
                   placeholder="12345"
                   maxLength={10}
+                  autoComplete="postal-code"
                   className={errors.zip ? 'border-red-500' : ''}
                 />
                 {errors.zip && (

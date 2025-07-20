@@ -196,8 +196,12 @@ export function useShippingForm(): ShippingFormState {
 
     if (!address.contactInfo?.phone?.trim()) {
       addressErrors[`${prefix}.phone`] = 'Phone number is required';
-    } else if (!/^\(\d{3}\) \d{3}-\d{4}$/.test(address.contactInfo.phone)) {
-      addressErrors[`${prefix}.phone`] = 'Phone number must be in format (555) 123-4567';
+    } else {
+      // Clean phone number of all non-digit characters
+      const cleanPhone = address.contactInfo.phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        addressErrors[`${prefix}.phone`] = 'Phone number must be 10 digits';
+      }
     }
 
     if (address.contactInfo?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.contactInfo.email)) {
@@ -278,17 +282,8 @@ export function useShippingForm(): ShippingFormState {
     const packageErrors = validatePackage(transaction.shipmentDetails?.package || {});
     Object.assign(newErrors, packageErrors);
 
-    // Business rule validations
-    const origin = transaction.shipmentDetails?.origin;
-    const destination = transaction.shipmentDetails?.destination;
-    
-    if (origin?.address && destination?.address && 
-        origin.address === destination.address && 
-        origin.city === destination.city && 
-        origin.state === destination.state &&
-        origin.zip === destination.zip) {
-      newErrors['business.sameAddress'] = 'Origin and destination addresses cannot be identical';
-    }
+    // Business rule validations - removed same address restriction
+    // Allow identical origin and destination addresses for testing and special cases
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
