@@ -1,10 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Enable experimental features
-  experimental: {
-    // Turbopack is already enabled via --turbopack flag in dev script
-  },
 
   // Environment variables
   env: {
@@ -25,15 +21,6 @@ const nextConfig: NextConfig = {
   compiler: {
     // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production',
-  },
-
-  // Bundle analyzer (development only)
-  webpack: (config, { dev, isServer }) => {
-    // Custom webpack config if needed
-    if (dev && !isServer) {
-      // Development-specific webpack config
-    }
-    return config;
   },
 
   // Output settings

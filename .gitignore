@@ -86,6 +86,7 @@ ai-docs
 .github/*copilot*.md
 .claude/settings.local.json
 /TASK*.md
+/techspec.md
 
 ## Sublime Text
 *.sublime-project
