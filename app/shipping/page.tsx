@@ -1,18 +1,23 @@
 'use client';
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Package, MapPin, User, Phone } from 'lucide-react';
-
-const TestShadowElement = () => {
-  return (
-    <div className="shadow-lg p-6 rounded-lg bg-primary text-white">
-      Test Shadow Element
-    </div>
-  );
-};
+import { MapPin } from 'lucide-react';
+import { AddressInput } from '@/components/forms/AddressInput';
+import { PackageInput } from '@/components/forms/PackageInput';
+import { useShipping } from '@/components/providers/ShippingProvider';
 
 export default function ShipmentDetailsPage() {
+  const {
+    transaction,
+    errors,
+    isValid,
+    updateOrigin,
+    updateDestination,
+    updatePackage
+  } = useShipping();
+
+  const shipmentDetails = transaction.shipmentDetails;
+
   return (
     <main className="space-y-6">
       {/* Page Header */}
@@ -26,67 +31,61 @@ export default function ShipmentDetailsPage() {
       </div>
 
       {/* Origin Address Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            Pickup Address (Origin)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Address input form will be implemented here
-          </div>
-        </CardContent>
-      </Card>
+      <AddressInput
+        title="Pickup Address (Origin)"
+        address={shipmentDetails?.origin || {}}
+        onChange={updateOrigin}
+        icon={<MapPin className="h-5 w-5" />}
+        iconColor="text-blue-600"
+        errors={Object.fromEntries(
+          Object.entries(errors)
+            .filter(([key]) => key.startsWith('origin.'))
+            .map(([key, value]) => [key.replace('origin.', ''), value])
+        )}
+      />
 
       {/* Destination Address Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-green-600" />
-            Delivery Address (Destination)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Address input form will be implemented here
-          </div>
-        </CardContent>
-      </Card>
+      <AddressInput
+        title="Delivery Address (Destination)"
+        address={shipmentDetails?.destination || {}}
+        onChange={updateDestination}
+        icon={<MapPin className="h-5 w-5" />}
+        iconColor="text-green-600"
+        errors={Object.fromEntries(
+          Object.entries(errors)
+            .filter(([key]) => key.startsWith('destination.'))
+            .map(([key, value]) => [key.replace('destination.', ''), value])
+        )}
+      />
 
       {/* Package Information Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-600" />
-            Package Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Package details form will be implemented here
-          </div>
-        </CardContent>
-      </Card>
+      <PackageInput
+        packageInfo={shipmentDetails?.package || {}}
+        onChange={updatePackage}
+        errors={Object.fromEntries(
+          Object.entries(errors)
+            .filter(([key]) => key.startsWith('package.'))
+            .map(([key, value]) => [key.replace('package.', ''), value])
+        )}
+      />
 
-      {/* Contact Information Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-orange-600" />
-            Contact Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Contact details form will be implemented here
+      {/* Business Rule Errors */}
+      {errors['business.sameAddress'] && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+          <div className="text-red-800 font-medium">
+            {errors['business.sameAddress']}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
-      {/* Test Shadow Element */}
-      <TestShadowElement />
+      {/* Form Status */}
+      <div className="text-sm text-muted-foreground">
+        {isValid ? (
+          <span className="text-green-600">✓ All required fields completed</span>
+        ) : (
+          <span>Please complete all required fields to continue</span>
+        )}
+      </div>
     </main>
   );
 }

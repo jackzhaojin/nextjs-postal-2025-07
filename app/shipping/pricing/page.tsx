@@ -2,77 +2,115 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { DollarSign, Truck, Plane, Package } from 'lucide-react';
+import { Truck, Plane, Package } from 'lucide-react';
+import { useShipping } from '@/components/providers/ShippingProvider';
 
-export default function PricingOptionsPage() {
+export default function PricingPage() {
+  const { transaction } = useShipping();
+
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Page Header */}
       <div className="text-center md:text-left">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
           Pricing & Options
         </h1>
         <p className="text-muted-foreground">
-          Compare shipping options and select the service that best fits your needs.
+          Select your preferred shipping service and review pricing options.
         </p>
       </div>
 
-      {/* Pricing Summary */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <DollarSign className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <p className="text-sm text-blue-600">
-              Pricing will be calculated based on your shipment details
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Shipment Summary */}
+      {transaction.shipmentDetails && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Shipment Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium">From:</span>
+                <div className="text-muted-foreground">
+                  {transaction.shipmentDetails.origin?.city}, {transaction.shipmentDetails.origin?.state} {transaction.shipmentDetails.origin?.zip}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">To:</span>
+                <div className="text-muted-foreground">
+                  {transaction.shipmentDetails.destination?.city}, {transaction.shipmentDetails.destination?.state} {transaction.shipmentDetails.destination?.zip}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Package:</span>
+                <div className="text-muted-foreground">
+                  {transaction.shipmentDetails.package?.type} - {transaction.shipmentDetails.package?.weight?.value} {transaction.shipmentDetails.package?.weight?.unit}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Value:</span>
+                <div className="text-muted-foreground">
+                  ${transaction.shipmentDetails.package?.declaredValue} {transaction.shipmentDetails.package?.currency}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Ground Shipping Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5 text-green-600" />
-            Ground Shipping
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Ground shipping options will be displayed here
-          </div>
-        </CardContent>
-      </Card>
+      {/* Mock Pricing Options */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-2 hover:border-blue-200 cursor-pointer transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-blue-600" />
+              Ground Service
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-blue-600">$24.99</div>
+              <div className="text-sm text-muted-foreground">3-5 business days</div>
+              <div className="text-sm">Standard ground delivery</div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Air Shipping Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plane className="h-5 w-5 text-blue-600" />
-            Air Express
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Air express options will be displayed here
-          </div>
-        </CardContent>
-      </Card>
+        <Card className="border-2 hover:border-green-200 cursor-pointer transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-green-600" />
+              Express Service
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-green-600">$39.99</div>
+              <div className="text-sm text-muted-foreground">2-3 business days</div>
+              <div className="text-sm">Faster delivery</div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Freight Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-600" />
-            Freight Services
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Freight service options will be displayed here
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <Card className="border-2 hover:border-purple-200 cursor-pointer transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plane className="h-5 w-5 text-purple-600" />
+              Overnight
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-purple-600">$59.99</div>
+              <div className="text-sm text-muted-foreground">Next business day</div>
+              <div className="text-sm">Premium delivery</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="text-center text-muted-foreground">
+        Pricing page - Step 2 implementation in progress
+      </div>
+    </main>
   );
 }

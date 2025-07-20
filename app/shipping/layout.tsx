@@ -1,10 +1,8 @@
-import type { Metadata } from 'next';
-import { ShippingLayout } from '@/components/layout/ShippingLayout';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Shipping Process - B2B Shipping System',
-  description: 'Complete your shipment booking in 6 easy steps',
-};
+import type { Metadata } from 'next';
+import { ShippingProvider, useShipping } from '@/components/providers/ShippingProvider';
+import { ShippingLayout } from '@/components/layout/ShippingLayout';
 
 // Default shipping steps configuration
 const defaultShippingSteps = [
@@ -62,19 +60,46 @@ interface ShippingLayoutWrapperProps {
   children: React.ReactNode;
 }
 
-export default function ShippingLayoutWrapper({ children }: ShippingLayoutWrapperProps) {
+function ShippingLayoutInner({ children }: ShippingLayoutWrapperProps) {
+  const {
+    currentStep,
+    canGoBack,
+    canGoNext,
+    isValid,
+    isLoading,
+    isDirty,
+    goToPrevious,
+    goToNext,
+    saveProgress,
+    resetShipment
+  } = useShipping();
+
   return (
     <ShippingLayout
-      currentStep={1}
+      currentStep={currentStep}
       steps={defaultShippingSteps}
       showStepIndicator={true}
       showNavigation={true}
       allowStepNavigation={false}
-      canGoBack={false}
-      canGoNext={false}
-      isValid={false}
+      canGoBack={canGoBack}
+      canGoNext={canGoNext}
+      isValid={isValid}
+      isLoading={isLoading}
+      isSaving={isDirty}
+      onPrevious={goToPrevious}
+      onNext={goToNext}
+      onSave={saveProgress}
+      onReset={resetShipment}
     >
       {children}
     </ShippingLayout>
+  );
+}
+
+export default function ShippingLayoutWrapper({ children }: ShippingLayoutWrapperProps) {
+  return (
+    <ShippingProvider>
+      <ShippingLayoutInner>{children}</ShippingLayoutInner>
+    </ShippingProvider>
   );
 }

@@ -40,6 +40,16 @@ export interface ContactInfo {
   extension?: string;
 }
 
+export type SpecialHandlingType = 
+  | 'fragile' 
+  | 'this-side-up' 
+  | 'temperature-controlled' 
+  | 'hazmat' 
+  | 'white-glove' 
+  | 'inside-delivery' 
+  | 'liftgate-pickup' 
+  | 'liftgate-delivery';
+
 export interface PackageInfo {
   type: 'envelope' | 'small' | 'medium' | 'large' | 'pallet' | 'crate' | 'multiple';
   dimensions: Dimensions;
@@ -48,7 +58,7 @@ export interface PackageInfo {
   currency: 'USD' | 'CAD' | 'MXN';
   contents: string;
   contentsCategory: PackageContentsCategory;
-  specialHandling: SpecialHandling[];
+  specialHandling: SpecialHandlingType[];
   multiplePackages?: MultiplePackageDetails;
 }
 
@@ -494,3 +504,27 @@ export interface AddressInputProps {
   required?: boolean;
   showContactInfo?: boolean;
 }
+
+// Package Type Limits and Special Handling Fees
+// These constants are used by PackageInput component for validation and pricing
+
+export const PACKAGE_TYPE_LIMITS: Record<string, { maxWeight: number; maxVolume: number }> = {
+  'envelope': { maxWeight: 1, maxVolume: 100 },
+  'small': { maxWeight: 10, maxVolume: 1000 },
+  'medium': { maxWeight: 50, maxVolume: 5000 },
+  'large': { maxWeight: 150, maxVolume: 15000 },
+  'pallet': { maxWeight: 2500, maxVolume: 100000 },
+  'crate': { maxWeight: 5000, maxVolume: 200000 },
+  'multiple': { maxWeight: 10000, maxVolume: 500000 }
+};
+
+export const SPECIAL_HANDLING_FEES: Record<string, number> = {
+  'fragile': 15,
+  'this-side-up': 5,
+  'temperature-controlled': 75,
+  'hazmat': 50,
+  'white-glove': 125,
+  'inside-delivery': 45,
+  'liftgate-pickup': 35,
+  'liftgate-delivery': 35
+};
