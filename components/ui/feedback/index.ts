@@ -1,8 +1,10 @@
 // Feedback Components
-export { EnhancedAlert } from './EnhancedAlert'
-export { LoadingSpinner } from './LoadingSpinner'
-export { ProgressBar } from './ProgressBar'
-export { ValidationMessage } from './ValidationMessage'
+export * from './EnhancedAlert'
+export * from './LoadingSpinner'
+export * from './ProgressBar'
+export * from './ValidationMessage'
+export * from './Toast'
+export * from './ErrorBoundary'
 
 // Export types
 export type { EnhancedAlertProps } from './EnhancedAlert'

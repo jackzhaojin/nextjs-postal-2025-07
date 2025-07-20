@@ -8,6 +8,11 @@ export {
   CardDescription
 } from './EnhancedCard'
 
+export * from './Modal'
+export * from './Drawer'
+export * from './Tabs'
+export * from './Accordion'
+
 // Export types
 export type { 
   EnhancedCardProps,
