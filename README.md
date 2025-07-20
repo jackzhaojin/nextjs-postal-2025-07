@@ -43,15 +43,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Selected Configuration
 
-| Option                                      | Selected |
-|--------------------------------------------|----------|
-| Use TypeScript                             | Yes      |
-| Use ESLint                                 | No       |
-| Use Tailwind CSS                           | Yes      |
-| Place code inside `/src` directory         | No       |
-| Use App Router (recommended)               | Yes      |
-| Use Turbopack for `next dev`               | Yes      |
-| Customize import alias (`@/*` by default)  | No       |
+| Option                                    | Selected |
+| ----------------------------------------- | -------- |
+| Use TypeScript                            | Yes      |
+| Use ESLint                                | No       |
+| Use Tailwind CSS                          | Yes      |
+| Place code inside `/src` directory        | No       |
+| Use App Router (recommended)              | Yes      |
+| Use Turbopack for `next dev`              | Yes      |
+| Customize import alias (`@/*` by default) | No       |
 
 ## Dependencies Installed
 
