@@ -4,9 +4,17 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Package, MapPin, User, Phone } from 'lucide-react';
 
+const TestShadowElement = () => {
+  return (
+    <div className="shadow-lg p-6 rounded-lg bg-primary text-white">
+      Test Shadow Element
+    </div>
+  );
+};
+
 export default function ShipmentDetailsPage() {
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Page Header */}
       <div className="text-center md:text-left">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
@@ -76,6 +84,9 @@ export default function ShipmentDetailsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+
+      {/* Test Shadow Element */}
+      <TestShadowElement />
+    </main>
   );
 }
