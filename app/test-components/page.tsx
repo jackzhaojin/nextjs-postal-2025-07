@@ -371,7 +371,11 @@ export default function ComponentTestPage() {
                     </div>
                   </DrawerBody>
                   <DrawerFooter>
-                    <Button variant="outline" onClick={() => setDrawerOpen(false)}>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setDrawerOpen(false)}
+                      data-testid="drawer-cancel-button"
+                    >
                       Cancel
                     </Button>
                     <Button onClick={() => setDrawerOpen(false)}>

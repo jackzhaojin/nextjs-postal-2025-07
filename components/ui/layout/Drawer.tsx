@@ -129,7 +129,7 @@ export function DrawerContent({
     <SheetContent 
       side={sideMapping[direction]}
       className={cn(
-        "flex flex-col gap-0 p-0",
+        "flex flex-col gap-0 p-0 overflow-hidden",
         getSizeClasses(),
         !showOverlay && "shadow-2xl border-l",
         className
@@ -211,7 +211,7 @@ export function DrawerBody({
   return (
     <div 
       className={cn(
-        "px-6 py-4 flex-1 overflow-y-auto",
+        "px-6 py-4 flex-1 overflow-y-auto min-h-0",
         className
       )}
       {...props}

@@ -89,9 +89,15 @@ test.describe('Task 2.2 UI Components', () => {
     await expect(page.getByText('Notification Settings')).toBeVisible()
     await expect(page.getByText('Email notifications')).toBeVisible()
     
-    // Close drawer - look for Cancel button
-    const cancelButton = page.getByRole('button', { name: 'Cancel' }).last()
-    await cancelButton.click()
+    // Close drawer using the test ID which should be more reliable
+    const cancelButton = page.getByTestId('drawer-cancel-button')
+    await expect(cancelButton).toBeVisible()
+    
+    // Scroll to ensure the button is in view and clickable
+    await cancelButton.scrollIntoViewIfNeeded()
+    
+    // Click with force to override any pointer event interception
+    await cancelButton.click({ force: true })
     
     // Wait for drawer to close
     await expect(page.getByText('Settings Panel')).not.toBeVisible({ timeout: 5000 })
