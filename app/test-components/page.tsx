@@ -76,7 +76,8 @@ function ToastDemo() {
         onClick={() => addToast({ 
           title: "Success!", 
           description: "Your action was completed successfully.",
-          type: "success" 
+          type: "success",
+          duration: 8000
         })}
       >
         Success Toast
@@ -86,7 +87,8 @@ function ToastDemo() {
         onClick={() => addToast({ 
           title: "Error occurred", 
           description: "Something went wrong. Please try again.",
-          type: "error" 
+          type: "error",
+          duration: 8000
         })}
       >
         Error Toast
@@ -96,7 +98,8 @@ function ToastDemo() {
         onClick={() => addToast({ 
           title: "Information", 
           description: "Here's some useful information for you.",
-          type: "info" 
+          type: "info",
+          duration: 8000
         })}
       >
         Info Toast
