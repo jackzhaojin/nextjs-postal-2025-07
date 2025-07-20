@@ -86,11 +86,12 @@ export async function GET(request: NextRequest) {
       throw validationError;
     }
 
-    // Generate cache key
-    const cacheKey = CacheManager.getFormConfigKey(
+    // Generate cache key including sections for proper separation
+    const sectionsKey = validatedRequest.sections ? validatedRequest.sections.sort().join(',') : 'all';
+    const cacheKey = `${CacheManager.getFormConfigKey(
       validatedRequest.locale,
       validatedRequest.version || CACHE_VERSION
-    );
+    )}:sections:${sectionsKey}`;
 
     // Check for conditional request (If-None-Match)
     const clientETag = request.headers.get('if-none-match');
@@ -143,48 +144,16 @@ export async function GET(request: NextRequest) {
         const assemblyStart = performance.now();
         
         try {
-          // Validate form configuration data integrity
-          const dataValidationStart = performance.now();
-          
-          // Check data consistency
-          if (!formConfigData.packageTypes || formConfigData.packageTypes.length === 0) {
+          // Quick validation (minimal overhead)
+          if (!formConfigData.packageTypes?.length || !formConfigData.countries?.length || !formConfigData.validation?.length) {
             throw new ApiError(
               ErrorCodes.INTERNAL_SERVER_ERROR,
-              'Package types configuration is missing or empty',
-              { section: 'packageTypes' },
+              'Form configuration data is incomplete',
+              { hasPackageTypes: !!formConfigData.packageTypes?.length, hasCountries: !!formConfigData.countries?.length, hasValidation: !!formConfigData.validation?.length },
               500,
               requestId
             );
           }
-
-          if (!formConfigData.countries || formConfigData.countries.length === 0) {
-            throw new ApiError(
-              ErrorCodes.INTERNAL_SERVER_ERROR,
-              'Geographic data configuration is missing or empty',
-              { section: 'countries' },
-              500,
-              requestId
-            );
-          }
-
-          if (!formConfigData.validation || formConfigData.validation.length === 0) {
-            throw new ApiError(
-              ErrorCodes.INTERNAL_SERVER_ERROR,
-              'Validation rules configuration is missing or empty',
-              { section: 'validation' },
-              500,
-              requestId
-            );
-          }
-
-          logger.log('info', 'Data integrity validation completed', {
-            validationTime: performance.now() - dataValidationStart,
-            packageTypesCount: formConfigData.packageTypes.length,
-            countriesCount: formConfigData.countries.length,
-            specialHandlingCount: formConfigData.specialHandling.length,
-            industriesCount: formConfigData.industries.length,
-            validationSectionsCount: formConfigData.validation.length
-          });
 
           // Apply any request-specific filtering
           let responseData = { ...formConfigData };
@@ -221,19 +190,10 @@ export async function GET(request: NextRequest) {
           };
 
           const assemblyTime = Math.round(performance.now() - assemblyStart);
-          logger.log('info', 'Configuration data assembly completed', {
-            assemblyTime,
-            dataSize: JSON.stringify(responseData).length,
-            sections: Object.keys(responseData).filter(k => k !== 'metadata')
-          });
-
+          
           return responseData;
 
         } catch (error) {
-          logger.log('error', 'Failed to assemble configuration data', { 
-            error: error instanceof Error ? error.message : 'Unknown error',
-            assemblyTime: performance.now() - assemblyStart
-          });
           throw error;
         }
       }
@@ -249,13 +209,11 @@ export async function GET(request: NextRequest) {
     // Build response
     const processingTime = Math.round(performance.now() - startTime);
 
-    logger.log('info', 'Form configuration request completed successfully', {
+    logger.log('info', 'Form configuration request completed', {
       processingTime,
-      dataSize: JSON.stringify(configData).length,
       cacheKey,
       etag,
-      sections: Object.keys(configData).filter(k => k !== 'metadata'),
-      cacheStats: globalCache.getStats()
+      sections: Object.keys(configData).filter(k => k !== 'metadata').length
     });
 
     return formatter.success(configData, {
