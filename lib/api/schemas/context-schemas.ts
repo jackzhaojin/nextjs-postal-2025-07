@@ -39,7 +39,7 @@ export const ProjectContextSchema = z.object({
   name: z.string(),
   version: z.string().optional(),
   environment: z.enum(['development', 'staging', 'production']).default('development'),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const PhaseContextSchema = z.object({
@@ -48,7 +48,7 @@ export const PhaseContextSchema = z.object({
   status: z.enum(['planning', 'active', 'completed', 'cancelled']).default('active'),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const TaskContextSchema = z.object({
@@ -59,7 +59,7 @@ export const TaskContextSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
   createdAt: z.string(),
   updatedAt: z.string(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const EnhancedMCPContextSchema = z.object({

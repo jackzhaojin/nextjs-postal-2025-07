@@ -8,6 +8,7 @@ import {
   generateSessionId, 
   logContextBootstrap,
   TraceLogger,
+  TraceEvent,
   createTraceLogger
 } from '../utils/trace-logger';
 
@@ -270,7 +271,7 @@ export async function bootstrapDevelopmentContext(
 
 // Create a no-op tracer for scenarios where tracing is disabled
 function createNoOpTracer(context: MCPContextType): TraceLogger {
-  return {
+  const noOpTracer = {
     startSpan: () => 'noop',
     endSpan: () => {},
     log: () => {},
@@ -284,7 +285,9 @@ function createNoOpTracer(context: MCPContextType): TraceLogger {
       warnings: 0,
       duration: 0
     })
-  } as TraceLogger;
+  };
+  
+  return noOpTracer as unknown as TraceLogger;
 }
 
 export interface ContextValidationResult {

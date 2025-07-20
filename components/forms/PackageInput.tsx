@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Package, AlertTriangle, Calculator } from 'lucide-react';
-import { PackageInfo, SpecialHandling, PACKAGE_TYPE_LIMITS, SPECIAL_HANDLING_FEES } from '@/lib/types';
+import { PackageInfo, SpecialHandlingType, PACKAGE_TYPE_LIMITS, SPECIAL_HANDLING_FEES } from '@/lib/types';
 
 interface PackageInputProps {
   packageInfo: Partial<PackageInfo>;
@@ -91,7 +91,7 @@ export function PackageInput({ packageInfo, onChange, errors = {} }: PackageInpu
     });
   };
 
-  const updateDimensions = (field: string, value: number) => {
+  const updateDimensions = (field: string, value: number | string) => {
     const newDimensions = {
       ...packageInfo.dimensions,
       [field]: value
@@ -109,12 +109,12 @@ export function PackageInput({ packageInfo, onChange, errors = {} }: PackageInpu
 
   const toggleSpecialHandling = (handlingId: string) => {
     const current = packageInfo.specialHandling || [];
-    const exists = current.includes(handlingId as SpecialHandling);
+    const exists = current.includes(handlingId as SpecialHandlingType);
     
     if (exists) {
       updateField('specialHandling', current.filter(h => h !== handlingId));
     } else {
-      updateField('specialHandling', [...current, handlingId as SpecialHandling]);
+      updateField('specialHandling', [...current, handlingId as SpecialHandlingType]);
     }
   };
 
@@ -420,7 +420,7 @@ export function PackageInput({ packageInfo, onChange, errors = {} }: PackageInpu
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={option.id}
-                  checked={(packageInfo.specialHandling || []).includes(option.id as SpecialHandling)}
+                  checked={(packageInfo.specialHandling || []).includes(option.id as SpecialHandlingType)}
                   onCheckedChange={() => toggleSpecialHandling(option.id)}
                 />
                 <Label htmlFor={option.id} className="text-sm flex-1 cursor-pointer">

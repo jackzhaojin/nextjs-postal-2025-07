@@ -53,11 +53,9 @@ export function validateRequest<T>(schema: ZodSchema<T>) {
             'Request validation failed',
             {
               code: 'SCHEMA_VALIDATION_FAILED',
-              errors: validationError.errors.map(err => ({
+              errors: validationError.issues.map(err => ({
                 field: err.path.join('.'),
                 message: err.message,
-                received: err.received,
-                expected: err.expected,
                 code: err.code
               }))
             },
@@ -179,11 +177,10 @@ export function validateQueryParams<T>(
         ErrorCodes.SCHEMA_VALIDATION_FAILED,
         'Query parameter validation failed',
         {
-          errors: error.errors.map(err => ({
+          errors: error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            received: err.received,
-            expected: err.expected
+            code: err.code
           }))
         },
         400

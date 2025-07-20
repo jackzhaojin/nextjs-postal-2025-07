@@ -51,7 +51,7 @@ export const TaskValidationSuccessResponseSchema = SuccessResponseSchema.extend(
       schemaValid: z.boolean(),
       businessRulesValid: z.boolean(),
       contextValid: z.boolean(),
-      details: z.record(z.any()).optional()
+      details: z.record(z.string(), z.any()).optional()
     }).optional()
   })
 });
@@ -76,7 +76,7 @@ export const HealthCheckResponseSchema = SuccessResponseSchema.extend({
     status: z.enum(['healthy', 'degraded', 'unhealthy']),
     version: z.string(),
     uptime: z.number(),
-    dependencies: z.record(z.object({
+    dependencies: z.record(z.string(), z.object({
       status: z.enum(['available', 'unavailable']),
       responseTime: z.number().optional(),
       lastChecked: z.string()

@@ -2,7 +2,9 @@
 import { jest } from '@jest/globals';
 
 // Mock Next.js environment variables
-process.env.NODE_ENV = 'test';
+if (!process.env.NODE_ENV) {
+  (process.env as any).NODE_ENV = 'test';
+}
 
 // Mock performance.now for consistent timing in tests
 const mockPerformance = {
@@ -43,7 +45,7 @@ export const createMockRequest = (
   body?: any,
   headers: Record<string, string> = {}
 ) => {
-  const defaultHeaders = {
+  const defaultHeaders: Record<string, string> = {
     'content-type': 'application/json',
     'user-agent': 'jest-test-runner',
     ...headers

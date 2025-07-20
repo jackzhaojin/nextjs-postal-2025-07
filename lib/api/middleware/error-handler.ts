@@ -40,11 +40,10 @@ export function handleApiError(error: unknown, context?: Partial<ErrorContext>):
       ErrorCodes.SCHEMA_VALIDATION_FAILED,
       'Request validation failed',
       {
-        errors: error.errors.map(err => ({
+        errors: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message,
-          received: err.received,
-          expected: err.expected
+          code: err.code
         }))
       },
       422,
@@ -234,7 +233,7 @@ export function handleValidationError(error: ZodError, requestId?: string): Next
       ErrorCodes.SCHEMA_VALIDATION_FAILED,
       'Validation failed',
       {
-        errors: error.errors.map(err => ({
+        errors: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message,
           code: err.code

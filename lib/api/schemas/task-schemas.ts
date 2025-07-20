@@ -5,12 +5,12 @@ export const TaskValidationRequest = z.object({
     input: z.string().min(1, 'Instruction input is required'),
     type: z.enum(['code-generation', 'validation', 'analysis', 'transformation']),
     priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
-    metadata: z.record(z.any()).optional()
+    metadata: z.record(z.string(), z.any()).optional()
   }),
   context: z.object({
     project: z.string().min(1, 'Project identifier is required'),
     phase: z.string().min(1, 'Phase identifier is required'),
-    metadata: z.record(z.any()).optional()
+    metadata: z.record(z.string(), z.any()).optional()
   }),
   options: z.object({
     validateOnly: z.boolean().default(true),
@@ -24,13 +24,13 @@ export const TaskExecutionRequest = z.object({
     input: z.string().min(1, 'Instruction input is required'),
     type: z.enum(['code-generation', 'validation', 'analysis', 'transformation']),
     priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
-    metadata: z.record(z.any()).optional()
+    metadata: z.record(z.string(), z.any()).optional()
   }),
   context: z.object({
     project: z.string().min(1, 'Project identifier is required'),
     phase: z.string().min(1, 'Phase identifier is required'),
     taskId: z.string().optional(),
-    metadata: z.record(z.any()).optional()
+    metadata: z.record(z.string(), z.any()).optional()
   }),
   options: z.object({
     async: z.boolean().default(false),

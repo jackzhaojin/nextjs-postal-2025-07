@@ -89,11 +89,19 @@ export function AddressInput({
   };
 
   const updateContactInfo = (field: string, value: any) => {
+    const currentContactInfo = address.contactInfo || {
+      name: '',
+      phone: '',
+      email: '',
+      company: '',
+      extension: ''
+    };
+    
     onChange({
       ...address,
       contactInfo: {
-        ...address.contactInfo,
-        [field]: value
+        ...currentContactInfo,
+        [field]: value || ''
       }
     });
   };
