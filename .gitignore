@@ -74,6 +74,7 @@ out/
 ai-docs
 /*AGENT*.md  
 /*CLAUDE*.md
+/*release*.mdc
 /*PRD*.md
 /.clauderc
 /*TECHNICAL*.md
