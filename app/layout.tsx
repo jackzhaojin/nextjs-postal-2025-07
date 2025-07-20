@@ -17,8 +17,12 @@ export const metadata: Metadata = {
   description: 'Professional shipping solutions for businesses. Fast, reliable, and transparent pricing.',
   keywords: ['shipping', 'b2b', 'transport', 'logistics', 'freight'],
   authors: [{ name: 'B2B Shipping System' }],
-  viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
