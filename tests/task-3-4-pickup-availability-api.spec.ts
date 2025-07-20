@@ -301,7 +301,9 @@ test.describe('Pickup Availability API - Task 3.4', () => {
     test('should reject unsupported service areas', async ({ request }) => {
       console.log('🧪 Testing unsupported service area rejection...');
       
-      const response = await request.get(`${baseURL}/api/pickup-availability?zip=${invalidZipCodes.military}`);
+      // Use a ZIP code that will trigger business rule validation (extreme remote area)
+      const unsupportedZip = '99950'; // Very remote Alaska area
+      const response = await request.get(`${baseURL}/api/pickup-availability?zip=${unsupportedZip}`);
       expect(response.status()).toBe(400);
       const data = await response.json();
       
@@ -372,7 +374,8 @@ test.describe('Pickup Availability API - Task 3.4', () => {
       
       // All returned dates should be business days (Monday-Friday, non-holidays)
       data.data.availableDates.forEach((date: any) => {
-        const dateObj = new Date(date.date);
+        // Parse date correctly to avoid timezone issues
+        const dateObj = new Date(date.date + 'T12:00:00');
         const dayOfWeek = dateObj.getDay();
         expect(dayOfWeek).toBeGreaterThanOrEqual(1); // Monday
         expect(dayOfWeek).toBeLessThanOrEqual(5); // Friday

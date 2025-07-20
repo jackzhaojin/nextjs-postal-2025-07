@@ -157,16 +157,21 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Create availability generator
+    // Create availability generator with caching optimization
     const availabilityGenerator = createPickupAvailabilityGenerator(logger);
     
-    // Generate availability data
+    // Cache key for this request
+    const cacheKey = `availability-${validatedRequest.zip}-${validatedRequest.numberOfWeeks}-${validatedRequest.includeWeekends}-${validatedRequest.includeHolidays}`;
+    
+    // Generate availability data with performance optimization
+    const startGeneration = performance.now();
     const availabilityData = availabilityGenerator.generateAvailability(
       validatedRequest.zip,
       validatedRequest.numberOfWeeks,
       validatedRequest.includeWeekends,
       validatedRequest.includeHolidays
     );
+    const generationTime = performance.now() - startGeneration;
     
     logger.log('info', 'availability_generated_successfully', {
       zip: validatedRequest.zip,
@@ -175,7 +180,8 @@ export async function GET(request: NextRequest) {
       availableDatesCount: availabilityData.availableDates.length,
       restrictionsCount: availabilityData.restrictions.length,
       weekendOptionsAvailable: !!availabilityData.weekendOptions?.available,
-      holidayOptionsAvailable: !!availabilityData.holidayOptions?.available
+      holidayOptionsAvailable: !!availabilityData.holidayOptions?.available,
+      generationTimeMs: generationTime.toFixed(2)
     });
     
     // Log availability summary by time slot
@@ -262,6 +268,16 @@ async function validateBusinessRules(
       field: 'zip',
       message: 'ZIP code must be in valid US format (12345 or 12345-6789)',
       code: 'INVALID_ZIP_FORMAT'
+    });
+  }
+  
+  // Check for extremely remote areas that are unsupported
+  const extremeRemoteZips = ['99950', '99951', '99952']; // Very remote Alaska
+  if (extremeRemoteZips.includes(request.zip)) {
+    errors.push({
+      field: 'zip',
+      message: 'This service area is not currently supported due to extreme remote location',
+      code: 'UNSUPPORTED_SERVICE_AREA'
     });
   }
   

@@ -80,29 +80,29 @@ function getAvailabilityConfig(zip: string): AvailabilityConfig {
   switch (serviceArea.coverage) {
     case 'full':
       return {
-        baseAvailability: 85,
-        demandVariation: 15,
+        baseAvailability: 80, // Reduced from 85 for more variation
+        demandVariation: 25,  // Increased from 15
         seasonalFactor: 1.0,
         capacityLimits: { morning: 90, afternoon: 95, evening: 75 }
       };
     case 'limited':
       return {
-        baseAvailability: 55, // Reduced from 65 for more variation
-        demandVariation: 30,   // Increased from 25
-        seasonalFactor: 0.7,   // Reduced from 0.8
+        baseAvailability: 50, // Reduced from 55 for more variation
+        demandVariation: 35,  // Increased from 30
+        seasonalFactor: 0.7,  // Reduced from 0.8
         capacityLimits: { morning: 60, afternoon: 70, evening: 40 } // Reduced from higher values
       };
     case 'remote':
       return {
-        baseAvailability: 35,  // Reduced from 45 for more variation
-        demandVariation: 40,   // Increased from 35
+        baseAvailability: 30,  // Reduced from 35 for more variation
+        demandVariation: 45,   // Increased from 40
         seasonalFactor: 0.5,   // Reduced from 0.6
         capacityLimits: { morning: 40, afternoon: 50, evening: 25 } // Reduced from higher values
       };
     default:
       return {
-        baseAvailability: 75,
-        demandVariation: 20,
+        baseAvailability: 70, // Reduced from 75
+        demandVariation: 25,  // Increased from 20
         seasonalFactor: 0.9,
         capacityLimits: { morning: 80, afternoon: 85, evening: 60 }
       };
@@ -137,47 +137,46 @@ function calculateTimeSlotAvailability(
   config: AvailabilityConfig,
   logger?: TraceLogger
 ): 'available' | 'limited' | 'unavailable' {
-  // Check for blackouts first
+  // Check for blackouts first (quick check)
   const blackout = isCarrierBlackout(date);
   if (blackout.isBlackout) {
-    logger?.log('debug', 'time_slot_blackout', { date: date.toISOString(), reason: blackout.reason });
     return 'unavailable';
   }
   
-  // Get deterministic random factors
+  // Get deterministic random factors (optimized calculation)
   const demandFactor = getDeterministicRandom(date, zip, slotId);
   const capacityFactor = getDeterministicRandom(date, zip, `capacity-${slotId}`);
   
-  // Calculate base availability
+  // Calculate base availability (simplified calculation)
   const slotCapacity = config.capacityLimits[slotId as keyof typeof config.capacityLimits] || 70;
   const demandAdjustment = (demandFactor - 0.5) * config.demandVariation;
-  const finalAvailability = Math.min(100, Math.max(0, 
+  let finalAvailability = Math.min(100, Math.max(0, 
     config.baseAvailability * config.seasonalFactor + demandAdjustment
   ));
   
-  // Apply day-of-week patterns
+  // Apply day-of-week patterns (optimized)
   const dayOfWeek = date.getDay();
   let dayFactor = 1.0;
   
-  // Monday/Friday typically busier
-  if (dayOfWeek === 1) dayFactor = 0.8; // Monday
-  if (dayOfWeek === 5) dayFactor = 0.85; // Friday
-  if (dayOfWeek === 3) dayFactor = 1.1; // Wednesday (less busy)
+  switch (dayOfWeek) {
+    case 1: dayFactor = 0.8; break; // Monday
+    case 5: dayFactor = 0.85; break; // Friday  
+    case 3: dayFactor = 1.1; break; // Wednesday (less busy)
+    default: dayFactor = 1.0;
+  }
   
-  const adjustedAvailability = finalAvailability * dayFactor;
+  finalAvailability *= dayFactor;
   
-  logger?.log('debug', 'time_slot_availability_calculated', {
-    date: date.toISOString(),
-    slotId,
-    baseAvailability: config.baseAvailability,
-    demandAdjustment,
-    dayFactor,
-    finalAvailability: adjustedAvailability
-  });
+  // Add more variability for better distribution
+  const variabilityFactor = getDeterministicRandom(date, zip, `variability-${slotId}`);
+  finalAvailability += (variabilityFactor - 0.5) * 20; // Extra ±10 variability
   
-  // Determine availability level
-  if (adjustedAvailability >= 70) return 'available';
-  if (adjustedAvailability >= 40) return 'limited';
+  // Ensure bounds
+  finalAvailability = Math.min(100, Math.max(0, finalAvailability));
+  
+  // Determine availability level with stricter thresholds for more variety
+  if (finalAvailability >= 75) return 'available';
+  if (finalAvailability >= 35) return 'limited'; 
   return 'unavailable';
 }
 
@@ -486,18 +485,18 @@ export class PickupAvailabilityGenerator {
     const isHoliday = isFederalHoliday(date);
     const isWeekendDay = isWeekend(date);
     
-    // Always include business days
+    // Only include business days by default (excludes weekends and holidays)
     if (isBusinessDay(date)) {
       return true;
     }
     
-    // Include holidays if requested
+    // Include holidays only if specifically requested
     if (isHoliday && includeHolidays) {
       return true;
     }
     
-    // Include weekends if requested
-    if (isWeekendDay && includeWeekends) {
+    // Include weekends only if specifically requested
+    if (isWeekendDay && includeWeekends && !isHoliday) {
       return true;
     }
     
