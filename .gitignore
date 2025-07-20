@@ -80,6 +80,7 @@ ai-docs
 /*TECHNICAL*.md
 .github/*copilot*.md
 .claude/settings.local.json
+/TASK*.md
 
 ## Sublime Text
 *.sublime-project
