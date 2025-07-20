@@ -202,7 +202,7 @@ const config: Config = {
         responsive: '1280px',
       },
       
-      // Border Radius
+      // Border Radius - Modern Design System
       borderRadius: {
         none: '0',
         sm: 'var(--radius-sm)',
@@ -210,6 +210,8 @@ const config: Config = {
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
         xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
+        '3xl': 'var(--radius-3xl)', // Modern rounded design from inspiration
         full: '9999px',
       },
       
@@ -307,6 +309,45 @@ const config: Config = {
       });
       
       addComponents({
+        // Modern Design System Components
+        '.bento-grid': {
+          display: 'grid',
+          width: '100%',
+          gridTemplateColumns: 'repeat(1, 1fr)',
+          gap: '1rem',
+          '@screen md': {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+          },
+          '@screen lg': {
+            gridTemplateColumns: 'repeat(3, 1fr)',
+          },
+        },
+        
+        '.bento-card': {
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          overflow: 'hidden',
+          borderRadius: 'var(--radius-3xl)',
+          backgroundColor: 'var(--card)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05)',
+          transition: 'all 300ms ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 0 0 1px rgba(0,0,0,.05), 0 4px 8px rgba(0,0,0,.1), 0 16px 32px rgba(0,0,0,.1)',
+          },
+        },
+        
+        '.bento-card-content': {
+          padding: '1.5rem',
+          zIndex: '10',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        },
+        
         // Container utilities
         '.container-responsive': {
           maxWidth: '1280px',

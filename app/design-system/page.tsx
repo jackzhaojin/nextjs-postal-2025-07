@@ -7,12 +7,22 @@
 'use client';
 
 import React, { useState } from 'react';
+import {
+  FileTextIcon,
+  CalendarIcon,
+  GlobeIcon,
+  BellIcon,
+  InputIcon,
+} from "@radix-ui/react-icons";
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { ModernCard, ModernCardContent, ModernCardDescription, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
 import { cn } from '@/lib/utils';
 
 // Icons for demonstration
@@ -192,17 +202,149 @@ const ButtonShowcase = () => {
   );
 };
 
+// Modern Design System Features for Bento Grid
+const modernDesignFeatures = [
+  {
+    Icon: FileTextIcon,
+    name: "Shipping Documents",
+    description: "Automated document generation for all shipment types including BOL, commercial invoices, and customs forms.",
+    href: "/shipping",
+    cta: "Start Shipping",
+    className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
+  },
+  {
+    Icon: InputIcon,
+    name: "Smart Address Lookup",
+    description: "Real-time address validation and autocomplete for accurate delivery locations.",
+    href: "/shipping",
+    cta: "Try Now",
+    className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
+  },
+  {
+    Icon: GlobeIcon,
+    name: "Global Coverage",
+    description: "International shipping to 220+ countries with customs clearance support.",
+    href: "/shipping",
+    cta: "View Coverage",
+    className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
+  },
+  {
+    Icon: CalendarIcon,
+    name: "Flexible Scheduling",
+    description: "Schedule pickups up to 3 weeks in advance with real-time availability.",
+    href: "/shipping/pickup",
+    cta: "Schedule Now",
+    className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
+  },
+  {
+    Icon: BellIcon,
+    name: "Real-time Tracking",
+    description: "Get instant notifications at every milestone of your shipment journey.",
+    href: "/tracking",
+    cta: "Track Shipment",
+    className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
+  },
+];
+
 export default function DesignSystemPage() {
   return (
     <div className="container-responsive py-12 space-y-16">
       {/* Header */}
       <div className="space-y-4">
+        <div className="status-indicator bg-primary/10 text-primary inline-flex">
+          Modern Design System
+        </div>
         <h1 className="text-4xl font-bold tracking-tight">B2B Shipping Design System</h1>
         <p className="text-lg text-muted-foreground max-w-3xl">
           A comprehensive design system built for professional shipping and logistics applications.
           This system prioritizes accessibility, mobile-first responsiveness, and B2B user experience patterns.
+          Enhanced with modern Bento Grid layouts and professional card designs.
         </p>
       </div>
+
+      {/* Modern Bento Grid Section */}
+      <section className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-semibold mb-2">Modern Layout Components</h2>
+          <p className="text-muted-foreground">
+            Bento Grid layouts and modern card designs inspired by contemporary design systems.
+          </p>
+        </div>
+        
+        <div className="container-modern">
+          <BentoGrid className="lg:grid-rows-3">
+            {modernDesignFeatures.map((feature) => (
+              <BentoCard key={feature.name} {...feature} />
+            ))}
+          </BentoGrid>
+        </div>
+      </section>
+
+      {/* Modern Cards Section */}
+      <section className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-semibold mb-2">Professional Card Variants</h2>
+          <p className="text-muted-foreground">
+            Modern card designs with elevated styling and professional aesthetics.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <ModernCard variant="elevated">
+            <ModernCardHeader>
+              <ModernCardTitle>Professional Cards</ModernCardTitle>
+              <ModernCardDescription>
+                Elevated design with subtle shadows and rounded corners
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="space-y-4">
+                <div className="status-indicator status-available">
+                  Available
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Modern card components with hover effects and professional styling.
+                </p>
+              </div>
+            </ModernCardContent>
+          </ModernCard>
+
+          <ModernCard variant="outlined">
+            <ModernCardHeader>
+              <ModernCardTitle>Status Indicators</ModernCardTitle>
+              <ModernCardDescription>
+                Clear visual feedback for system states
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="space-y-3">
+                <div className="status-indicator status-available">Available</div>
+                <div className="status-indicator status-limited">Limited</div>
+                <div className="status-indicator status-unavailable">Unavailable</div>
+              </div>
+            </ModernCardContent>
+          </ModernCard>
+
+          <ModernCard variant="default">
+            <ModernCardHeader>
+              <ModernCardTitle>Modern Buttons</ModernCardTitle>
+              <ModernCardDescription>
+                Professional button designs with rounded corners
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="space-y-3">
+                <Button className="btn-modern btn-modern-lg w-full">
+                  Primary Action
+                </Button>
+                <Button variant="outline" className="btn-modern w-full">
+                  Secondary Action
+                </Button>
+              </div>
+            </ModernCardContent>
+          </ModernCard>
+        </div>
+      </section>
       
       {/* Color System */}
       <section className="space-y-8">

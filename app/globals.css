@@ -156,14 +156,14 @@
   --container-xl: 1280px;
   --container-2xl: 1536px;
   
-  /* Border Radius System */
+  /* Border Radius System - Modern Design System */
   --radius-none: 0;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-3xl: 1.5rem; /* 24px - Modern rounded design from inspiration */
   --radius-full: 9999px;
   
   /* Shadow System - Elevation levels */
@@ -635,5 +635,95 @@
   
   .transition-slow {
     @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Modern Design System Components - Inspired by Magic Results */
+  .bento-grid {
+    @apply grid w-full gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .bento-card {
+    @apply relative flex flex-col justify-between overflow-hidden rounded-3xl bg-card border border-border/5 border-t-border/15 transition-all duration-300;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
+  }
+
+  .bento-card:hover {
+    @apply -translate-y-1;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.05), 0 4px 8px rgba(0,0,0,.1), 0 16px 32px rgba(0,0,0,.1);
+  }
+
+  .bento-card-content {
+    @apply p-6 z-10 flex flex-col gap-4;
+  }
+
+  .bento-card-overlay {
+    @apply absolute inset-0 bg-black/3 opacity-0 transition-opacity group-hover:opacity-100;
+  }
+
+  /* Modern Button Patterns - Professional B2B Design */
+  .btn-modern {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-3xl text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-modern-sm {
+    @apply h-9 px-3 rounded-3xl;
+  }
+
+  .btn-modern-lg {
+    @apply h-11 px-8 rounded-3xl;
+  }
+
+  /* Professional Card Variants - Enhanced from Inspiration */
+  .card-modern {
+    @apply rounded-3xl bg-card border border-border shadow-sm transition-all duration-300;
+  }
+
+  .card-modern:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  .card-modern-elevated {
+    @apply rounded-3xl bg-card border border-border shadow-lg;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
+  }
+
+  .card-modern-elevated:hover {
+    @apply -translate-y-1;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.05), 0 4px 8px rgba(0,0,0,.1), 0 16px 32px rgba(0,0,0,.1);
+  }
+
+  /* Modern Form Styling - B2B Professional */
+  .form-modern {
+    @apply space-y-6 p-6 bg-card border border-border rounded-3xl;
+  }
+
+  .input-modern {
+    @apply flex h-11 w-full rounded-3xl border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Professional Status Indicators */
+  .status-indicator {
+    @apply inline-flex items-center rounded-3xl px-3 py-1 text-sm font-medium;
+  }
+
+  .status-available {
+    @apply bg-success/10 text-success;
+  }
+
+  .status-limited {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .status-unavailable {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  /* Modern Layout Containers */
+  .section-modern {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .container-modern {
+    @apply mx-auto px-4 md:px-6 border border-border rounded-3xl;
   }
 }
