@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   // Enable experimental features
   experimental: {
     // Turbopack is already enabled via --turbopack flag in dev script
-    typedRoutes: true,
   },
 
   // Environment variables
