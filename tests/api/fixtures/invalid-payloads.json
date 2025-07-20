@@ -1,0 +1,147 @@
+{
+  "missingInstruction": {
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "invalidInstructionType": {
+    "instruction": {
+      "input": "Test input",
+      "type": "invalid-type"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "emptyInstructionInput": {
+    "instruction": {
+      "input": "",
+      "type": "validation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "missingContext": {
+    "instruction": {
+      "input": "Test input",
+      "type": "code-generation"
+    }
+  },
+  "emptyProject": {
+    "instruction": {
+      "input": "Valid instruction",
+      "type": "validation"
+    },
+    "context": {
+      "project": "",
+      "phase": "testing"
+    }
+  },
+  "emptyPhase": {
+    "instruction": {
+      "input": "Valid instruction",
+      "type": "analysis"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": ""
+    }
+  },
+  "invalidPriority": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "code-generation",
+      "priority": "invalid-priority"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "invalidTraceLevel": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "validation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    },
+    "options": {
+      "traceLevel": "invalid-level"
+    }
+  },
+  "invalidTimeout": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "code-generation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    },
+    "options": {
+      "timeout": 500
+    }
+  },
+  "timeoutTooLarge": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "transformation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    },
+    "options": {
+      "timeout": 500000
+    }
+  },
+  "malformedJson": "{ invalid json }",
+  "wrongDataType": {
+    "instruction": "this should be an object",
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "missingRequiredField": {
+    "instruction": {
+      "type": "validation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    }
+  },
+  "invalidBoolean": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "validation"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing"
+    },
+    "options": {
+      "validateOnly": "true"
+    }
+  },
+  "extraUnknownFields": {
+    "instruction": {
+      "input": "Test instruction",
+      "type": "validation",
+      "unknownField": "should not be here"
+    },
+    "context": {
+      "project": "test-project",
+      "phase": "testing",
+      "extraField": "also should not be here"
+    },
+    "invalidTopLevel": "this field should not exist"
+  }
+}

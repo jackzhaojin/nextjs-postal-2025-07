@@ -1,0 +1,164 @@
+{
+  "mcpHeaders": {
+    "minimal": {
+      "X-MCP-Project": "test-project",
+      "X-MCP-Phase": "test-phase"
+    },
+    "complete": {
+      "X-MCP-Project": "enterprise-system",
+      "X-MCP-Phase": "production-deployment",
+      "X-MCP-Task-ID": "task_prod_001",
+      "X-MCP-Session-ID": "session_12345_abcdef",
+      "X-MCP-Trace-Level": "verbose",
+      "X-MCP-Request-ID": "req_custom_001",
+      "X-MCP-Parent-Span-ID": "span_parent_123"
+    },
+    "authentication": {
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      "X-MCP-Project": "secure-project",
+      "X-MCP-Phase": "authenticated-phase"
+    },
+    "traceVerbose": {
+      "X-MCP-Project": "debug-project",
+      "X-MCP-Phase": "debugging",
+      "X-MCP-Trace-Level": "verbose"
+    },
+    "traceMinimal": {
+      "X-MCP-Project": "production-project",
+      "X-MCP-Phase": "production",
+      "X-MCP-Trace-Level": "minimal"
+    }
+  },
+  "contexts": {
+    "development": {
+      "project": "dev-project",
+      "phase": "development",
+      "taskId": "dev_task_001",
+      "metadata": {
+        "environment": "development",
+        "branch": "feature/new-component",
+        "developer": "john.doe"
+      }
+    },
+    "testing": {
+      "project": "test-suite",
+      "phase": "automated-testing",
+      "taskId": "test_run_001",
+      "metadata": {
+        "testType": "integration",
+        "framework": "jest",
+        "coverage": "enabled"
+      }
+    },
+    "staging": {
+      "project": "staging-environment",
+      "phase": "pre-production-validation",
+      "taskId": "staging_deploy_001",
+      "metadata": {
+        "environment": "staging",
+        "deploymentType": "blue-green",
+        "approver": "qa-team"
+      }
+    },
+    "production": {
+      "project": "production-system",
+      "phase": "live-deployment",
+      "taskId": "prod_hotfix_001",
+      "metadata": {
+        "environment": "production",
+        "urgency": "critical",
+        "incident": "INC-2025-001"
+      }
+    },
+    "minimal": {
+      "project": "minimal-project",
+      "phase": "basic-phase"
+    },
+    "enterprise": {
+      "project": "enterprise-platform",
+      "phase": "multi-tenant-deployment",
+      "taskId": "enterprise_migration_001",
+      "metadata": {
+        "clientId": "client_enterprise_001",
+        "compliance": ["SOC2", "GDPR", "HIPAA"],
+        "scale": "large",
+        "geography": "global",
+        "team": "platform-engineering"
+      }
+    }
+  },
+  "expectedBootstrappedContexts": {
+    "withDefaults": {
+      "project": "default-project",
+      "phase": "default-phase",
+      "requestId": "req_generated_123",
+      "taskId": "task_generated_456",
+      "metadata": {
+        "sessionId": "session_generated_789",
+        "timestamp": "2025-07-20T12:00:00.000Z",
+        "traceLevel": "standard"
+      }
+    },
+    "fromHeaders": {
+      "project": "header-project",
+      "phase": "header-phase",
+      "requestId": "req_generated_456",
+      "taskId": "header-task-id",
+      "metadata": {
+        "user": "authenticated-user",
+        "sessionId": "header-session-id",
+        "timestamp": "2025-07-20T12:00:00.000Z",
+        "traceLevel": "verbose"
+      }
+    },
+    "fromPayload": {
+      "project": "payload-project",
+      "phase": "payload-phase",
+      "requestId": "req_generated_789",
+      "taskId": "task_generated_abc",
+      "metadata": {
+        "sessionId": "session_generated_def",
+        "timestamp": "2025-07-20T12:00:00.000Z",
+        "traceLevel": "standard"
+      }
+    }
+  },
+  "errorScenarios": {
+    "missingProject": {
+      "headers": {
+        "X-MCP-Phase": "test-phase"
+      },
+      "payload": {
+        "context": {
+          "phase": "test-phase"
+        }
+      },
+      "expectedError": "Project identifier is required"
+    },
+    "missingPhase": {
+      "headers": {
+        "X-MCP-Project": "test-project"
+      },
+      "payload": {
+        "context": {
+          "project": "test-project"
+        }
+      },
+      "expectedError": "Phase identifier is required"
+    },
+    "invalidAuth": {
+      "headers": {
+        "Authorization": "Invalid Bearer Token",
+        "X-MCP-Project": "test-project",
+        "X-MCP-Phase": "test-phase"
+      },
+      "payload": {
+        "context": {
+          "project": "test-project",
+          "phase": "test-phase"
+        }
+      },
+      "expectedBehavior": "Should handle gracefully without throwing"
+    }
+  }
+}

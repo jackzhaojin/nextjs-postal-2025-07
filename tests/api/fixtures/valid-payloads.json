@@ -1,0 +1,158 @@
+{
+  "taskValidation": {
+    "basic": {
+      "instruction": {
+        "input": "Generate a React component for user authentication",
+        "type": "code-generation",
+        "priority": "medium",
+        "metadata": {
+          "targetFramework": "React",
+          "outputFormat": "TypeScript"
+        }
+      },
+      "context": {
+        "project": "nextjs-portal-ai",
+        "phase": "development",
+        "metadata": {
+          "feature": "authentication"
+        }
+      },
+      "options": {
+        "validateOnly": true,
+        "traceLevel": "standard"
+      }
+    },
+    "withHeaders": {
+      "instruction": {
+        "input": "Validate API schema for user endpoint",
+        "type": "validation",
+        "priority": "high"
+      },
+      "context": {
+        "project": "api-validation-project",
+        "phase": "testing"
+      }
+    },
+    "minimal": {
+      "instruction": {
+        "input": "Simple analysis task",
+        "type": "analysis"
+      },
+      "context": {
+        "project": "test-project",
+        "phase": "test-phase"
+      }
+    },
+    "complex": {
+      "instruction": {
+        "input": "Transform legacy monolithic application into microservices architecture with proper authentication, authorization, database migration, API gateway integration, service discovery, monitoring, logging, and deployment automation using Docker, Kubernetes, and CI/CD pipelines while maintaining backward compatibility and ensuring zero-downtime deployment",
+        "type": "transformation",
+        "priority": "critical",
+        "metadata": {
+          "targetArchitecture": "microservices",
+          "technologies": ["Docker", "Kubernetes", "API Gateway"],
+          "constraints": ["zero-downtime", "backward-compatibility"],
+          "complexity": "high"
+        }
+      },
+      "context": {
+        "project": "enterprise-modernization",
+        "phase": "architecture-transformation",
+        "metadata": {
+          "stakeholders": ["engineering", "devops", "product"],
+          "timeline": "6-months",
+          "budget": "high"
+        }
+      },
+      "options": {
+        "validateOnly": true,
+        "skipContextBootstrap": false,
+        "traceLevel": "verbose"
+      }
+    }
+  },
+  "taskExecution": {
+    "basic": {
+      "instruction": {
+        "input": "Transform legacy component to modern React hooks",
+        "type": "transformation",
+        "priority": "medium"
+      },
+      "context": {
+        "project": "legacy-migration",
+        "phase": "modernization",
+        "taskId": "task_12345"
+      },
+      "options": {
+        "async": false,
+        "timeout": 60000,
+        "traceLevel": "verbose"
+      }
+    },
+    "async": {
+      "instruction": {
+        "input": "Perform comprehensive code analysis on large codebase",
+        "type": "analysis",
+        "priority": "low",
+        "metadata": {
+          "scope": "full-codebase",
+          "analysisType": "security-audit"
+        }
+      },
+      "context": {
+        "project": "security-audit-2025",
+        "phase": "analysis",
+        "taskId": "audit_task_001"
+      },
+      "options": {
+        "async": true,
+        "timeout": 300000,
+        "traceLevel": "minimal"
+      }
+    },
+    "quickValidation": {
+      "instruction": {
+        "input": "Validate form component props interface",
+        "type": "validation",
+        "priority": "high"
+      },
+      "context": {
+        "project": "ui-components",
+        "phase": "validation"
+      },
+      "options": {
+        "async": false,
+        "timeout": 5000,
+        "traceLevel": "standard"
+      }
+    },
+    "codeGeneration": {
+      "instruction": {
+        "input": "Generate REST API endpoints for user management with authentication, CRUD operations, input validation, error handling, and OpenAPI documentation",
+        "type": "code-generation",
+        "priority": "high",
+        "metadata": {
+          "framework": "Express.js",
+          "database": "PostgreSQL",
+          "authentication": "JWT",
+          "validation": "Joi",
+          "documentation": "OpenAPI"
+        }
+      },
+      "context": {
+        "project": "user-management-api",
+        "phase": "implementation",
+        "taskId": "api_gen_001",
+        "metadata": {
+          "version": "v1.0",
+          "environment": "development"
+        }
+      },
+      "options": {
+        "async": false,
+        "timeout": 120000,
+        "traceLevel": "verbose"
+      }
+    }
+  }
+}
