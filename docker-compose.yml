@@ -24,7 +24,7 @@ services:
         max-file: "3"
 
   nextjs-shipping-portal:
-    image: ghcr.io/experiencereinvented/nextjs-portal-ai-instructions:latest
+    image: ghcr.io/jackzhaojin/nextjs-portal-ai-instructions:latest
     container_name: nextjs-shipping-portal
     ports:
       - "280:3000"  # External debugging access port

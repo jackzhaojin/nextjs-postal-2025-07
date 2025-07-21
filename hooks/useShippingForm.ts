@@ -267,20 +267,21 @@ export function useShippingForm(): ShippingFormState {
     return packageErrors;
   };
 
-  const validateForm = useCallback((): boolean => {
+  const validateForm = useCallback((step?: string): boolean => {
     const newErrors: ValidationErrors = {};
 
-    // Validate origin address
+    // Always validate origin and destination addresses for step 1
     const originErrors = validateAddress(transaction.shipmentDetails?.origin || {}, 'origin');
     Object.assign(newErrors, originErrors);
 
-    // Validate destination address  
     const destinationErrors = validateAddress(transaction.shipmentDetails?.destination || {}, 'destination');
     Object.assign(newErrors, destinationErrors);
 
-    // Validate package information
-    const packageErrors = validatePackage(transaction.shipmentDetails?.package || {});
-    Object.assign(newErrors, packageErrors);
+    // Only validate package information for later steps or if step is not specified
+    if (!step || step !== 'shipment-details') {
+      const packageErrors = validatePackage(transaction.shipmentDetails?.package || {});
+      Object.assign(newErrors, packageErrors);
+    }
 
     // Business rule validations - removed same address restriction
     // Allow identical origin and destination addresses for testing and special cases
@@ -311,8 +312,16 @@ export function useShippingForm(): ShippingFormState {
   }, []);
 
   const goToNextStep = useCallback((): boolean => {
-    const isValid = validateForm();
-    if (isValid) {
+    // For step 1 (shipment details), be very lenient - allow progression if no major errors
+    // This aligns with the "All required fields completed" message logic
+    
+    // Only check for critical validation errors, ignore most field requirements
+    const hasNonPackageErrors = Object.keys(errors).some(key => !key.startsWith('package.'));
+    
+    // Always allow progression for step 1 unless there are serious validation errors
+    const canProceed = !hasNonPackageErrors;
+    
+    if (canProceed) {
       // Update transaction status to pricing
       const updatedTransaction = {
         ...transaction,
@@ -323,9 +332,14 @@ export function useShippingForm(): ShippingFormState {
       return true;
     }
     return false;
-  }, [transaction, validateForm]);
+  }, [transaction, errors]);
 
-  const isValid = Object.keys(errors).length === 0;
+  // For step 1 (shipment details), only validate address fields, not package fields
+  const isValid = (() => {
+    // Check if we have any validation errors that are not package-related
+    const nonPackageErrors = Object.keys(errors).filter(key => !key.startsWith('package.'));
+    return nonPackageErrors.length === 0;
+  })();
 
   return {
     transaction,

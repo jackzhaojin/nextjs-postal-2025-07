@@ -537,15 +537,49 @@ export class ShipmentValidator {
   /**
    * Calculate form completion percentage
    */
-  static calculateCompletionProgress(shipmentDetails: Partial<ShipmentDetails>): {
+  static calculateCompletionProgress(shipmentDetails: Partial<ShipmentDetails>, step?: string): {
     percentage: number;
     completedFields: number;
     totalFields: number;
     requiredFieldsComplete: boolean;
   } {
-    console.log('ShipmentValidator: Calculating completion progress');
+    console.log('ShipmentValidator: Calculating completion progress for step:', step);
 
-    const requiredFields = Object.keys(this.VALIDATION_SCHEMA).filter(field => 
+    // Define which fields are relevant for each step
+    const stepFieldMappings: Record<string, string[]> = {
+      'shipment-details': [
+        'origin.address',
+        'origin.city', 
+        'origin.state',
+        'origin.zip',
+        'origin.contactInfo.name',
+        'origin.contactInfo.phone',
+        'origin.contactInfo.email',
+        'destination.address',
+        'destination.city',
+        'destination.state', 
+        'destination.zip',
+        'destination.contactInfo.name',
+        'destination.contactInfo.phone',
+        'destination.contactInfo.email'
+      ],
+      'package-details': [
+        'package.weight.value',
+        'package.dimensions.length',
+        'package.dimensions.width', 
+        'package.dimensions.height',
+        'package.declaredValue',
+        'package.contents'
+      ]
+    };
+
+    // Use step-specific fields if provided, otherwise use address fields for backward compatibility
+    const relevantFields = step && stepFieldMappings[step] 
+      ? stepFieldMappings[step]
+      : stepFieldMappings['shipment-details'];
+
+    const requiredFields = relevantFields.filter(field => 
+      this.VALIDATION_SCHEMA[field] && 
       this.VALIDATION_SCHEMA[field].some(rule => rule.severity === 'error')
     );
 
@@ -558,7 +592,8 @@ export class ShipmentValidator {
       
       if (isComplete) {
         completedFields++;
-        const isRequired = this.VALIDATION_SCHEMA[fieldPath].some(rule => rule.severity === 'error');
+        const isRequired = this.VALIDATION_SCHEMA[fieldPath] && 
+          this.VALIDATION_SCHEMA[fieldPath].some(rule => rule.severity === 'error');
         if (isRequired) {
           requiredFieldsCompleted++;
         }
@@ -570,10 +605,13 @@ export class ShipmentValidator {
     const requiredFieldsComplete = requiredFieldsCompleted === requiredFields.length;
 
     console.log('ShipmentValidator: Progress calculation:', {
+      step,
       percentage,
       completedFields,
       totalFields,
-      requiredFieldsComplete
+      requiredFieldsComplete,
+      relevantFields: relevantFields.length,
+      requiredFields: requiredFields.length
     });
 
     return {
