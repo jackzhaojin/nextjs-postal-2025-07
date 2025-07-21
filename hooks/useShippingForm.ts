@@ -267,20 +267,21 @@ export function useShippingForm(): ShippingFormState {
     return packageErrors;
   };
 
-  const validateForm = useCallback((): boolean => {
+  const validateForm = useCallback((step?: string): boolean => {
     const newErrors: ValidationErrors = {};
 
-    // Validate origin address
+    // Always validate origin and destination addresses for step 1
     const originErrors = validateAddress(transaction.shipmentDetails?.origin || {}, 'origin');
     Object.assign(newErrors, originErrors);
 
-    // Validate destination address  
     const destinationErrors = validateAddress(transaction.shipmentDetails?.destination || {}, 'destination');
     Object.assign(newErrors, destinationErrors);
 
-    // Validate package information
-    const packageErrors = validatePackage(transaction.shipmentDetails?.package || {});
-    Object.assign(newErrors, packageErrors);
+    // Only validate package information for later steps or if step is not specified
+    if (!step || step !== 'shipment-details') {
+      const packageErrors = validatePackage(transaction.shipmentDetails?.package || {});
+      Object.assign(newErrors, packageErrors);
+    }
 
     // Business rule validations - removed same address restriction
     // Allow identical origin and destination addresses for testing and special cases
@@ -311,7 +312,7 @@ export function useShippingForm(): ShippingFormState {
   }, []);
 
   const goToNextStep = useCallback((): boolean => {
-    const isValid = validateForm();
+    const isValid = validateForm('shipment-details');
     if (isValid) {
       // Update transaction status to pricing
       const updatedTransaction = {
@@ -325,7 +326,12 @@ export function useShippingForm(): ShippingFormState {
     return false;
   }, [transaction, validateForm]);
 
-  const isValid = Object.keys(errors).length === 0;
+  // For step 1 (shipment details), only validate address fields, not package fields
+  const isValid = (() => {
+    // Check if we have any validation errors that are not package-related
+    const nonPackageErrors = Object.keys(errors).filter(key => !key.startsWith('package.'));
+    return nonPackageErrors.length === 0;
+  })();
 
   return {
     transaction,
