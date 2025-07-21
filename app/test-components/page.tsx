@@ -53,6 +53,9 @@ import {
 import { PackageInfoSection } from "@/components/forms/PackageInfoSection"
 import { PackageInfo, Weight, Dimensions } from "@/lib/types"
 
+// Import Task 4.4 components
+import { Task44Demo } from "@/components/forms/Task44Demo"
+
 // Test component for error boundary
 function ErrorComponent() {
   const [shouldError, setShouldError] = React.useState(false)
@@ -546,6 +549,9 @@ export default function ComponentTestPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Advanced Form State Management Test - Task 4.4 */}
+        <Task44Demo />
       </div>
     </ToastProvider>
   )
