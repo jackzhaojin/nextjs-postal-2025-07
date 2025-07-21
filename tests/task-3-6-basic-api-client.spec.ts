@@ -27,7 +27,7 @@ test.describe('API Client - Form Configuration', () => {
       const response = await request.get(`${BASE_URL}/api/form-config`, { timeout: 1 });
       console.log('Response received despite short timeout');
     } catch (error) {
-      expect(error.message.toLowerCase()).toContain('timeout');
+      expect((error as Error).message.toLowerCase()).toContain('timeout');
       console.log('✅ [TEST] Timeout handled correctly');
     }
   });

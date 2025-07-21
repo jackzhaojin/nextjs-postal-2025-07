@@ -191,7 +191,7 @@ const SubmissionRequestSchema = z.object({
           authorizationCode: z.string().optional()
         }).optional(),
         netTerms: z.object({
-          period: z.enum([15, 30, 45, 60]),
+          period: z.enum(['15', '30', '45', '60']),
           tradeReferences: z.array(z.object({
             companyName: z.string().min(1),
             contactName: z.string().min(1),
@@ -289,12 +289,12 @@ export async function POST(request: NextRequest) {
     // Validate request structure
     const validationResult = SubmissionRequestSchema.safeParse(body);
     if (!validationResult.success) {
-      console.error('❌ [SUBMIT-SHIPMENT] Validation failed:', validationResult.error.errors);
+      console.error('❌ [SUBMIT-SHIPMENT] Validation failed:', validationResult.error.issues);
       return NextResponse.json(
         {
           error: 'VALIDATION_ERROR',
           message: 'Invalid submission data',
-          details: validationResult.error.errors?.map(err => ({
+          details: validationResult.error.issues?.map((err: any) => ({
             field: err.path?.join('.') || 'unknown',
             message: err.message || 'Validation error',
             code: err.code || 'VALIDATION_ERROR'
@@ -304,7 +304,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transaction: ShippingTransaction = validationResult.data.transaction;
+    const transactionData = validationResult.data.transaction;
+    
+    // Create the transaction with proper type conversion
+    const transaction: ShippingTransaction = {
+      ...transactionData,
+      timestamp: new Date(transactionData.timestamp)
+    } as ShippingTransaction; // Type assertion to handle complex type conversions
+    
     console.log('✅ [SUBMIT-SHIPMENT] Transaction validation successful');
 
     // Validate transaction status

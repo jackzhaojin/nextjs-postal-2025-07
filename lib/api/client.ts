@@ -9,7 +9,7 @@ import type {
 } from '@/lib/types';
 
 export interface ApiClientError extends ApiError {
-  statusCode?: number;
+  statusCode: number;
   response?: any;
 }
 
@@ -17,7 +17,7 @@ export class ApiClientError extends Error implements ApiClientError {
   constructor(
     public message: string,
     public code: string,
-    public statusCode?: number,
+    public statusCode: number = 500,
     public details?: any,
     public response?: any
   ) {
