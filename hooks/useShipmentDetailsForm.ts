@@ -549,10 +549,16 @@ export function useShipmentDetailsForm(
     }
   }, [isDirty, autoSave, triggerAutoSave]);
 
-  // Initial validation
+  // Initial validation - only run if form has been touched or has existing data
   useEffect(() => {
-    validateAll();
-  }, [validateAll]);
+    // Only validate if we have touched fields or if the form has data from localStorage
+    const hasTouchedFields = Object.keys(validation.touched).length > 0;
+    const hasExistingData = JSON.stringify(shipmentDetails) !== JSON.stringify(defaultShipmentDetails);
+    
+    if (hasTouchedFields || hasExistingData) {
+      validateAll();
+    }
+  }, [validateAll, validation.touched, shipmentDetails]);
 
   // Conflict detection on focus
   useEffect(() => {
