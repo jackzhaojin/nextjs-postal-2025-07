@@ -49,6 +49,10 @@ import {
   SettingsAccordion
 } from "@/components/ui/layout/Accordion"
 
+// Import Task 4.3 components
+import { PackageInfoSection } from "@/components/forms/PackageInfoSection"
+import { PackageInfo, Weight, Dimensions } from "@/lib/types"
+
 // Test component for error boundary
 function ErrorComponent() {
   const [shouldError, setShouldError] = React.useState(false)
@@ -115,6 +119,19 @@ export default function ComponentTestPage() {
   const [alertModalOpen, setAlertModalOpen] = React.useState(false)
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [mobileDrawerOpen, setMobileDrawerOpen] = React.useState(false)
+
+  // Package info state for Task 4.3 testing
+  const [packageInfo, setPackageInfo] = React.useState<PackageInfo>({
+    type: 'medium',
+    weight: { value: 5, unit: 'lbs' } as Weight,
+    dimensions: { length: 12, width: 8, height: 6, unit: 'in' } as Dimensions,
+    declaredValue: 100,
+    currency: 'USD',
+    contents: 'Test contents',
+    contentsCategory: 'electronics',
+    specialHandling: [],
+    multiplePackages: undefined
+  })
 
   const tabsData = [
     {
@@ -510,6 +527,23 @@ export default function ComponentTestPage() {
             >
               <ErrorComponent />
             </ErrorBoundary>
+          </CardContent>
+        </Card>
+
+        {/* Package Info Section Test - Task 4.3 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Package Information - Task 4.3 Components</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <h2>Package Information</h2>
+              <PackageInfoSection
+                value={packageInfo}
+                onChange={setPackageInfo}
+                errors={{}}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
