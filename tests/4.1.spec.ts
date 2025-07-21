@@ -139,7 +139,7 @@ test.describe('Task 4.1: Advanced Address Input Architecture', () => {
           await expect(firstSelector).toBeChecked();
           console.log('✓ Radio button location type selection works');
           
-        } else if (await firstSelector.tagName() === 'SELECT') {
+        } else if (await firstSelector.evaluate(el => el.tagName) === 'SELECT') {
           console.log('Testing dropdown location selection...');
           await firstSelector.selectOption({ index: 1 });
           console.log('✓ Dropdown location type selection works');

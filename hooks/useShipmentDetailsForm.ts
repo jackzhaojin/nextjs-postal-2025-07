@@ -126,7 +126,7 @@ export function useShipmentDetailsForm(
   const [isLoading, setIsLoading] = useState(false);
   
   // Refs for managing auto-save
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialDataRef = useRef(initialData);
 
   console.log('useShipmentDetailsForm: Current state - isDirty:', isDirty, 'isValid:', validation.isValid);

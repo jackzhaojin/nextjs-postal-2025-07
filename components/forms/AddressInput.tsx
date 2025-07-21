@@ -49,7 +49,7 @@ export function AddressInput({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   console.log('AddressInput: Current state - suggestions:', suggestions.length, 'showSuggestions:', showSuggestions);
 

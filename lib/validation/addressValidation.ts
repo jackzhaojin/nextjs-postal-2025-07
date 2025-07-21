@@ -63,7 +63,7 @@ export class AddressValidator {
       if (address.zip) {
         const zipValidation = this.validateZipCode(address.zip, address.country);
         if (!zipValidation.isValid) {
-          errors.zip = zipValidation.error;
+          errors.zip = zipValidation.error || 'Invalid ZIP code format';
         }
       }
 
@@ -71,7 +71,7 @@ export class AddressValidator {
       if (address.country === 'USA' || address.country === 'US') {
         const stateValidation = this.validateUSState(address.state);
         if (!stateValidation.isValid) {
-          errors.state = stateValidation.error;
+          errors.state = stateValidation.error || 'Invalid state';
         }
       }
 
@@ -79,7 +79,7 @@ export class AddressValidator {
       if (address.address) {
         const addressValidation = this.validateAddressFormat(address.address);
         if (!addressValidation.isValid) {
-          warnings.address = addressValidation.warning;
+          warnings.address = addressValidation.warning || 'Address format may be invalid';
         }
       }
     }
@@ -88,7 +88,7 @@ export class AddressValidator {
     if (rules.validateServiceArea && address.zip) {
       const serviceAreaValidation = this.validateServiceArea(address.zip, address.country);
       if (!serviceAreaValidation.isValid) {
-        warnings.serviceArea = serviceAreaValidation.warning;
+        warnings.serviceArea = serviceAreaValidation.warning || 'Service area may not be available';
       }
     }
 
@@ -96,7 +96,7 @@ export class AddressValidator {
     if (address.zip && address.state && address.country) {
       const crossValidation = this.validateZipStateMatch(address.zip, address.state, address.country);
       if (!crossValidation.isValid) {
-        warnings.zipState = crossValidation.warning;
+        warnings.zipState = crossValidation.warning || 'ZIP code and state may not match';
       }
     }
 
@@ -137,7 +137,7 @@ export class AddressValidator {
     if (contactInfo.phone) {
       const phoneValidation = this.validatePhoneNumber(contactInfo.phone);
       if (!phoneValidation.isValid) {
-        errors['contactInfo.phone'] = phoneValidation.error;
+        errors['contactInfo.phone'] = phoneValidation.error || 'Invalid phone number';
       }
     }
 
@@ -145,7 +145,7 @@ export class AddressValidator {
     if (contactInfo.email) {
       const emailValidation = this.validateEmail(contactInfo.email);
       if (!emailValidation.isValid) {
-        errors['contactInfo.email'] = emailValidation.error;
+        errors['contactInfo.email'] = emailValidation.error || 'Invalid email address';
       }
     }
 
@@ -153,7 +153,7 @@ export class AddressValidator {
     if (contactInfo.extension) {
       const extValidation = this.validateExtension(contactInfo.extension);
       if (!extValidation.isValid) {
-        warnings['contactInfo.extension'] = extValidation.warning;
+        warnings['contactInfo.extension'] = extValidation.warning || 'Extension format may be invalid';
       }
     }
 
