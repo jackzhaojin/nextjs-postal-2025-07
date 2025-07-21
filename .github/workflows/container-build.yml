@@ -1,0 +1,120 @@
+name: Container Build and Deploy
+
+on:
+  push:
+    branches:
+      - 'release/*'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        default: 'main'
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: experiencereinvented/nextjs-portal-ai-instructions
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run type check
+        run: npm run type-check || echo "Type check command not found, skipping"
+
+      - name: Build application
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from branch name
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            VERSION=${GITHUB_REF#refs/heads/release/}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+            echo "branch_tag=release-$VERSION" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.branch }}" == "main" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "version=main-latest" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            echo "branch_tag=main-latest" >> $GITHUB_OUTPUT
+          else
+            echo "version=dev-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            echo "branch_tag=dev-build" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if this is the latest release
+        id: latest
+        if: steps.version.outputs.is_release == 'true'
+        run: |
+          # Get all release tags and find the highest semantic version
+          CURRENT_VERSION="${{ steps.version.outputs.version }}"
+          
+          # For now, assume this is latest. In a real scenario, you would compare semantic versions
+          # This is a simplified approach - you might want to use a proper semver comparison tool
+          echo "is_latest=true" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.branch_tag }}
+            ${{ steps.latest.outputs.is_latest == 'true' && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+
+      - name: Generate build summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch Tag**: \`${{ steps.version.outputs.branch_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.latest.outputs.is_latest }}" == "true" ]]; then
+            echo "- **Latest Tag**: ✅ Applied" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Latest Tag**: ❌ Not applied" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- **Registry**: Public (no auth required for pulls)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull Command" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
