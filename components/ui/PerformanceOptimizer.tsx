@@ -12,7 +12,7 @@ import React, {
   createContext,
   useContext
 } from 'react';
-import { AlertTriangle, TrendingUp, Zap, Clock, Memory } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Zap, Clock, HardDriveIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -336,7 +336,7 @@ export function PerformanceMonitor({
           {Math.round(metrics.renderTime)}ms
         </Badge>
         <Badge className={getStatusColor(getMetricStatus(metrics.memoryUsage, { good: 25, warning: 50 }))}>
-          <Memory className="h-3 w-3 mr-1" />
+          <HardDriveIcon className="h-3 w-3 mr-1" />
           {Math.round(metrics.memoryUsage)}MB
         </Badge>
         {suggestions.length > 0 && (
@@ -435,7 +435,7 @@ export function PerformanceMonitor({
               }`}>
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-0.5">
-                    {suggestion.type === 'memory' && <Memory className="h-4 w-4" />}
+                    {suggestion.type === 'memory' && <HardDriveIcon className="h-4 w-4" />}
                     {suggestion.type === 'render' && <Clock className="h-4 w-4" />}
                     {suggestion.type === 'network' && <TrendingUp className="h-4 w-4" />}
                     {suggestion.type === 'performance' && <Zap className="h-4 w-4" />}

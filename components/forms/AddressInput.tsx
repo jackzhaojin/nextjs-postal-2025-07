@@ -18,6 +18,8 @@ interface AddressInputProps {
   required?: boolean;
   showContactInfo?: boolean;
   type?: 'origin' | 'destination';
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 interface AddressSuggestion {
