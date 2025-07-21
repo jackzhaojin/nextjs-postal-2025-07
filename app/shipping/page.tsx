@@ -36,13 +36,12 @@ export default function ShipmentDetailsPage() {
     validation,
     updateOrigin,
     updateDestination,
+    progress,
     isDirty,
-    isLoading,
-    completionProgress,
-    requiredFieldsComplete
+    isLoading
   } = useShipmentDetailsForm();
 
-  console.log('ShipmentDetailsPage: Form state - isDirty:', isDirty, 'progress:', completionProgress);
+  console.log('ShipmentDetailsPage: Form state - isDirty:', isDirty, 'progress:', progress.percentage);
 
   const handleOriginChange = useCallback((address: Address) => {
     console.log('ShipmentDetailsPage: Origin address changed:', address);
@@ -72,11 +71,11 @@ export default function ShipmentDetailsPage() {
               <div className="flex-1 bg-gray-200 rounded-full h-2">
                 <div 
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${completionProgress}%` }}
+                  style={{ width: `${progress.percentage}%` }}
                 />
               </div>
               <span className="ml-3 text-sm font-medium text-gray-700">
-                {completionProgress}%
+                {progress.percentage}%
               </span>
             </div>
           </div>
@@ -135,7 +134,7 @@ export default function ShipmentDetailsPage() {
           <div className="bg-white rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                {requiredFieldsComplete ? (
+                {progress.requiredFieldsComplete ? (
                   <>
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
