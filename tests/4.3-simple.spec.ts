@@ -11,14 +11,14 @@ test.describe('Task 4.3: Package Information Components - Simple Test', () => {
   test('should display package information section', async ({ page }) => {
     console.log('[Test] Testing basic package info section visibility');
 
-    // Check that our Task 4.3 section is visible
-    await expect(page.locator('div').filter({ hasText: 'Package Information - Task 4.3 Components' })).toBeVisible();
+    // Check that our Task 4.3 section is visible - using the exact text from the page
+    await expect(page.getByText('Package Information - Task 4.3 Components')).toBeVisible();
     
-    // Check that the PackageInfoSection component loaded
-    await expect(page.locator('h2').filter({ hasText: 'Package Information' }).last()).toBeVisible();
+    // Check that the PackageInfoSection component loaded - using the specific one in our section
+    await expect(page.getByRole('heading', { name: 'Package Information' }).first()).toBeVisible();
     
-    // Check for basic package type options
-    await expect(page.locator('text=Medium Package').first()).toBeVisible();
+    // Check for package type options - the actual button text from the page
+    await expect(page.getByRole('button', { name: /Medium Box/ })).toBeVisible();
     
     console.log('[Test] Package information section is visible');
   });
@@ -27,42 +27,39 @@ test.describe('Task 4.3: Package Information Components - Simple Test', () => {
     console.log('[Test] Testing contents categorization system');
 
     // Wait for the section to load
-    await expect(page.locator('div').filter({ hasText: 'Package Information - Task 4.3 Components' })).toBeVisible();
+    await expect(page.getByText('Package Information - Task 4.3 Components')).toBeVisible();
 
-    // Look for Contents Category section
-    const contentsSection = page.locator('text=Contents Category').first();
-    if (await contentsSection.isVisible()) {
-      console.log('[Test] Contents category section found');
-      
-      // Check for category options
-      const electronicsOption = page.locator('text=Electronics').first();
-      if (await electronicsOption.isVisible()) {
-        await electronicsOption.click();
-        console.log('[Test] Successfully clicked electronics category');
-      }
-    } else {
-      console.log('[Test] Contents category section not visible yet');
-    }
+    // Look for Contents Category section by heading
+    await expect(page.getByRole('heading', { name: '5. Contents Information' })).toBeVisible();
+    
+    // Check for electronics category option - using the first occurrence
+    const electronicsOption = page.getByRole('heading', { name: 'Electronics & Computer Equipment' }).first();
+    await expect(electronicsOption).toBeVisible();
+    
+    // Click the electronics category
+    await electronicsOption.click();
+    console.log('[Test] Successfully clicked electronics category');
   });
 
   test('should display special handling options', async ({ page }) => {
     console.log('[Test] Testing special handling options');
 
     // Wait for the section to load
-    await expect(page.locator('div').filter({ hasText: 'Package Information - Task 4.3 Components' })).toBeVisible();
+    await expect(page.getByText('Package Information - Task 4.3 Components')).toBeVisible();
 
-    // Look for Special Handling section
-    const specialHandlingSection = page.locator('text=Special Handling').first();
-    if (await specialHandlingSection.isVisible()) {
-      console.log('[Test] Special handling section found');
-      
-      // Check for fragile option
-      const fragileOption = page.locator('text=Fragile').first();
-      if (await fragileOption.isVisible()) {
-        console.log('[Test] Fragile option found');
-      }
-    } else {
-      console.log('[Test] Special handling section not visible yet');
-    }
+    // Look for Special Handling section by heading
+    await expect(page.getByRole('heading', { name: '6. Special Handling' })).toBeVisible();
+    
+    // Check for fragile option - using the actual heading text
+    const fragileOption = page.getByRole('heading', { name: 'Fragile / Handle with Care' });
+    await expect(fragileOption).toBeVisible();
+    
+    console.log('[Test] Fragile special handling option found');
+    
+    // Check for other special handling options
+    await expect(page.getByRole('heading', { name: 'Temperature Controlled' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Hazardous Materials' })).toBeVisible();
+    
+    console.log('[Test] Special handling options are visible');
   });
 });
