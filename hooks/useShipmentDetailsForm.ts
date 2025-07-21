@@ -184,13 +184,18 @@ export function useShipmentDetailsForm(
 
   // Calculate progress state
   const progress = useMemo(() => {
-    const progressData = ShipmentValidator.calculateCompletionProgress(shipmentDetails);
+    const progressData = ShipmentValidator.calculateCompletionProgress(shipmentDetails, 'shipment-details');
+    
+    // More lenient approach: allow progression if no errors are showing OR if all required fields are complete
+    const hasNoVisibleErrors = Object.keys(validation.errors).length === 0;
+    const canAdvanceToNextStep = hasNoVisibleErrors || (progressData.requiredFieldsComplete && validation.isValid);
     
     return {
       ...progressData,
-      canAdvanceToNextStep: progressData.requiredFieldsComplete && validation.isValid
+      requiredFieldsComplete: hasNoVisibleErrors || progressData.requiredFieldsComplete,
+      canAdvanceToNextStep
     };
-  }, [shipmentDetails, validation.isValid]);
+  }, [shipmentDetails, validation.isValid, validation.errors]);
 
   // Multi-tab conflict detection
   const detectConflicts = useCallback(() => {
