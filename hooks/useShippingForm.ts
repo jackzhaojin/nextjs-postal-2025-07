@@ -22,6 +22,7 @@ interface ShippingFormState {
   updateOrigin: (address: Partial<Address>) => void;
   updateDestination: (address: Partial<Address>) => void;
   updatePackage: (packageInfo: Partial<PackageInfo>) => void;
+  updateTransaction: (transaction: Partial<ShippingTransaction>) => void;
   validateForm: () => boolean;
   saveProgress: () => void;
   clearForm: () => void;
@@ -85,7 +86,12 @@ const initialTransaction: Partial<ShippingTransaction> = {
 };
 
 export function useShippingForm(): ShippingFormState {
-  const [transaction, setTransaction] = useState<Partial<ShippingTransaction>>(initialTransaction);
+  const [transaction, setShippingTransaction] = useState<Partial<ShippingTransaction>>(initialTransaction);
+
+  const updateTransaction = useCallback((updatedTransaction: Partial<ShippingTransaction>) => {
+    setShippingTransaction(prev => ({ ...prev, ...updatedTransaction }));
+    setIsDirty(true);
+  }, []);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isDirty, setIsDirty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +100,7 @@ export function useShippingForm(): ShippingFormState {
   useEffect(() => {
     const result = ShippingTransactionManager.load();
     if (result.success && result.data) {
-      setTransaction(result.data);
+      setShippingTransaction(result.data);
     } else {
       // Initialize with a new transaction ID
       const newTransaction = {
@@ -102,7 +108,7 @@ export function useShippingForm(): ShippingFormState {
         id: `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         timestamp: new Date()
       };
-      setTransaction(newTransaction);
+      setShippingTransaction(newTransaction);
     }
   }, []);
 
@@ -119,7 +125,7 @@ export function useShippingForm(): ShippingFormState {
   }, [transaction, isDirty]);
 
   const updateOrigin = useCallback((address: Partial<Address>) => {
-    setTransaction(prev => ({
+    setShippingTransaction(prev => ({
       ...prev,
       shipmentDetails: {
         ...prev.shipmentDetails!,
@@ -142,7 +148,7 @@ export function useShippingForm(): ShippingFormState {
   }, [errors]);
 
   const updateDestination = useCallback((address: Partial<Address>) => {
-    setTransaction(prev => ({
+    setShippingTransaction(prev => ({
       ...prev,
       shipmentDetails: {
         ...prev.shipmentDetails!,
@@ -165,7 +171,7 @@ export function useShippingForm(): ShippingFormState {
   }, [errors]);
 
   const updatePackage = useCallback((packageInfo: Partial<PackageInfo>) => {
-    setTransaction(prev => ({
+    setShippingTransaction(prev => ({
       ...prev,
       shipmentDetails: {
         ...prev.shipmentDetails!,
@@ -305,7 +311,7 @@ export function useShippingForm(): ShippingFormState {
       id: `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       timestamp: new Date()
     };
-    setTransaction(newTransaction);
+    setShippingTransaction(newTransaction);
     setErrors({});
     setIsDirty(false);
     ShippingTransactionManager.clear();
@@ -327,7 +333,7 @@ export function useShippingForm(): ShippingFormState {
         ...transaction,
         status: 'pricing' as const
       };
-      setTransaction(updatedTransaction);
+      setShippingTransaction(updatedTransaction);
       ShippingTransactionManager.save(updatedTransaction);
       return true;
     }
@@ -350,6 +356,7 @@ export function useShippingForm(): ShippingFormState {
     updateOrigin,
     updateDestination,
     updatePackage,
+    updateTransaction,
     validateForm,
     saveProgress,
     clearForm,

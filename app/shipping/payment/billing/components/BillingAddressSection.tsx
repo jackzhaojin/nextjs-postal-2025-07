@@ -23,9 +23,8 @@ import {
 import {
   BillingInfo,
   billingAddressSchema,
-  ValidationErrors,
 } from '@/lib/payment/billingTypes';
-import { Address } from '@/lib/types';
+import { Address, ValidationErrors } from '@/lib/types';
 import { useEffect } from 'react';
 
 interface BillingAddressSectionProps {
@@ -109,26 +108,18 @@ export function BillingAddressSection({
     <Form {...form}>
       <form className="space-y-4">
         {originAddress && (
-          <FormField
-            control={form.control}
-            name="sameAsOriginAddress"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-                <FormControl>
-                  <Checkbox
-                    checked={billingInfo.sameAsOriginAddress}
-                    onCheckedChange={handleSameAsOriginChange}
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Same as Origin Address
-                  </FormLabel>
-                </div>
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+            <Checkbox
+              checked={billingInfo.sameAsOriginAddress}
+              onCheckedChange={handleSameAsOriginChange}
+              disabled={isSubmitting}
+            />
+            <div className="space-y-1 leading-none">
+              <FormLabel>
+                Same as Origin Address
+              </FormLabel>
+            </div>
+          </div>
         )}
         <FormField
           control={form.control}

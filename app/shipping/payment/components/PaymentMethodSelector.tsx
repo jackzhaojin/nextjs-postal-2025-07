@@ -16,27 +16,27 @@ export function PaymentMethodSelector({
 }: PaymentMethodSelectorProps) {
   const paymentMethods: { value: PaymentMethodType; label: string; description: string }[] = [
     {
-      value: 'PurchaseOrder',
+      value: 'po',
       label: 'Purchase Order',
       description: 'Pay with a valid purchase order number.',
     },
     {
-      value: 'BillOfLading',
+      value: 'bol',
       label: 'Bill of Lading',
       description: 'Pay using a freight bill of lading.',
     },
     {
-      value: 'ThirdPartyBilling',
+      value: 'thirdparty',
       label: 'Third-Party Billing',
       description: 'Bill to a third-party account.',
     },
     {
-      value: 'NetTerms',
+      value: 'net',
       label: 'Net Terms',
       description: 'Pay on credit with approved net terms.',
     },
     {
-      value: 'CorporateAccount',
+      value: 'corporate',
       label: 'Corporate Account',
       description: 'Use your existing corporate account.',
     },

@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useShippingTransaction } from '@/components/providers/ShippingProvider';
+import { useShipping } from '@/components/providers/ShippingProvider';
 import { StepIndicator } from '@/components/layout/StepIndicator';
+import { SHIPPING_STEPS } from '@/components/providers/ShippingProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { BillingInfo, BillingValidationStatus } from '@/lib/payment/billingTypes';
+import { PaymentInfo } from '@/lib/payment/types';
 import { BillingAddressSection } from './components/BillingAddressSection';
 import { AccountsPayableSection } from './components/AccountsPayableSection';
 import { CompanyInfoSection } from './components/CompanyInfoSection';
@@ -16,7 +18,7 @@ import { InvoicePreferencesSection } from './components/InvoicePreferencesSectio
 import { validateBillingInfo } from '@/lib/payment/validation'; // Assuming this will be updated to validate BillingInfo
 
 export default function BillingInformationPage() {
-  const { transaction, updateTransaction } = useShippingTransaction();
+  const { transaction, updateTransaction } = useShipping();
   const router = useRouter();
 
   const [billingInfo, setBillingInfo] = useState<BillingInfo>(() => {
@@ -73,16 +75,24 @@ export default function BillingInformationPage() {
     const newValidationStatus: BillingValidationStatus = Object.keys(validationResult.errors).length === 0 ? 'complete' : 'incomplete';
     
     // Update the transaction with the new billing information and its validation status
+    const currentPaymentInfo: PaymentInfo = transaction?.paymentInfo || { method: 'po', validationStatus: 'incomplete', lastUpdated: new Date().toISOString(), paymentDetails: {} };
+    const newPaymentInfo: PaymentInfo = {
+      ...currentPaymentInfo,
+      method: currentPaymentInfo.method,
+      validationStatus: currentPaymentInfo.validationStatus,
+      lastUpdated: currentPaymentInfo.lastUpdated,
+      paymentDetails: currentPaymentInfo.paymentDetails,
+      billingInformation: {
+        ...updatedInfo,
+        validationStatus: newValidationStatus,
+      },
+    };
+
+    // Update the transaction with the new billing information and its validation status
     const updatedTransaction = {
       ...transaction,
-      paymentInfo: {
-        ...transaction?.paymentInfo,
-        billingInformation: {
-          ...updatedInfo,
-          validationStatus: newValidationStatus,
-        },
-      },
-      status: 'payment', // Keep status as payment until this step is fully completed
+      paymentInfo: newPaymentInfo,
+      status: 'payment' as 'payment', // Keep status as payment until this step is fully completed
     };
     updateTransaction(updatedTransaction);
   };
@@ -98,16 +108,19 @@ export default function BillingInformationPage() {
       return;
     }
 
+    const currentPaymentInfo: PaymentInfo = transaction?.paymentInfo || { method: 'po', validationStatus: 'incomplete', lastUpdated: new Date().toISOString(), paymentDetails: {} };
+    const newPaymentInfo: PaymentInfo = {
+      ...currentPaymentInfo,
+      billingInformation: {
+        ...billingInfo,
+        validationStatus: 'complete',
+      },
+    };
+
     const updatedTransaction = {
       ...transaction,
-      paymentInfo: {
-        ...transaction?.paymentInfo,
-        billingInformation: {
-          ...billingInfo,
-          validationStatus: 'complete',
-        },
-      },
-      status: 'review', // Move to next step (Review)
+      paymentInfo: newPaymentInfo,
+      status: 'review' as 'review', // Move to next step (Review)
     };
 
     await updateTransaction(updatedTransaction);
@@ -123,7 +136,7 @@ export default function BillingInformationPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <StepIndicator currentStep={3} /> {/* Still step 3, but a sub-step */}
+      <StepIndicator currentStep={3} steps={SHIPPING_STEPS} /> {/* Still step 3, but a sub-step */}
       <h1 className="text-3xl font-bold mb-6 text-center">Billing Information</h1>
       <Progress value={progress} className="w-full mb-6" />
 

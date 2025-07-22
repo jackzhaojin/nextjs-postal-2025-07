@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input';
 import {
   BillingInfo,
   accountsPayableContactSchema,
-  ValidationErrors,
 } from '@/lib/payment/billingTypes';
+import { ValidationErrors } from '@/lib/types';
 import { useEffect } from 'react';
 
 interface AccountsPayableSectionProps {

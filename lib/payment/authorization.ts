@@ -1,4 +1,4 @@
-import type { PaymentInfo } from '@/lib/types';
+import type { PaymentInfo } from '@/lib/payment/types';
 
 export interface PaymentAuthorizationResult {
   authorized: boolean;
@@ -92,9 +92,9 @@ async function authorizePurchaseOrder(paymentInfo: PaymentInfo): Promise<Omit<Pa
   const validationChecks = [
     { check: 'PO Number Format', pass: validatePONumber(poDetails.poNumber) },
     { check: 'PO Amount Validity', pass: poDetails.poAmount > 0 },
-    { check: 'PO Expiration', pass: new Date(poDetails.expirationDate) > new Date() },
-    { check: 'Approval Contact', pass: poDetails.approvalContact.length > 0 },
-    { check: 'Department Code', pass: poDetails.department.length > 0 }
+    { check: 'PO Expiration', pass: new Date(poDetails.poExpiration) > new Date() },
+    { check: 'Approval Contact', pass: poDetails.approvalContactName.length > 0 },
+    { check: 'Department Code', pass: (poDetails.department ?? '').length > 0 }
   ];
   
   console.log('🔍 [PAYMENT-AUTH] PO validation checks:', validationChecks);
@@ -147,7 +147,7 @@ async function authorizeBillOfLading(paymentInfo: PaymentInfo): Promise<Omit<Pay
   const validationChecks = [
     { check: 'BOL Number Format', pass: validateBOLNumber(bolDetails.bolNumber) },
     { check: 'BOL Date Validity', pass: new Date(bolDetails.bolDate) <= new Date() },
-    { check: 'Shipper Reference', pass: bolDetails.shipperReference.length > 0 },
+    { check: 'Shipper Reference', pass: bolDetails.shipperReference && bolDetails.shipperReference.length > 0 },
     { check: 'Freight Terms', pass: ['prepaid', 'collect', 'prepaid-add'].includes(bolDetails.freightTerms) }
   ];
   
@@ -201,7 +201,7 @@ async function authorizeThirdParty(paymentInfo: PaymentInfo): Promise<Omit<Payme
   const validationChecks = [
     { check: 'Account Number Format', pass: validateAccountNumber(thirdPartyDetails.accountNumber) },
     { check: 'Company Name', pass: thirdPartyDetails.companyName.length > 0 },
-    { check: 'Contact Information', pass: thirdPartyDetails.contactInfo.name.length > 0 },
+    { check: 'Contact Information', pass: thirdPartyDetails.contactName.length > 0 },
     { check: 'Authorization Code', pass: !thirdPartyDetails.authorizationCode || thirdPartyDetails.authorizationCode.length >= 6 }
   ];
   
@@ -253,7 +253,7 @@ async function authorizeNetTerms(paymentInfo: PaymentInfo): Promise<Omit<Payment
   
   // Simulate credit check and validation
   const validationChecks = [
-    { check: 'Payment Period', pass: [15, 30, 45, 60].includes(netTermsDetails.period) },
+    { check: 'Payment Period', pass: ['Net 15', 'Net 30', 'Net 45', 'Net 60'].includes(netTermsDetails.netTermsPeriod) },
     { check: 'Trade References', pass: netTermsDetails.tradeReferences.length >= 2 },
     { check: 'Annual Revenue', pass: netTermsDetails.annualRevenue.length > 0 },
     { check: 'Credit History', pass: Math.random() > 0.15 } // Simulate credit check
@@ -269,7 +269,7 @@ async function authorizeNetTerms(paymentInfo: PaymentInfo): Promise<Omit<Payment
   if (authSuccess) {
     const authCode = generateAuthorizationCode('NET');
     console.log('✅ [PAYMENT-AUTH] Net terms authorized:', { 
-      period: netTermsDetails.period, 
+      period: netTermsDetails.netTermsPeriod, 
       authCode,
       tradeRefs: netTermsDetails.tradeReferences.length
     });

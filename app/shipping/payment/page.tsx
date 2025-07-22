@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useShippingTransaction } from '@/components/providers/ShippingProvider';
+import { useShipping } from '@/components/providers/ShippingProvider';
 import { StepIndicator } from '@/components/layout/StepIndicator';
 import { Button } from '@/components/ui/button';
 import { PaymentMethodSelector } from './components/PaymentMethodSelector';
@@ -12,6 +12,7 @@ import { ThirdPartyBillingForm } from './components/payment-methods/ThirdPartyBi
 import { NetTermsForm } from './components/payment-methods/NetTermsForm';
 import { CorporateAccountForm } from './components/payment-methods/CorporateAccountForm';
 import { PaymentMethodType, PaymentInfo } from '@/lib/payment/types';
+import { ShippingTransaction } from '@/lib/types';
 import { validatePaymentInfo } from '@/lib/payment/validation';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +20,13 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 
 export default function PaymentPage() {
-  const { transaction, updateTransaction } = useShippingTransaction();
+  const { transaction, updateTransaction, saveProgress, isLoading } = useShipping();
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType | undefined>(
     transaction?.paymentInfo?.method
   );
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>(
-    transaction?.paymentInfo || { method: 'PurchaseOrder', validationStatus: 'incomplete', lastUpdated: new Date().toISOString() }
+    transaction?.paymentInfo || { method: 'po', validationStatus: 'incomplete', lastUpdated: new Date().toISOString(), paymentDetails: {} }
   );
   const [errors, setErrors] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,16 +56,16 @@ export default function PaymentPage() {
     const validationResult = validatePaymentInfo(updatedInfo);
     setErrors(validationResult.errors);
 
-    const newValidationStatus = Object.keys(validationResult.errors).length === 0 ? 'complete' : 'incomplete';
+    const newValidationStatus: 'incomplete' | 'complete' = Object.keys(validationResult.errors).length === 0 ? 'complete' : 'incomplete';
     const updatedTransaction = {
       ...transaction,
       paymentInfo: {
         ...updatedInfo,
         validationStatus: newValidationStatus,
       },
-      status: 'payment',
+      status: 'payment' as 'payment',
     };
-    updateTransaction(updatedTransaction);
+    updateTransaction(updatedTransaction as Partial<ShippingTransaction>);
   };
 
   const handleNext = async () => {
@@ -84,10 +85,10 @@ export default function PaymentPage() {
         ...paymentInfo,
         validationStatus: 'complete',
       },
-      status: 'pickup', // Move to next step
+      status: 'pickup' as 'pickup', // Move to next step
     };
 
-    await updateTransaction(updatedTransaction);
+    await updateTransaction(updatedTransaction as Partial<ShippingTransaction>);
     setIsSubmitting(false);
     router.push('/shipping/payment/billing');
   };
@@ -100,7 +101,7 @@ export default function PaymentPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <StepIndicator currentStep={3} />
+      <StepIndicator currentStep={3} steps={[]} />
       <h1 className="text-3xl font-bold mb-6 text-center">Payment Information</h1>
       <Progress value={progress} className="w-full mb-6" />
 
@@ -122,7 +123,7 @@ export default function PaymentPage() {
             <CardTitle>{selectedMethod.replace(/([A-Z])/g, ' $1').trim()} Details</CardTitle>
           </CardHeader>
           <CardContent>
-            {selectedMethod === 'PurchaseOrder' && (
+            {selectedMethod === 'po' && (
               <PurchaseOrderForm
                 paymentInfo={paymentInfo}
                 onPaymentInfoChange={handlePaymentInfoChange}
@@ -130,7 +131,7 @@ export default function PaymentPage() {
                 isSubmitting={isSubmitting}
               />
             )}
-            {selectedMethod === 'BillOfLading' && (
+            {selectedMethod === 'bol' && (
               <BillOfLadingForm
                 paymentInfo={paymentInfo}
                 onPaymentInfoChange={handlePaymentInfoChange}
@@ -138,7 +139,7 @@ export default function PaymentPage() {
                 isSubmitting={isSubmitting}
               />
             )}
-            {selectedMethod === 'ThirdPartyBilling' && (
+            {selectedMethod === 'thirdparty' && (
               <ThirdPartyBillingForm
                 paymentInfo={paymentInfo}
                 onPaymentInfoChange={handlePaymentInfoChange}
@@ -146,7 +147,7 @@ export default function PaymentPage() {
                 isSubmitting={isSubmitting}
               />
             )}
-            {selectedMethod === 'NetTerms' && (
+            {selectedMethod === 'net' && (
               <NetTermsForm
                 paymentInfo={paymentInfo}
                 onPaymentInfoChange={handlePaymentInfoChange}
@@ -154,7 +155,7 @@ export default function PaymentPage() {
                 isSubmitting={isSubmitting}
               />
             )}
-            {selectedMethod === 'CorporateAccount' && (
+            {selectedMethod === 'corporate' && (
               <CorporateAccountForm
                 paymentInfo={paymentInfo}
                 onPaymentInfoChange={handlePaymentInfoChange}

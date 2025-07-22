@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Address, ContactInfo, ValidationErrors } from "@/lib/types";
+import { Address, ContactInfo } from "@/lib/types";
 
 export type BillingValidationStatus = 'incomplete' | 'complete';
 

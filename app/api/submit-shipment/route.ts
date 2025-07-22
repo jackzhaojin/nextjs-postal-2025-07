@@ -309,7 +309,12 @@ export async function POST(request: NextRequest) {
     // Create the transaction with proper type conversion
     const transaction: ShippingTransaction = {
       ...transactionData,
-      timestamp: new Date(transactionData.timestamp)
+      timestamp: new Date(transactionData.timestamp),
+      paymentInfo: {
+        ...transactionData.paymentInfo,
+        validationStatus: 'incomplete', // Default value
+        lastUpdated: new Date().toISOString(), // Default value
+      }
     } as ShippingTransaction; // Type assertion to handle complex type conversions
     
     console.log('✅ [SUBMIT-SHIPMENT] Transaction validation successful');

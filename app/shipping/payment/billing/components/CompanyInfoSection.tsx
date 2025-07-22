@@ -23,11 +23,11 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   BillingInfo,
   companyInfoSchema,
-  ValidationErrors,
   businessTypeSchema,
   industryTypeSchema,
   annualShippingVolumeSchema,
 } from '@/lib/payment/billingTypes';
+import { ValidationErrors } from '@/lib/types';
 import { useEffect } from 'react';
 
 interface CompanyInfoSectionProps {

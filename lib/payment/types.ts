@@ -1,15 +1,16 @@
 import { z } from 'zod';
+import { BillingInfo } from '@/lib/payment/billingTypes';
 
 export type PaymentMethodType =
-  | 'PurchaseOrder'
-  | 'BillOfLading'
-  | 'ThirdPartyBilling'
-  | 'NetTerms'
-  | 'CorporateAccount';
+  | 'po'
+  | 'bol'
+  | 'thirdparty'
+  | 'net'
+  | 'corporate';
 
 export const purchaseOrderSchema = z.object({
   poNumber: z.string().min(4).max(50, 'PO Number must be between 4 and 50 characters.').regex(/^[a-zA-Z0-9]+$/, 'PO Number must be alphanumeric.').nonempty('PO Number is required.'),
-  poAmount: z.number().min(0.01, 'PO Amount must be greater than 0.').nonnegative('PO Amount cannot be negative.').finite('Invalid PO Amount.').safeParse(0).success ? z.number() : z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid currency format.').transform(Number),
+  poAmount: z.number().min(0.01, 'PO Amount must be greater than 0.').nonnegative('PO Amount cannot be negative.').finite('Invalid PO Amount.'),
   poExpiration: z.string().refine((date) => new Date(date) > new Date(), 'PO Expiration must be a future date.').nonempty('PO Expiration is required.'),
   approvalContactName: z.string().min(2, 'Approval Contact Name is required.').nonempty('Approval Contact Name is required.'),
   approvalContactEmail: z.string().email('Invalid email format.').nonempty('Approval Contact Email is required.').regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format.').refine(email => !/personal|gmail|yahoo|hotmail|outlook/i.test(email), 'Personal email domains are not allowed.'),
@@ -69,6 +70,7 @@ export type CorporateAccountInfo = z.infer<typeof corporateAccountSchema>;
 
 export type PaymentInfo = {
   method: PaymentMethodType;
+  reference?: string; // Added reference property
   purchaseOrder?: PurchaseOrderInfo;
   billOfLading?: BillOfLadingInfo;
   thirdPartyBilling?: ThirdPartyBillingInfo;
@@ -77,6 +79,14 @@ export type PaymentInfo = {
   totalWithPaymentFees?: number;
   validationStatus: 'incomplete' | 'complete';
   lastUpdated: string;
+  billingInformation?: BillingInfo;
+  paymentDetails: {
+    purchaseOrder?: PurchaseOrderInfo;
+    billOfLading?: BillOfLadingInfo;
+    thirdParty?: ThirdPartyBillingInfo;
+    netTerms?: NetTermsInfo;
+    corporate?: CorporateAccountInfo;
+  };
 };
 
 export type MonetaryAmount = {

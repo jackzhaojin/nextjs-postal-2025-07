@@ -106,7 +106,8 @@ export function ThirdPartyBillingForm({
                 <FormMessage>{validationErrors.contactName as string}</FormMessage>
               )}
             </FormItem>
-          )}\n        />
+          )}
+        />
         <FormField
           control={form.control}
           name="contactEmail"

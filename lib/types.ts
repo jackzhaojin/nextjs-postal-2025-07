@@ -3,6 +3,8 @@ import { z } from "zod";
 // Core TypeScript interfaces for B2B Shipping Transport System
 // Based on specifications in TECHNICAL_HIGH_LEVEL.md and prd.md
 
+
+
 import { PaymentInfo } from "./payment/types";
 
 export interface ShippingTransaction {
@@ -10,7 +12,7 @@ export interface ShippingTransaction {
   timestamp: Date;
   shipmentDetails: ShipmentDetails;
   selectedOption?: PricingOption;
-  paymentInfo?: PaymentInfo & { billingInformation?: BillingInfo };
+  paymentInfo?: PaymentInfo;
   pickupDetails?: PickupDetails;
   confirmationNumber?: string;
   status: 'draft' | 'pricing' | 'payment' | 'pickup' | 'review' | 'confirmed';
@@ -358,6 +360,8 @@ export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
 }
+
+export type ValidationErrors<T = any> = { [key: string]: string | ValidationErrors<T> };
 
 // Utility Types
 

@@ -16,6 +16,7 @@ interface ShippingContextValue {
   updateOrigin: ReturnType<typeof useShippingForm>['updateOrigin'];
   updateDestination: ReturnType<typeof useShippingForm>['updateDestination'];
   updatePackage: ReturnType<typeof useShippingForm>['updatePackage'];
+  updateTransaction: ReturnType<typeof useShippingForm>['updateTransaction'];
   validateForm: ReturnType<typeof useShippingForm>['validateForm'];
   saveProgress: ReturnType<typeof useShippingForm>['saveProgress'];
   clearForm: ReturnType<typeof useShippingForm>['clearForm'];
@@ -38,13 +39,13 @@ interface ShippingProviderProps {
 }
 
 // Step configuration with paths
-const SHIPPING_STEPS = [
-  { id: 1, path: '/shipping', title: 'Shipment Details' },
-  { id: 2, path: '/shipping/pricing', title: 'Pricing & Options' },
-  { id: 3, path: '/shipping/payment', title: 'Payment Information' },
-  { id: 4, path: '/shipping/pickup', title: 'Pickup Scheduling' },
-  { id: 5, path: '/shipping/review', title: 'Review & Confirm' },
-  { id: 6, path: '/shipping/confirmation', title: 'Confirmation' }
+export const SHIPPING_STEPS = [
+  { id: 1, path: '/shipping', title: 'Shipment Details', description: 'Enter origin, destination, and package info', status: 'not-started' as const, completed: false },
+  { id: 2, path: '/shipping/pricing', title: 'Pricing & Options', description: 'Select service and view pricing', status: 'not-started' as const, completed: false },
+  { id: 3, path: '/shipping/payment', title: 'Payment Information', description: 'Provide payment details', status: 'not-started' as const, completed: false },
+  { id: 4, path: '/shipping/pickup', title: 'Pickup Scheduling', description: 'Schedule pickup date and time', status: 'not-started' as const, completed: false },
+  { id: 5, path: '/shipping/review', title: 'Review & Confirm', description: 'Review and confirm your shipment', status: 'not-started' as const, completed: false },
+  { id: 6, path: '/shipping/confirmation', title: 'Confirmation', description: 'View shipment confirmation', status: 'not-started' as const, completed: false }
 ];
 
 export function ShippingProvider({ children }: ShippingProviderProps) {
@@ -107,7 +108,8 @@ export function ShippingProvider({ children }: ShippingProviderProps) {
     goToPrevious,
     goToNext,
     goToStep,
-    resetShipment
+    resetShipment,
+    updateTransaction: formState.updateTransaction
   };
   
   return (

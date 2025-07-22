@@ -255,8 +255,31 @@ function generateReferences(
 ): ConfirmationDetails['references'] {
   const internalReference = `INT-${Date.now().toString().slice(-8)}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
   
+  let customerReference: string | undefined;
+  if (transaction.paymentInfo) {
+    switch (transaction.paymentInfo.method) {
+      case 'po':
+        customerReference = transaction.paymentInfo.purchaseOrder?.poNumber;
+        break;
+      case 'bol':
+        customerReference = transaction.paymentInfo.billOfLading?.bolNumber;
+        break;
+      case 'thirdparty':
+        customerReference = transaction.paymentInfo.thirdPartyBilling?.accountNumber;
+        break;
+      case 'net':
+        customerReference = transaction.paymentInfo.netTerms?.netTermsPeriod;
+        break;
+      case 'corporate':
+        customerReference = transaction.paymentInfo.corporateAccount?.accountNumber;
+        break;
+      default:
+        customerReference = undefined;
+    }
+  }
+
   return {
-    customerReference: transaction.paymentInfo?.reference,
+    customerReference,
     internalReference,
     pickupConfirmation: pickupConfirmation.confirmationId!,
     paymentReference: paymentAuth.authorizationCode!
