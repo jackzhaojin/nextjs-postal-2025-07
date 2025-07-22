@@ -10,7 +10,7 @@ export interface ShippingTransaction {
   timestamp: Date;
   shipmentDetails: ShipmentDetails;
   selectedOption?: PricingOption;
-  paymentInfo?: PaymentInfo;
+  paymentInfo?: PaymentInfo & { billingInformation?: BillingInfo };
   pickupDetails?: PickupDetails;
   confirmationNumber?: string;
   status: 'draft' | 'pricing' | 'payment' | 'pickup' | 'review' | 'confirmed';

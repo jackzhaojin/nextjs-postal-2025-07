@@ -1,39 +1,63 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CorporateAccountInfoSchema } from '@/lib/payment/validation';
-import { PaymentMethodFormProps } from '../types';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+'use client';
 
-interface CorporateAccountFormProps extends PaymentMethodFormProps {
-  // Add any specific props for CorporateAccountForm if needed
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  PaymentInfo,
+  corporateAccountSchema,
+  ValidationErrors,
+} from '@/lib/payment/types';
+import { useEffect } from 'react';
+
+interface CorporateAccountFormProps {
+  paymentInfo: PaymentInfo;
+  onPaymentInfoChange: (info: PaymentInfo) => void;
+  validationErrors: ValidationErrors;
+  isSubmitting: boolean;
 }
 
-export const CorporateAccountForm: React.FC<CorporateAccountFormProps> = ({
+export function CorporateAccountForm({
   paymentInfo,
   onPaymentInfoChange,
   validationErrors,
   isSubmitting,
-}) => {
-  const form = useForm<z.infer<typeof CorporateAccountInfoSchema>>({
-    resolver: zodResolver(CorporateAccountInfoSchema),
-    defaultValues: paymentInfo?.corporateAccount || {
+}: CorporateAccountFormProps) {
+  const form = useForm<z.infer<typeof corporateAccountSchema>>({
+    resolver: zodResolver(corporateAccountSchema),
+    defaultValues: paymentInfo.corporateAccount || {
       accountNumber: '',
       accountPin: '',
-      billingContact: '',
+      billingContactName: '',
+      billingContactEmail: '',
+      billingContactPhone: '',
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (paymentInfo.corporateAccount) {
+      form.reset(paymentInfo.corporateAccount);
+    }
+  }, [paymentInfo.corporateAccount, form]);
+
+  useEffect(() => {
     const subscription = form.watch((value) => {
       onPaymentInfoChange({
-        corporateAccount: value as z.infer<typeof CorporateAccountInfoSchema>,
+        ...paymentInfo,
+        corporateAccount: value as z.infer<typeof corporateAccountSchema>,
       });
     });
     return () => subscription.unsubscribe();
-  }, [form, onPaymentInfoChange]);
+  }, [form, onPaymentInfoChange, paymentInfo]);
 
   return (
     <Form {...form}>
@@ -45,9 +69,11 @@ export const CorporateAccountForm: React.FC<CorporateAccountFormProps> = ({
             <FormItem>
               <FormLabel>Account Number</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Corporate Account Number" />
+                <Input {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.accountNumber && (
+                <FormMessage>{validationErrors.accountNumber as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
@@ -58,26 +84,60 @@ export const CorporateAccountForm: React.FC<CorporateAccountFormProps> = ({
             <FormItem>
               <FormLabel>Account PIN</FormLabel>
               <FormControl>
-                <Input type="password" {...field} placeholder="****" />
+                <Input type="password" {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.accountPin && (
+                <FormMessage>{validationErrors.accountPin as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="billingContact"
+          name="billingContactName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Billing Contact (Email or Phone)</FormLabel>
+              <FormLabel>Billing Contact Name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="billing@example.com" />
+                <Input {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.billingContactName && (
+                <FormMessage>{validationErrors.billingContactName as string}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="billingContactEmail"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Billing Contact Email</FormLabel>
+              <FormControl>
+                <Input type="email" {...field} disabled={isSubmitting} />
+              </FormControl>
+              {validationErrors.billingContactEmail && (
+                <FormMessage>{validationErrors.billingContactEmail as string}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="billingContactPhone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Billing Contact Phone</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isSubmitting} />
+              </FormControl>
+              {validationErrors.billingContactPhone && (
+                <FormMessage>{validationErrors.billingContactPhone as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
       </form>
     </Form>
   );
-};
+}

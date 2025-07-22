@@ -1,42 +1,66 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { PurchaseOrderInfoSchema } from '@/lib/payment/validation';
-import { PaymentMethodFormProps } from './types'; // Assuming types.ts is in the same directory
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+'use client';
 
-interface PurchaseOrderFormProps extends PaymentMethodFormProps {
-  // Add any specific props for PurchaseOrderForm if needed
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { 
+  PaymentInfo,
+  purchaseOrderSchema,
+  ValidationErrors,
+} from '@/lib/payment/types';
+import { useEffect } from 'react';
+
+interface PurchaseOrderFormProps {
+  paymentInfo: PaymentInfo;
+  onPaymentInfoChange: (info: PaymentInfo) => void;
+  validationErrors: ValidationErrors;
+  isSubmitting: boolean;
 }
 
-export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
+export function PurchaseOrderForm({
   paymentInfo,
   onPaymentInfoChange,
   validationErrors,
   isSubmitting,
-}) => {
-  const form = useForm<z.infer<typeof PurchaseOrderInfoSchema>>({
-    resolver: zodResolver(PurchaseOrderInfoSchema),
-    defaultValues: paymentInfo?.purchaseOrder || {
+}: PurchaseOrderFormProps) {
+  const form = useForm<z.infer<typeof purchaseOrderSchema>>({
+    resolver: zodResolver(purchaseOrderSchema),
+    defaultValues: paymentInfo.purchaseOrder || {
       poNumber: '',
-      poAmount: { amount: 0, currency: 'USD' },
+      poAmount: 0,
       poExpiration: '',
-      approvalContact: '',
-      departmentCostCenter: '',
+      approvalContactName: '',
+      approvalContactEmail: '',
+      approvalContactPhone: '',
+      department: '',
+      costCenter: '',
     },
   });
 
-  // Watch for form changes and update parent state
-  React.useEffect(() => {
+  useEffect(() => {
+    if (paymentInfo.purchaseOrder) {
+      form.reset(paymentInfo.purchaseOrder);
+    }
+  }, [paymentInfo.purchaseOrder, form]);
+
+  useEffect(() => {
     const subscription = form.watch((value) => {
       onPaymentInfoChange({
-        purchaseOrder: value as z.infer<typeof PurchaseOrderInfoSchema>,
+        ...paymentInfo,
+        purchaseOrder: value as z.infer<typeof purchaseOrderSchema>,
       });
     });
     return () => subscription.unsubscribe();
-  }, [form, onPaymentInfoChange]);
+  }, [form, onPaymentInfoChange, paymentInfo]);
 
   return (
     <Form {...form}>
@@ -48,22 +72,26 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             <FormItem>
               <FormLabel>PO Number</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="PO-12345" />
+                <Input {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.poNumber && (
+                <FormMessage>{validationErrors.poNumber as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="poAmount.amount"
+          name="poAmount"
           render={({ field }) => (
             <FormItem>
               <FormLabel>PO Amount</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.poAmount && (
+                <FormMessage>{validationErrors.poAmount as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
@@ -72,41 +100,92 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
           name="poExpiration"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>PO Expiration Date</FormLabel>
+              <FormLabel>PO Expiration</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.poExpiration && (
+                <FormMessage>{validationErrors.poExpiration as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="approvalContact"
+          name="approvalContactName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Approval Contact (Email or Phone)</FormLabel>
+              <FormLabel>Approval Contact Name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="approver@example.com" />
+                <Input {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.approvalContactName && (
+                <FormMessage>{validationErrors.approvalContactName as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="departmentCostCenter"
+          name="approvalContactEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department/Cost Center (Optional)</FormLabel>
+              <FormLabel>Approval Contact Email</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Marketing Dept" />
+                <Input type="email" {...field} disabled={isSubmitting} />
               </FormControl>
-              <FormMessage />
+              {validationErrors.approvalContactEmail && (
+                <FormMessage>{validationErrors.approvalContactEmail as string}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="approvalContactPhone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Approval Contact Phone</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isSubmitting} />
+              </FormControl>
+              {validationErrors.approvalContactPhone && (
+                <FormMessage>{validationErrors.approvalContactPhone as string}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="department"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Department (Optional)</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isSubmitting} />
+              </FormControl>
+              {validationErrors.department && (
+                <FormMessage>{validationErrors.department as string}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="costCenter"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cost Center (Optional)</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isSubmitting} />
+              </FormControl>
+              {validationErrors.costCenter && (
+                <FormMessage>{validationErrors.costCenter as string}</FormMessage>
+              )}
             </FormItem>
           )}
         />
       </form>
     </Form>
   );
-};
+}

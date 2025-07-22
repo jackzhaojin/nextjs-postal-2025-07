@@ -1,142 +1,179 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePaymentTransaction } from '@/lib/payment/hooks/usePaymentTransaction';
-import { PaymentMethodType } from '@/lib/payment/types';
+import { useShippingTransaction } from '@/components/providers/ShippingProvider';
+import { StepIndicator } from '@/components/layout/StepIndicator';
+import { Button } from '@/components/ui/button';
 import { PaymentMethodSelector } from './components/PaymentMethodSelector';
 import { PurchaseOrderForm } from './components/payment-methods/PurchaseOrderForm';
 import { BillOfLadingForm } from './components/payment-methods/BillOfLadingForm';
 import { ThirdPartyBillingForm } from './components/payment-methods/ThirdPartyBillingForm';
 import { NetTermsForm } from './components/payment-methods/NetTermsForm';
 import { CorporateAccountForm } from './components/payment-methods/CorporateAccountForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
+import { PaymentMethodType, PaymentInfo } from '@/lib/payment/types';
+import { validatePaymentInfo } from '@/lib/payment/validation';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 
-const PaymentMethodPage: React.FC = () => {
+export default function PaymentPage() {
+  const { transaction, updateTransaction } = useShippingTransaction();
   const router = useRouter();
-  const { paymentInfo, updatePaymentInfo, validatePaymentMethod, isPaymentMethodComplete } = usePaymentTransaction();
-
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>(
-    paymentInfo?.method || 'purchaseOrder'
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType | undefined>(
+    transaction?.paymentInfo?.method
   );
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>(
+    transaction?.paymentInfo || { method: 'PurchaseOrder', validationStatus: 'incomplete', lastUpdated: new Date().toISOString() }
+  );
+  const [errors, setErrors] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (paymentInfo?.method) {
-      setSelectedMethod(paymentInfo.method);
+    if (transaction?.paymentInfo) {
+      setSelectedMethod(transaction.paymentInfo.method);
+      setPaymentInfo(transaction.paymentInfo);
     }
-  }, [paymentInfo?.method]);
+  }, [transaction]);
 
-  const handleMethodChange = (method: PaymentMethodType) => {
-    setSelectedMethod(method);
-    updatePaymentInfo({ method });
-    setValidationErrors({}); // Clear errors when method changes
+  useEffect(() => {
+    if (selectedMethod) {
+      const newPaymentInfo: PaymentInfo = {
+        ...paymentInfo,
+        method: selectedMethod,
+        lastUpdated: new Date().toISOString(),
+      };
+      setPaymentInfo(newPaymentInfo);
+      // Validate and update transaction immediately on method change
+      handlePaymentInfoChange(newPaymentInfo);
+    }
+  }, [selectedMethod]);
+
+  const handlePaymentInfoChange = (updatedInfo: PaymentInfo) => {
+    setPaymentInfo(updatedInfo);
+    const validationResult = validatePaymentInfo(updatedInfo);
+    setErrors(validationResult.errors);
+
+    const newValidationStatus = Object.keys(validationResult.errors).length === 0 ? 'complete' : 'incomplete';
+    const updatedTransaction = {
+      ...transaction,
+      paymentInfo: {
+        ...updatedInfo,
+        validationStatus: newValidationStatus,
+      },
+      status: 'payment',
+    };
+    updateTransaction(updatedTransaction);
   };
 
-  const handlePaymentInfoChange = (info: Partial<PaymentInfo>) => {
-    updatePaymentInfo({
-      ...paymentInfo,
-      ...info,
-      method: selectedMethod, // Ensure the method is always set
-    });
-  };
+  const handleNext = async () => {
+    setIsSubmitting(true);
+    const validationResult = validatePaymentInfo(paymentInfo);
+    setErrors(validationResult.errors);
 
-  const renderPaymentForm = () => {
-    const commonProps = {
-      paymentInfo: paymentInfo || undefined,
-      onPaymentInfoChange: handlePaymentInfoChange,
-      validationErrors,
-      isSubmitting,
+    if (Object.keys(validationResult.errors).length > 0) {
+      toast.error('Please correct the errors in the payment information.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const updatedTransaction = {
+      ...transaction,
+      paymentInfo: {
+        ...paymentInfo,
+        validationStatus: 'complete',
+      },
+      status: 'pickup', // Move to next step
     };
 
-    switch (selectedMethod) {
-      case 'purchaseOrder':
-        return <PurchaseOrderForm {...commonProps} />;
-      case 'billOfLading':
-        return <BillOfLadingForm {...commonProps} />;
-      case 'thirdPartyBilling':
-        return <ThirdPartyBillingForm {...commonProps} />;
-      case 'netTerms':
-        return <NetTermsForm {...commonProps} />;
-      case 'corporateAccount':
-        return <CorporateAccountForm {...commonProps} />;
-      default:
-        return <p>Select a payment method to continue.</p>;
-    }
-  };
-
-  const handleNext = () => {
-    setIsSubmitting(true);
-    const result = validatePaymentMethod(selectedMethod);
-    if (result.isValid) {
-      updatePaymentInfo({ validationStatus: 'completed' });
-      router.push('/shipping/pickup'); // Navigate to the next step
-    } else {
-      setValidationErrors(result.errors);
-      updatePaymentInfo({ validationStatus: 'failed' });
-      console.error('Validation failed:', result.errors);
-    }
+    await updateTransaction(updatedTransaction);
     setIsSubmitting(false);
+    router.push('/shipping/payment/billing');
   };
 
   const handleBack = () => {
-    router.push('/shipping/pricing'); // Navigate to the previous step
+    router.push('/shipping/pricing');
   };
 
-  const isFormValid = isPaymentMethodComplete(selectedMethod);
+  const progress = selectedMethod ? 33 : 0; // Example progress
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <Card>
+    <div className="container mx-auto p-4">
+      <StepIndicator currentStep={3} />
+      <h1 className="text-3xl font-bold mb-6 text-center">Payment Information</h1>
+      <Progress value={progress} className="w-full mb-6" />
+
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Payment Information</CardTitle>
-          <CardDescription>Select your preferred B2B payment method.</CardDescription>
+          <CardTitle>Select Payment Method</CardTitle>
         </CardHeader>
         <CardContent>
           <PaymentMethodSelector
             selectedMethod={selectedMethod}
-            onSelectMethod={handleMethodChange}
+            onSelectMethod={setSelectedMethod}
           />
         </CardContent>
       </Card>
 
-      {Object.keys(validationErrors).length > 0 && (
-        <Alert variant="destructive">
-          <Terminal className="h-4 w-4" />
-          <AlertTitle>Validation Error</AlertTitle>
-          <AlertDescription>
-            Please correct the following issues:
-            <ul className="list-disc pl-5 mt-2">
-              {Object.entries(validationErrors).map(([key, value]) => (
-                <li key={key}>{value}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+      {selectedMethod && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>{selectedMethod.replace(/([A-Z])/g, ' $1').trim()} Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {selectedMethod === 'PurchaseOrder' && (
+              <PurchaseOrderForm
+                paymentInfo={paymentInfo}
+                onPaymentInfoChange={handlePaymentInfoChange}
+                validationErrors={errors}
+                isSubmitting={isSubmitting}
+              />
+            )}
+            {selectedMethod === 'BillOfLading' && (
+              <BillOfLadingForm
+                paymentInfo={paymentInfo}
+                onPaymentInfoChange={handlePaymentInfoChange}
+                validationErrors={errors}
+                isSubmitting={isSubmitting}
+              />
+            )}
+            {selectedMethod === 'ThirdPartyBilling' && (
+              <ThirdPartyBillingForm
+                paymentInfo={paymentInfo}
+                onPaymentInfoChange={handlePaymentInfoChange}
+                validationErrors={errors}
+                isSubmitting={isSubmitting}
+              />
+            )}
+            {selectedMethod === 'NetTerms' && (
+              <NetTermsForm
+                paymentInfo={paymentInfo}
+                onPaymentInfoChange={handlePaymentInfoChange}
+                validationErrors={errors}
+                isSubmitting={isSubmitting}
+              />
+            )}
+            {selectedMethod === 'CorporateAccount' && (
+              <CorporateAccountForm
+                paymentInfo={paymentInfo}
+                onPaymentInfoChange={handlePaymentInfoChange}
+                validationErrors={errors}
+                isSubmitting={isSubmitting}
+              />
+            )}
+          </CardContent>
+        </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Enter Payment Details</CardTitle>
-          <CardDescription>Provide the necessary information for your selected payment method.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {renderPaymentForm()}
-        </CardContent>
-      </Card>
 
       <div className="flex justify-between mt-8">
         <Button variant="outline" onClick={handleBack}>
-          Back
+          Back to Pricing
         </Button>
-        <Button onClick={handleNext} disabled={!isFormValid || isSubmitting}>
-          {isSubmitting ? 'Processing...' : 'Continue to Pickup'}
+        <Button onClick={handleNext} disabled={isSubmitting || !selectedMethod || Object.keys(errors).length > 0}>
+          {isSubmitting ? 'Saving...' : 'Continue to Pickup'}
         </Button>
       </div>
     </div>
   );
-};
-
-export default PaymentMethodPage;
+}

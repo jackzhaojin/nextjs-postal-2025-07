@@ -1,0 +1,2 @@
+set PORT=4000
+npm run dev
