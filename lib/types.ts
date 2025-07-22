@@ -1,5 +1,9 @@
+import { z } from "zod";
+
 // Core TypeScript interfaces for B2B Shipping Transport System
 // Based on specifications in TECHNICAL_HIGH_LEVEL.md and prd.md
+
+import { PaymentInfo } from "./payment/types";
 
 export interface ShippingTransaction {
   id: string;
@@ -159,72 +163,16 @@ export interface PricingBreakdown {
   };
 }
 
-export interface PaymentInfo {
-  method: 'po' | 'bol' | 'thirdparty' | 'net' | 'corporate';
-  reference: string;
-  billingContact: ContactInfo;
-  companyInfo: CompanyInfo;
-  billingAddress: Address;
-  invoicePreferences: InvoicePreferences;
-  paymentDetails: PaymentMethodDetails;
+export interface MonetaryAmount {
+  amount: number;
+  currency: string;
 }
 
-export interface CompanyInfo {
-  legalName: string;
-  dbaName?: string;
-  businessType: 'corporation' | 'llc' | 'partnership' | 'sole-proprietorship' | 'government' | 'non-profit';
-  industry: string;
-  annualShippingVolume: '<10k' | '10k-50k' | '50k-250k' | '250k-1m' | '>1m';
-  taxId: string;
-  glCode?: string;
-}
+export const MonetaryAmountSchema = z.object({
+  amount: z.number().min(0, "Amount must be a non-negative number"),
+  currency: z.string().min(1, "Currency is required"),
+});
 
-export interface InvoicePreferences {
-  deliveryMethod: 'email' | 'mail' | 'edi' | 'portal';
-  format: 'standard' | 'itemized' | 'summary' | 'custom';
-  frequency: 'per-shipment' | 'weekly' | 'monthly';
-}
-
-export interface PaymentMethodDetails {
-  purchaseOrder?: {
-    poNumber: string;
-    poAmount: number;
-    expirationDate: string;
-    approvalContact: string;
-    department: string;
-  };
-  billOfLading?: {
-    bolNumber: string;
-    bolDate: string;
-    shipperReference: string;
-    freightTerms: 'prepaid' | 'collect' | 'prepaid-add';
-  };
-  thirdParty?: {
-    accountNumber: string;
-    companyName: string;
-    contactInfo: ContactInfo;
-    authorizationCode?: string;
-  };
-  netTerms?: {
-    period: 15 | 30 | 45 | 60;
-    creditApplication?: File;
-    tradeReferences: TradeReference[];
-    annualRevenue: string;
-  };
-  corporate?: {
-    accountNumber: string;
-    accountPin: string;
-    billingContact: ContactInfo;
-  };
-}
-
-export interface TradeReference {
-  companyName: string;
-  contactName: string;
-  phone: string;
-  email: string;
-  relationship: string;
-}
 
 export interface PickupDetails {
   date: string;
