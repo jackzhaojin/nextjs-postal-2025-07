@@ -254,7 +254,7 @@ async function authorizeNetTerms(paymentInfo: PaymentInfo): Promise<Omit<Payment
   // Simulate credit check and validation
   const validationChecks = [
     { check: 'Payment Period', pass: ['Net 15', 'Net 30', 'Net 45', 'Net 60'].includes(netTermsDetails.netTermsPeriod) },
-    { check: 'Trade References', pass: netTermsDetails.tradeReferences.length >= 2 },
+    { check: 'Trade References', pass: netTermsDetails.tradeReference1Name.length > 0 && netTermsDetails.tradeReference2Name.length > 0 },
     { check: 'Annual Revenue', pass: netTermsDetails.annualRevenue.length > 0 },
     { check: 'Credit History', pass: Math.random() > 0.15 } // Simulate credit check
   ];
