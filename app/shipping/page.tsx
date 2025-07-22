@@ -29,7 +29,7 @@ const defaultAddress: Address = {
   city: '',
   state: '',
   zip: '',
-  country: 'USA',
+  country: 'US',
   isResidential: false,
   locationType: 'commercial',
   locationDescription: '',

@@ -90,7 +90,7 @@ export function PackageInfoSection({ value, onChange, className, errors }: Packa
                 value.dimensions.height > 0 &&
                 value.weight.value > 0 &&
                 value.declaredValue > 0 &&
-                value.contents.trim().length > 0 &&
+                (value.contents?.trim().length ?? 0) > 0 &&
                 value.contentsCategory !== undefined;
     }
     
@@ -312,7 +312,7 @@ export function PackageInfoSection({ value, onChange, className, errors }: Packa
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2 mb-4">
             <span>{value.type === 'multiple' ? '2' : '5'}. Contents Information</span>
-            {((value.contents.trim().length > 0 || value.type === 'multiple') && value.contentsCategory) && 
+            {(((value.contents?.trim().length ?? 0) > 0 || value.type === 'multiple') && value.contentsCategory) && 
              <Zap className="w-4 h-4 text-green-500" />}
           </h3>
           

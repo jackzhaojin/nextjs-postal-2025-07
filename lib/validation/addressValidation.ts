@@ -68,7 +68,7 @@ export class AddressValidator {
       }
 
       // State validation for US addresses
-      if (address.country === 'USA' || address.country === 'US') {
+      if (address.country === 'US' || address.country === 'USA') {
         const stateValidation = this.validateUSState(address.state);
         if (!stateValidation.isValid) {
           errors.state = stateValidation.error || 'Invalid state';
@@ -168,14 +168,14 @@ export class AddressValidator {
     };
   }
 
-  private static validateZipCode(zip: string, country: string = 'USA'): { isValid: boolean; error?: string } {
+  private static validateZipCode(zip: string, country: string = 'US'): { isValid: boolean; error?: string } {
     console.log('AddressValidator: Validating ZIP code:', zip, 'for country:', country);
     
     const cleanZip = zip.trim();
     
     switch (country.toUpperCase()) {
-      case 'USA':
       case 'US':
+      case 'USA':
         // US ZIP code: 5 digits or 5+4 format
         const usZipPattern = /^(\d{5})(-\d{4})?$/;
         if (!usZipPattern.test(cleanZip)) {
@@ -271,7 +271,7 @@ export class AddressValidator {
 
   private static validateZipStateMatch(zip: string, state: string, country: string): { isValid: boolean; warning?: string } {
     // Mock ZIP/state validation - in production this would use a real ZIP database
-    if (country.toUpperCase() !== 'USA' && country.toUpperCase() !== 'US') {
+    if (country.toUpperCase() !== 'US' && country.toUpperCase() !== 'USA') {
       return { isValid: true };
     }
 

@@ -56,8 +56,8 @@ export interface PackageInfo {
   weight: Weight;
   declaredValue: number;
   currency: 'USD' | 'CAD' | 'MXN';
-  contents: string;
-  contentsCategory: PackageContentsCategory;
+  contents?: string;
+  contentsCategory?: PackageContentsCategory;
   specialHandling: SpecialHandlingType[];
   multiplePackages?: MultiplePackageDetails;
 }

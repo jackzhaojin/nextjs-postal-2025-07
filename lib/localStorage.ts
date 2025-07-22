@@ -107,6 +107,16 @@ export class ShippingTransactionManager {
       if (parsed.timestamp && typeof parsed.timestamp === 'string') {
         parsed.timestamp = new Date(parsed.timestamp);
       }
+      
+      // Data sanitization: ensure country codes are in correct format
+      if (parsed.shipmentDetails) {
+        if (parsed.shipmentDetails.origin?.country === 'USA') {
+          parsed.shipmentDetails.origin.country = 'US';
+        }
+        if (parsed.shipmentDetails.destination?.country === 'USA') {
+          parsed.shipmentDetails.destination.country = 'US';
+        }
+      }
 
       return {
         success: true,
@@ -270,9 +280,17 @@ export class ShippingTransactionManager {
    */
   private static migrateData(data: string, fromVersion: string): StorageResult<ShippingTransaction | null> {
     try {
-      // For v1.0, no migration needed yet
-      // Future versions can add migration logic here
       const parsed = JSON.parse(data);
+      
+      // Migration logic for country codes: USA -> US
+      if (parsed.shipmentDetails) {
+        if (parsed.shipmentDetails.origin?.country === 'USA') {
+          parsed.shipmentDetails.origin.country = 'US';
+        }
+        if (parsed.shipmentDetails.destination?.country === 'USA') {
+          parsed.shipmentDetails.destination.country = 'US';
+        }
+      }
       
       // Update version after successful migration
       localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
@@ -424,10 +442,23 @@ export class LocalStorageUtil {
   }
 
   /**
-   * Clean up old data (placeholder for future implementation)
+   * Clean up old data and fix country code format
    */
   static cleanup(): StorageResult<boolean> {
     try {
+      // Load current data
+      const existing = ShippingTransactionManager.load();
+      if (existing.success && existing.data) {
+        // Force save to trigger data sanitization
+        const cleanupResult = ShippingTransactionManager.save(existing.data);
+        if (!cleanupResult.success) {
+          return {
+            success: false,
+            error: cleanupResult.error,
+          };
+        }
+      }
+      
       // Future implementation: remove old transaction data, temporary data, etc.
       // For now, just return success
       return {

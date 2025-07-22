@@ -63,11 +63,11 @@ const PackageInfoSchema = z.object({
   weight: WeightSchema,
   declaredValue: z.number().min(0.01, 'Declared value must be positive').max(1000000),
   currency: z.enum(['USD', 'CAD', 'MXN']).default('USD'),
-  contents: z.string().min(2, 'Package contents description required').max(200),
+  contents: z.string().max(200).optional(),
   contentsCategory: z.enum([
     'electronics', 'automotive', 'industrial', 'documents', 'clothing',
     'food', 'medical', 'furniture', 'raw-materials', 'other'
-  ]),
+  ]).optional(),
   specialHandling: SpecialHandlingSchema,
   multiplePackages: z.object({
     numberOfPieces: z.number().min(2).max(100),

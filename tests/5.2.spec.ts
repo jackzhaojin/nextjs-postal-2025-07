@@ -21,7 +21,7 @@ async function setupShipmentForPricing(page: any) {
         city: 'New York',
         state: 'NY',
         zip: '10001',
-        country: 'USA',
+        country: 'US',
         isResidential: false,
         locationType: 'commercial',
         contactInfo: {
@@ -36,7 +36,7 @@ async function setupShipmentForPricing(page: any) {
         city: 'Los Angeles',
         state: 'CA',
         zip: '90210',
-        country: 'USA',
+        country: 'US',
         isResidential: false,
         locationType: 'commercial',
         contactInfo: {

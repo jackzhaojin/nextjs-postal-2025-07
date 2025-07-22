@@ -488,7 +488,7 @@ async function validateDeclaredValue(transaction: ShippingTransaction, errors: V
     'other': { min: 1, max: 100000, typical: 500 }
   };
   
-  const categoryLimit = categoryLimits[pkg.contentsCategory];
+  const categoryLimit = pkg.contentsCategory ? categoryLimits[pkg.contentsCategory] : null;
   if (categoryLimit) {
     if (declaredValue < categoryLimit.min) {
       console.log('⚠️ [BUSINESS-RULES] Declared value seems low for category:', { 

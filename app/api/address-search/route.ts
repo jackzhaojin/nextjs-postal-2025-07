@@ -57,7 +57,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'New York',
       state: 'NY',
       zip: '10001',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '123 Main Street'
     },
@@ -67,7 +67,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Los Angeles',
       state: 'CA',
       zip: '90210',
-      country: 'USA',
+      country: 'US',
       isCommercial: false,
       displayText: '456 Oak Avenue'
     },
@@ -77,7 +77,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Chicago',
       state: 'IL',
       zip: '60601',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '789 Pine Road'
     },
@@ -87,7 +87,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Houston',
       state: 'TX',
       zip: '77001',
-      country: 'USA',
+      country: 'US',
       isCommercial: false,
       displayText: '321 Elm Street'
     },
@@ -97,7 +97,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Phoenix',
       state: 'AZ',
       zip: '85001',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '654 Cedar Lane'
     },
@@ -107,7 +107,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Philadelphia',
       state: 'PA',
       zip: '19101',
-      country: 'USA',
+      country: 'US',
       isCommercial: false,
       displayText: '987 Maple Drive'
     },
@@ -117,7 +117,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'San Antonio',
       state: 'TX',
       zip: '78201',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '147 Birch Boulevard'
     },
@@ -127,7 +127,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'San Diego',
       state: 'CA',
       zip: '92101',
-      country: 'USA',
+      country: 'US',
       isCommercial: false,
       displayText: '258 Willow Way'
     },
@@ -137,7 +137,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Dallas',
       state: 'TX',
       zip: '75201',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '369 Spruce Street'
     },
@@ -147,7 +147,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'San Jose',
       state: 'CA',
       zip: '95101',
-      country: 'USA',
+      country: 'US',
       isCommercial: false,
       displayText: '741 Aspen Avenue'
     },
@@ -158,7 +158,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Atlanta',
       state: 'GA',
       zip: '30301',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '1000 Corporate Plaza'
     },
@@ -168,7 +168,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Miami',
       state: 'FL',
       zip: '33101',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '2500 Business Center Drive'
     },
@@ -178,7 +178,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Detroit',
       state: 'MI',
       zip: '48201',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '3750 Industrial Boulevard'
     },
@@ -188,7 +188,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Seattle',
       state: 'WA',
       zip: '98101',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '4900 Technology Way'
     },
@@ -198,7 +198,7 @@ function generateMockSuggestions(query: string, type: string) {
       city: 'Denver',
       state: 'CO',
       zip: '80201',
-      country: 'USA',
+      country: 'US',
       isCommercial: true,
       displayText: '5200 Warehouse District'
     }
@@ -230,7 +230,7 @@ function generateMockSuggestions(query: string, type: string) {
         city: 'Anytown',
         state: 'OH',
         zip: '43215',
-        country: 'USA',
+        country: 'US',
         isCommercial: Math.random() > 0.5,
         displayText: `${number} Main Street`
       },
@@ -240,7 +240,7 @@ function generateMockSuggestions(query: string, type: string) {
         city: 'Commerce City',
         state: 'CA',
         zip: '90210',
-        country: 'USA',
+        country: 'US',
         isCommercial: true,
         displayText: `${number} Business Park Drive`
       }
@@ -259,7 +259,7 @@ function generateMockSuggestions(query: string, type: string) {
         city: 'Springfield',
         state: 'IL',
         zip: '62701',
-        country: 'USA',
+        country: 'US',
         isCommercial: Math.random() > 0.5,
         displayText: `${number} ${streetName}`
       });

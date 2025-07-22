@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronDownIcon, MapPinIcon, PhoneIcon, MailIcon, BuildingIcon, CheckIcon } from 'lucide-react';
 
 interface AddressInputProps {
@@ -39,6 +40,12 @@ const LOCATION_TYPE_OPTIONS = [
   { value: 'warehouse', label: 'Warehouse', desc: 'Storage facility' },
   { value: 'construction', label: 'Construction', desc: 'Job site' },
   { value: 'other', label: 'Other', desc: 'Specify below' }
+] as const;
+
+const COUNTRY_OPTIONS = [
+  { value: 'US', label: 'United States', code: 'US' },
+  { value: 'CA', label: 'Canada', code: 'CA' },
+  { value: 'MX', label: 'Mexico', code: 'MX' }
 ] as const;
 
 export function AddressInput({
@@ -234,9 +241,9 @@ export function AddressInput({
     onChange({ ...currentValue, zip: e.target.value });
   }, [onChange]);
 
-  const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCountryChange = useCallback((country: string) => {
     const currentValue = valueRef.current;
-    onChange({ ...currentValue, country: e.target.value });
+    onChange({ ...currentValue, country });
   }, [onChange]);
 
   const handleLocationDescChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -390,14 +397,18 @@ export function AddressInput({
           <Label htmlFor={`${type}-country`} className="text-sm font-medium">
             Country {required && <span className="text-red-500">*</span>}
           </Label>
-          <Input
-            id={`${type}-country`}
-            value={value.country}
-            onChange={handleCountryChange}
-            placeholder="Country"
-            className={`rounded-xl ${errors.country ? 'border-red-500' : ''}`}
-            autoComplete="country-name"
-          />
+          <Select value={value.country} onValueChange={handleCountryChange}>
+            <SelectTrigger className={`rounded-xl ${errors.country ? 'border-red-500' : ''}`}>
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRY_OPTIONS.map((country) => (
+                <SelectItem key={country.value} value={country.value}>
+                  {country.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {errors.country && (
             <p className="text-sm text-red-600 mt-1">{errors.country}</p>
           )}

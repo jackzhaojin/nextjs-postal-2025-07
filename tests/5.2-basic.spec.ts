@@ -18,12 +18,12 @@ test.describe('Task 5.2: Basic Component Tests', () => {
       shipmentDetails: {
         origin: {
           address: '123 Main St', city: 'New York', state: 'NY', zip: '10001',
-          country: 'USA', isResidential: false, locationType: 'commercial',
+          country: 'US', isResidential: false, locationType: 'commercial',
           contactInfo: { name: 'John Doe', phone: '555-123-4567', email: 'john@example.com', company: 'Test Co' }
         },
         destination: {
           address: '456 Oak Ave', city: 'Los Angeles', state: 'CA', zip: '90210',
-          country: 'USA', isResidential: false, locationType: 'commercial',
+          country: 'US', isResidential: false, locationType: 'commercial',
           contactInfo: { name: 'Jane Smith', phone: '555-987-6543', email: 'jane@example.com', company: 'Target Co' }
         },
         package: {
