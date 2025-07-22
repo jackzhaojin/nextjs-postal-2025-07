@@ -379,6 +379,7 @@ export function WeightInput({
             disabled={disabled}
             className="flex-1 px-3 py-2 text-gray-900 placeholder-gray-500 border-none rounded-l-md focus:outline-none focus:ring-0 disabled:bg-gray-50 disabled:text-gray-500"
             data-testid="weight-input"
+            id="package-weight-value"
           />
           
           {/* Unit Selector */}

@@ -3,16 +3,16 @@
 import React, { useState, useCallback, Suspense } from 'react';
 import { Address, ContactInfo } from '@/lib/types';
 import { AddressInput } from '@/components/forms/AddressInput';
-import { useShipmentDetailsForm } from '@/hooks/useShipmentDetailsForm';
+import { useShipmentDetailsFormWithPresets } from '@/hooks/useShipmentDetailsFormWithPresets';
 import { PackageSummary } from '@/components/ui/PackageSummary';
 import { ContextualHelp } from '@/components/ui/ContextualHelp';
-import { ProgressiveDisclosureProvider, DisclosureSection, ModeToggle } from '@/components/ui/ProgressiveDisclosure';
 import { PerformanceProvider, PerformanceMonitor, useComponentPerformance } from '@/components/ui/PerformanceOptimizer';
 import { PackageTypeSelector } from '@/components/forms/PackageTypeSelector';
 import { WeightInput } from '@/components/forms/WeightInput';
 import { DimensionsInput } from '@/components/forms/DimensionsInput';
 import { DeclaredValueInput } from '@/components/forms/DeclaredValueInput';
 import { SpecialHandlingSelector } from '@/components/forms/SpecialHandlingSelector';
+import { PresetSelector } from '@/components/forms/PresetSelector';
 
 // Default values for the form
 const defaultContactInfo: ContactInfo = {
@@ -39,7 +39,7 @@ const defaultAddress: Address = {
 function ShipmentDetailsContent() {
   console.log('ShipmentDetailsContent: Rendering');
 
-  // Initialize form state
+  // Initialize form state with preset support
   const {
     shipmentDetails,
     validation,
@@ -48,8 +48,11 @@ function ShipmentDetailsContent() {
     updatePackage,
     progress,
     isDirty,
-    isLoading
-  } = useShipmentDetailsForm();
+    isLoading,
+    presetState,
+    applyPreset,
+    clearPreset
+  } = useShipmentDetailsFormWithPresets();
 
   console.log('ShipmentDetailsContent: Form state - isDirty:', isDirty, 'progress:', progress.percentage);
 
@@ -73,7 +76,6 @@ function ShipmentDetailsContent() {
               Shipment Details
             </h1>
             <div className="flex items-center gap-4">
-              <ModeToggle compact={true} data-testid="mode-toggle" />
               <PerformanceMonitor compact={true} data-testid="performance-monitor" />
             </div>
           </div>
@@ -99,13 +101,26 @@ function ShipmentDetailsContent() {
         </div>
 
         <div className="space-y-8">
+          {/* Preset Selection Section */}
+          <PresetSelector
+            selectedPresetId={presetState.selectedPresetId}
+            onPresetSelect={(preset) => {
+              if (preset) {
+                console.log('ShipmentDetailsContent: Applying preset:', preset.name);
+                applyPreset(preset);
+              } else {
+                console.log('ShipmentDetailsContent: Clearing preset');
+                clearPreset();
+              }
+            }}
+            isModified={presetState.isModified}
+            modifiedFields={presetState.modifiedFields}
+            className="bg-white rounded-3xl shadow-sm"
+          />
+
           {/* Origin Address Section */}
-          <DisclosureSection
-            title="Pickup Address (Origin)"
-            level="basic"
-            fieldId="origin-section"
-            className="bg-white rounded-3xl p-6 shadow-sm"
-          >
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Pickup Address (Origin)</h3>
             <div className="flex items-start gap-2">
               <div className="flex-1">
                 <AddressInput
@@ -128,15 +143,11 @@ function ShipmentDetailsContent() {
                 data-testid="help-origin-address"
               />
             </div>
-          </DisclosureSection>
+          </div>
 
           {/* Destination Address Section */}
-          <DisclosureSection
-            title="Delivery Address (Destination)"
-            level="basic"
-            fieldId="destination-section"
-            className="bg-white rounded-3xl p-6 shadow-sm"
-          >
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Address (Destination)</h3>
             <div className="flex items-start gap-2">
               <div className="flex-1">
                 <AddressInput
@@ -159,15 +170,11 @@ function ShipmentDetailsContent() {
                 data-testid="help-destination-address"
               />
             </div>
-          </DisclosureSection>
+          </div>
 
           {/* Package Information Section */}
-          <DisclosureSection
-            title="Package Information"
-            level="basic"
-            fieldId="package-section"
-            className="bg-white rounded-3xl p-6 shadow-sm"
-          >
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Package Information</h3>
             <div className="space-y-6">
               {/* Package Type Selector */}
               <div>
@@ -236,7 +243,7 @@ function ShipmentDetailsContent() {
                 />
               </div>
             </div>
-          </DisclosureSection>
+          </div>
 
           {/* Package Summary */}
           {shipmentDetails.package && (
@@ -432,18 +439,16 @@ export default function ShipmentDetailsPage() {
   
   return (
     <PerformanceProvider enableMonitoring={true}>
-      <ProgressiveDisclosureProvider initialMode="basic" initialUserLevel="beginner">
-        <Suspense fallback={
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading shipping form...</p>
-            </div>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading shipping form...</p>
           </div>
-        }>
-          <ShipmentDetailsContent />
-        </Suspense>
-      </ProgressiveDisclosureProvider>
+        </div>
+      }>
+        <ShipmentDetailsContent />
+      </Suspense>
     </PerformanceProvider>
   );
 }
