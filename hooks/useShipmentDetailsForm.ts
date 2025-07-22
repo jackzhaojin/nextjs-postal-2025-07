@@ -194,9 +194,32 @@ export function useShipmentDetailsForm(
   const progress = useMemo(() => {
     const progressData = ShipmentValidator.calculateCompletionProgress(shipmentDetailsRef.current, 'shipment-details');
     
-    // More lenient approach: allow progression if no errors are showing OR if all required fields are complete
+    console.log('useShipmentDetailsForm: Progress calculation:', {
+      progressData,
+      errorsCount: Object.keys(validation.errors).length,
+      validationIsValid: validation.isValid,
+      shipmentData: shipmentDetailsRef.current
+    });
+    
+    // More lenient approach for shipment details page: 
+    // Allow progression if basic required fields are filled, even if there are minor validation warnings
     const hasNoVisibleErrors = Object.keys(validation.errors).length === 0;
-    const canAdvanceToNextStep = hasNoVisibleErrors || (progressData.requiredFieldsComplete && validation.isValid);
+    const hasCriticalAddressInfo = shipmentDetailsRef.current.origin?.address && 
+                                  shipmentDetailsRef.current.origin?.city &&
+                                  shipmentDetailsRef.current.destination?.address && 
+                                  shipmentDetailsRef.current.destination?.city;
+    const hasBasicPackageInfo = shipmentDetailsRef.current.package?.weight?.value > 0;
+    
+    // Enable Get Quotes if we have addresses and basic package info, OR if validation shows no errors
+    const canAdvanceToNextStep = hasNoVisibleErrors || (hasCriticalAddressInfo && hasBasicPackageInfo) || progressData.requiredFieldsComplete;
+    
+    console.log('useShipmentDetailsForm: Calculated canAdvanceToNextStep:', {
+      canAdvanceToNextStep,
+      hasNoVisibleErrors,
+      hasCriticalAddressInfo,
+      hasBasicPackageInfo,
+      requiredFieldsComplete: progressData.requiredFieldsComplete
+    });
     
     return {
       ...progressData,
@@ -577,6 +600,25 @@ export function useShipmentDetailsForm(
       triggerAutoSave();
     }
   }, [isDirty, autoSave, triggerAutoSave]);
+
+    // Trigger auto-save when form data changes
+  useEffect(() => {
+    if (isDirty) {
+      triggerAutoSave();
+    }
+  }, [isDirty, triggerAutoSave]);
+
+  // Enhanced validation trigger - validate immediately when key fields change
+  useEffect(() => {
+    console.log('useShipmentDetailsForm: Shipment details changed, triggering validation');
+    
+    // Run validation after a short delay to avoid excessive validation during rapid changes
+    const validateTimeout = setTimeout(() => {
+      validateAll();
+    }, 300);
+
+    return () => clearTimeout(validateTimeout);
+  }, [shipmentDetails, validateAll]);
 
   // Initial validation - only run if form has been touched or has existing data
   useEffect(() => {

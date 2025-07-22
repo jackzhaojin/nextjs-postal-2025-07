@@ -190,6 +190,18 @@ export class ShipmentValidator {
         severity: 'error'
       }
     ],
+    'package.type': [
+      {
+        validator: (value: string) => !!value?.trim(),
+        message: 'Package type is required',
+        severity: 'error'
+      },
+      {
+        validator: (value: string) => ['small', 'medium', 'large', 'extra-large', 'tube', 'envelope'].includes(value || ''),
+        message: 'Invalid package type selected',
+        severity: 'error'
+      }
+    ],
     'package.weight.value': [
       {
         validator: (value: number) => value > 0,
@@ -548,6 +560,7 @@ export class ShipmentValidator {
     // Define which fields are relevant for each step
     const stepFieldMappings: Record<string, string[]> = {
       'shipment-details': [
+        // Origin address fields
         'origin.address',
         'origin.city', 
         'origin.state',
@@ -555,15 +568,25 @@ export class ShipmentValidator {
         'origin.contactInfo.name',
         'origin.contactInfo.phone',
         'origin.contactInfo.email',
+        // Destination address fields
         'destination.address',
         'destination.city',
         'destination.state', 
         'destination.zip',
         'destination.contactInfo.name',
         'destination.contactInfo.phone',
-        'destination.contactInfo.email'
+        'destination.contactInfo.email',
+        // Package fields - now included in shipment details
+        'package.type',
+        'package.weight.value',
+        'package.dimensions.length',
+        'package.dimensions.width', 
+        'package.dimensions.height',
+        'package.declaredValue',
+        'package.contents'
       ],
       'package-details': [
+        'package.type',
         'package.weight.value',
         'package.dimensions.length',
         'package.dimensions.width', 

@@ -250,7 +250,7 @@ function ShipmentDetailsContent() {
           )}
 
           {/* Cross-field Validation Errors */}
-          {validation.errors['addresses.different'] && (
+          {(validation.errors['origin.address_destination.address'] || validation.errors['origin.zip_destination.zip']) && (
             <div className="bg-red-50 border border-red-200 rounded-3xl p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -260,7 +260,7 @@ function ShipmentDetailsContent() {
                 </div>
                 <div className="ml-3">
                   <p className="text-red-800 font-medium">
-                    {validation.errors['addresses.different']}
+                    {validation.errors['origin.address_destination.address'] || validation.errors['origin.zip_destination.zip']}
                   </p>
                 </div>
               </div>
@@ -327,6 +327,100 @@ function ShipmentDetailsContent() {
               </div>
             </div>
           )}
+
+          {/* Navigation Actions */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm" data-testid="navigation-actions">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+              <div className="flex-1">
+                {progress.canAdvanceToNextStep ? (
+                  <div className="flex items-center text-green-600">
+                    <svg className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Ready to get quotes</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-gray-500">
+                    <svg className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <span>Complete all required fields to continue</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    console.log('ShipmentDetailsPage: Resetting form');
+                    if (window.confirm('Are you sure you want to start over? All entered information will be lost.')) {
+                      localStorage.removeItem('currentShipmentDetails');
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-colors font-medium"
+                  data-testid="start-over-button"
+                >
+                  Start Over
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    console.log('ShipmentDetailsPage: Navigating to pricing, canAdvance:', progress.canAdvanceToNextStep);
+                    console.log('ShipmentDetailsPage: Validation state:', validation);
+                    console.log('ShipmentDetailsPage: Shipment details:', shipmentDetails);
+                    
+                    if (progress.canAdvanceToNextStep) {
+                      // Update transaction status before navigation
+                      const updatedTransaction = {
+                        ...shipmentDetails,
+                        status: 'pricing' as const
+                      };
+                      
+                      try {
+                        localStorage.setItem('currentShippingTransaction', JSON.stringify({
+                          id: Date.now().toString(),
+                          shipmentDetails: shipmentDetails,
+                          status: 'pricing'
+                        }));
+                        console.log('ShipmentDetailsPage: Saved transaction to localStorage');
+                        
+                        window.location.href = '/shipping/pricing';
+                      } catch (error) {
+                        console.error('ShipmentDetailsPage: Error saving transaction:', error);
+                        alert('Error saving shipment details. Please try again.');
+                      }
+                    } else {
+                      console.log('ShipmentDetailsPage: Cannot advance - validation failed');
+                    }
+                  }}
+                  disabled={!progress.canAdvanceToNextStep || isLoading}
+                  className={`px-8 py-3 rounded-2xl font-medium transition-all duration-200 ${
+                    progress.canAdvanceToNextStep && !isLoading
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  data-testid="get-quotes-button"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Get Quotes
+                      <svg className="h-5 w-5 ml-2 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
