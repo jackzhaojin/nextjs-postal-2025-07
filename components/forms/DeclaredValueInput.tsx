@@ -306,7 +306,7 @@ export function DeclaredValueInput({
     }
     
     const valueValidation = validator.validateValue(normalizedValue);
-    let packageValidation = { isValid: true, data: true, errors: [], warnings: [] };
+    let packageValidation: ValidationResult<boolean> = { isValid: true, data: true, errors: [], warnings: [] };
     
     if (packageType) {
       packageValidation = validator.validatePackageCompatibility(normalizedValue, packageType);
@@ -333,10 +333,12 @@ export function DeclaredValueInput({
     return insuranceCalculator.calculateInsurance(normalizedValue.amount, packageType, normalizedValue.currency);
   }, [normalizedValue, packageType, insuranceCalculator]);
 
+  // Calculate current value and currency for display
+  const currentValue = typeof value === 'number' ? value : normalizedValue?.amount || 0;
+  const currentCurrency = currency || normalizedValue?.currency || 'USD';
+
   // Legacy calculate insurance cost and level for backward compatibility
   useEffect(() => {
-    const currentValue = typeof value === 'number' ? value : normalizedValue?.amount || 0;
-    const currentCurrency = currency || normalizedValue?.currency || 'USD';
     
     if (currentValue > 0) {
       // Convert to USD for insurance calculation using legacy rate
@@ -591,12 +593,12 @@ export function DeclaredValueInput({
       )}
 
       {/* Currency conversion display */}
-      {value > 0 && currency !== 'USD' && (
+      {currentValue > 0 && currentCurrency !== 'USD' && (
         <div className="bg-gray-50 rounded-lg p-3">
           <div className="text-sm">
             <div className="text-gray-600 font-medium mb-1">Currency Conversion</div>
             <div className="flex justify-between">
-              <span>{formatCurrency(value, currency)}</span>
+              <span>{formatCurrency(currentValue, currentCurrency)}</span>
               <span className="text-gray-500">≈ {formatCurrency(valueInUSD, 'USD')}</span>
             </div>
             <div className="text-xs text-gray-500 mt-1">
@@ -607,7 +609,7 @@ export function DeclaredValueInput({
       )}
 
       {/* Insurance calculation */}
-      {value > 0 && (
+      {currentValue > 0 && (
         <div className="bg-blue-50 rounded-lg p-4">
           <div className="flex items-center space-x-2 mb-3">
             <Shield className="w-4 h-4 text-blue-600" />

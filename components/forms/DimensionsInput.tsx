@@ -12,7 +12,7 @@ export interface DimensionMeasurement {
   readonly unit: DimensionUnit;
 }
 
-export type DimensionUnit = 'in' | 'cm' | 'ft' | 'm';
+export type DimensionUnit = 'in' | 'cm';
 
 export interface DimensionConstraints {
   readonly maxLength: number;
@@ -42,8 +42,8 @@ export interface ValidationWarning {
 }
 
 interface DimensionsInputProps {
-  readonly value: DimensionMeasurement | Dimensions | null;
-  readonly onChange: (dimensions: DimensionMeasurement | Dimensions) => void;
+  readonly value: Dimensions | null;
+  readonly onChange: (dimensions: Dimensions) => void;
   readonly packageType?: string | null;
   readonly constraints?: DimensionConstraints;
   readonly showVolume?: boolean;
@@ -60,10 +60,8 @@ interface DimensionsInputProps {
 
 // Dimension conversion rates
 const DIMENSION_CONVERSION_RATES: Record<DimensionUnit, Record<DimensionUnit, number>> = {
-  in: { in: 1, cm: 2.54, ft: 0.0833333, m: 0.0254 },
-  cm: { in: 0.393701, cm: 1, ft: 0.0328084, m: 0.01 },
-  ft: { in: 12, cm: 30.48, ft: 1, m: 0.3048 },
-  m: { in: 39.3701, cm: 100, ft: 3.28084, m: 1 }
+  in: { in: 1, cm: 2.54 },
+  cm: { in: 0.393701, cm: 1 }
 };
 
 // Package type dimension limits (in inches)
@@ -273,7 +271,7 @@ export function DimensionsInput({
     }
     
     const rangeValidation = validator.validateDimensions(normalizedValue, effectiveConstraints);
-    let packageValidation = { isValid: true, data: true, errors: [], warnings: [] };
+    let packageValidation: ValidationResult<boolean> = { isValid: true, data: true, errors: [], warnings: [] };
     
     if (packageType) {
       packageValidation = validator.validatePackageCompatibility(normalizedValue, packageType);

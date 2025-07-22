@@ -12,7 +12,7 @@ export interface WeightMeasurement {
   readonly displayFormat: WeightDisplayFormat;
 }
 
-export type WeightUnit = 'lbs' | 'kg' | 'oz' | 'g';
+export type WeightUnit = 'lbs' | 'kg';
 export type WeightDisplayFormat = 'decimal' | 'fractional' | 'mixed';
 
 export interface WeightConstraints {
@@ -41,8 +41,8 @@ export interface ValidationWarning {
 }
 
 interface WeightInputProps {
-  readonly value: WeightMeasurement | Weight | null;
-  readonly onChange: (weight: WeightMeasurement | Weight) => void;
+  readonly value: Weight | null;
+  readonly onChange: (weight: Weight) => void;
   readonly packageType: string | null;
   readonly constraints?: WeightConstraints;
   readonly showBillingWeight?: boolean;
@@ -50,6 +50,7 @@ interface WeightInputProps {
   readonly validationMode?: 'strict' | 'lenient' | 'disabled';
   readonly onValidationChange?: (result: ValidationResult<WeightMeasurement>) => void;
   readonly className?: string;
+  readonly placeholder?: string;
   readonly label?: string;
   readonly error?: string;
   readonly disabled?: boolean;
@@ -57,18 +58,14 @@ interface WeightInputProps {
 
 // Weight conversion rates
 const CONVERSION_RATES: Record<WeightUnit, Record<WeightUnit, number>> = {
-  lbs: { lbs: 1, kg: 0.453592, oz: 16, g: 453.592 },
-  kg: { lbs: 2.20462, kg: 1, oz: 35.274, g: 1000 },
-  oz: { lbs: 0.0625, kg: 0.0283495, oz: 1, g: 28.3495 },
-  g: { lbs: 0.00220462, kg: 0.001, oz: 0.035274, g: 1 }
+  lbs: { lbs: 1, kg: 0.453592 },
+  kg: { lbs: 2.20462, kg: 1 }
 };
 
 // Precision rules by unit
 const PRECISION_RULES: Record<WeightUnit, number> = {
   lbs: 1, // 0.1 lb minimum
-  kg: 2,  // 0.01 kg minimum
-  oz: 0,  // 1 oz minimum
-  g: 0    // 1 g minimum
+  kg: 2   // 0.01 kg minimum
 };
 
 // Package type weight limits
@@ -270,7 +267,7 @@ export function WeightInput({
     }
     
     const rangeValidation = validator.validateRange(normalizedValue, effectiveConstraints);
-    let packageValidation = { isValid: true, data: true, errors: [], warnings: [] };
+    let packageValidation: ValidationResult<boolean> = { isValid: true, data: true, errors: [], warnings: [] };
     
     if (packageType) {
       packageValidation = validator.validatePackageCompatibility(normalizedValue, packageType);
