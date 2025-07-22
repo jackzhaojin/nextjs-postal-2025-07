@@ -7,6 +7,7 @@ import React, { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SortOption, PricingSortingProps } from './types';
 import { 
   ArrowUpDown, 
   DollarSign, 
@@ -17,21 +18,12 @@ import {
   TrendingDown
 } from 'lucide-react';
 
-export type SortOption = 'price-asc' | 'price-desc' | 'speed-asc' | 'speed-desc' | 'rating-desc' | 'carbon-asc';
-
 export interface SortConfig {
   readonly key: SortOption;
   readonly label: string;
   readonly icon: React.ComponentType<{ className?: string }>;
   readonly direction: 'asc' | 'desc';
   readonly description: string;
-}
-
-export interface PricingSortingProps {
-  readonly sortBy: SortOption;
-  readonly onSortChange: (sortBy: SortOption) => void;
-  readonly resultCount: number;
-  readonly isCompact?: boolean;
 }
 
 const SORT_OPTIONS: SortConfig[] = [

@@ -13,8 +13,8 @@ export interface PricingGridProps {
   readonly error: ApiClientError | null;
   readonly groupBy: 'category' | 'price' | 'speed';
   readonly sortBy: 'price' | 'speed' | 'rating';
-  readonly filters: PricingFilters;
-  readonly onFiltersChange: (filters: PricingFilters) => void;
+  readonly filters: PricingFiltersData;
+  readonly onFiltersChange: (filters: PricingFiltersData) => void;
 }
 
 export interface PricingCategoryProps {
@@ -23,7 +23,7 @@ export interface PricingCategoryProps {
   readonly selectedQuote: PricingOption | null;
   readonly onSelectQuote: (quote: PricingOption) => void;
   readonly loading: boolean;
-  readonly sortBy: SortOption;
+  readonly sortBy: SortField;
   readonly filters: CategoryFilters;
 }
 
@@ -56,10 +56,10 @@ export interface ServiceCategory {
   readonly name: string;
   readonly description: string;
   readonly icon: React.ComponentType<{ className?: string }>;
-  readonly defaultSort: SortOption;
+  readonly defaultSort: SortField;
 }
 
-export interface PricingFilters {
+export interface PricingFiltersData {
   readonly maxPrice?: number;
   readonly maxTransitDays?: number;
   readonly carriers?: readonly string[];
@@ -67,7 +67,7 @@ export interface PricingFilters {
   readonly excludeHazmat?: boolean;
 }
 
-export interface CategoryFilters extends PricingFilters {
+export interface CategoryFilters extends PricingFiltersData {
   readonly category: 'ground' | 'air' | 'freight';
 }
 
@@ -78,7 +78,7 @@ export interface CurrencyDisplayOptions {
   readonly showSymbol: boolean;
 }
 
-export type SortOption = 'price' | 'speed' | 'rating' | 'carbon';
+export type SortField = 'price' | 'speed' | 'rating' | 'carbon';
 export type CardVariant = 'default' | 'featured' | 'compact';
 
 export interface ApiClientError {

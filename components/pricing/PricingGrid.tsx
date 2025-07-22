@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, RefreshCw, AlertTriangle, Package } from 'lucide-react';
-import { PricingGridProps, ServiceCategory, PricingFilters } from './types';
+import { PricingGridProps, ServiceCategory, PricingFiltersData } from './types';
 import { PricingOption, ShipmentDetails } from '@/lib/types';
 import { usePricingQuotes, usePricingSelection } from './hooks';
 import PricingCategory from './PricingCategory';
@@ -32,7 +32,7 @@ export function PricingGrid({
   });
 
   // State management
-  const [filters, setFilters] = useState<PricingFilters>({});
+  const [filters, setFilters] = useState<PricingFiltersData>({});
   const [sortBy, setSortBy] = useState<'price' | 'speed' | 'rating' | 'carbon'>('price');
   const [groupBy, setGroupBy] = useState<'category' | 'price' | 'speed'>('category');
 
