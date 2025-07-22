@@ -1,0 +1,71 @@
+{
+  "shipmentDetails": {
+    "origin": {
+      "address": "5787 Camargo Ct",
+      "suite": "",
+      "city": "Westerville",
+      "state": "OH",
+      "zip": "43082",
+      "country": "US",
+      "isResidential": false,
+      "locationType": "commercial",
+      "locationDescription": "",
+      "contactInfo": {
+        "name": "Jack",
+        "company": "",
+        "phone": "3233331234",
+        "email": "origin@example.com",
+        "extension": ""
+      }
+    },
+    "destination": {
+      "address": "7739 Kiowa Way",
+      "suite": "",
+      "city": "Worthington",
+      "state": "OH",
+      "zip": "43082",
+      "country": "US",
+      "isResidential": false,
+      "locationType": "commercial",
+      "locationDescription": "",
+      "contactInfo": {
+        "name": "Shreya Patel",
+        "company": "",
+        "phone": "(555) 123-4567",
+        "email": "destination@example.com",
+        "extension": ""
+      }
+    },
+    "package": {
+      "type": "pallet",
+      "dimensions": {
+        "length": 3,
+        "width": 2,
+        "height": 3,
+        "unit": "in"
+      },
+      "weight": {
+        "value": 322,
+        "unit": "lbs"
+      },
+      "declaredValue": 33,
+      "currency": "USD",
+      "contents": "322",
+      "contentsCategory": "automotive",
+      "specialHandling": [
+        "white-glove",
+        "hazmat",
+        "this-side-up"
+      ]
+    },
+    "deliveryPreferences": {
+      "signatureRequired": false,
+      "adultSignatureRequired": false,
+      "smsConfirmation": false,
+      "photoProof": false,
+      "saturdayDelivery": false,
+      "holdAtLocation": false,
+      "serviceLevel": "reliable"
+    }
+  }
+}

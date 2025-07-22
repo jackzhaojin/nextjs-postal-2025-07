@@ -188,27 +188,43 @@ export function PricingGrid({
 
   // Show error state
   if (error && !quotes) {
+    const isServerError = error.statusCode >= 500;
+    const errorTitle = isServerError ? 'Service Temporarily Unavailable' : 'Quote Request Failed';
+    const errorMessage = isServerError 
+      ? 'Our pricing service is currently experiencing issues. Please try again later.'
+      : error.message;
+
     return (
       <div className="space-y-6">
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>{error.message}</span>
-            {error.retryable && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRetry}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                Retry
-              </Button>
-            )}
+          <AlertDescription>
+            <div className="space-y-3">
+              <div>
+                <h4 className="font-medium">{errorTitle}</h4>
+                <p className="text-sm mt-1">{errorMessage}</p>
+              </div>
+              {error.retryable && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Try Again
+                </Button>
+              )}
+              {isServerError && (
+                <p className="text-xs text-muted-foreground">
+                  If this problem persists, please contact support.
+                </p>
+              )}
+            </div>
           </AlertDescription>
         </Alert>
       </div>

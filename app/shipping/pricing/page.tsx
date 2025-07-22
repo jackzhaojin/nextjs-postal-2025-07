@@ -8,12 +8,13 @@ import { PricingOption } from '@/lib/types';
 import { ShippingTransactionManager } from '@/lib/localStorage';
 
 export default function PricingPage() {
-  const { transaction } = useShipping();
+  const { transaction, isLoading } = useShipping();
 
   console.log('[PricingPage] Component rendered', {
     hasShipmentDetails: !!transaction.shipmentDetails,
     hasSelectedOption: !!transaction.selectedOption,
-    transactionStatus: transaction.status
+    transactionStatus: transaction.status,
+    isLoading
   });
 
   // Handle quote selection
@@ -88,11 +89,20 @@ export default function PricingPage() {
       )}
 
       {/* Pricing Grid */}
-      <PricingGrid
-        shipmentDetails={transaction.shipmentDetails || null}
-        onQuoteSelected={handleQuoteSelected}
-        initialSelectedQuote={transaction.selectedOption || null}
-      />
+      {isLoading ? (
+        <Card className="p-8 text-center">
+          <div className="text-muted-foreground">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+            <p>Loading shipment details...</p>
+          </div>
+        </Card>
+      ) : (
+        <PricingGrid
+          shipmentDetails={transaction.shipmentDetails || null}
+          onQuoteSelected={handleQuoteSelected}
+          initialSelectedQuote={transaction.selectedOption || null}
+        />
+      )}
     </main>
   );
 }

@@ -88,10 +88,11 @@ export function useShippingForm(): ShippingFormState {
   const [transaction, setTransaction] = useState<Partial<ShippingTransaction>>(initialTransaction);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isDirty, setIsDirty] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start as loading
 
   // Load saved data on mount
   useEffect(() => {
+    setIsLoading(true);
     const result = ShippingTransactionManager.load();
     if (result.success && result.data) {
       setTransaction(result.data);
@@ -104,6 +105,7 @@ export function useShippingForm(): ShippingFormState {
       };
       setTransaction(newTransaction);
     }
+    setIsLoading(false); // Done loading
   }, []);
 
   // Auto-save when data changes

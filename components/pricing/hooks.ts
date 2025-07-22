@@ -99,7 +99,21 @@ export function usePricingQuotes(shipmentDetails: ShipmentDetails | null): UsePr
           message: `HTTP ${response.status}` 
         }));
         
-        throw new Error(errorData.message || `Request failed with status ${response.status}`);
+        // Classify errors for retry logic
+        const isRetryable = response.status < 500; // Don't retry 5xx server errors
+        
+        const apiError: ApiClientError = {
+          code: response.status >= 500 ? 'SERVER_ERROR' : 'CLIENT_ERROR',
+          message: errorData.message || `Request failed with status ${response.status}`,
+          statusCode: response.status,
+          retryable: isRetryable,
+          context: { errorData }
+        };
+        
+        setError(apiError);
+        setQuotes(null);
+        setLoading(false);
+        return;
       }
 
       const data = await response.json();
@@ -140,7 +154,7 @@ export function usePricingQuotes(shipmentDetails: ShipmentDetails | null): UsePr
         code: 'QUOTE_REQUEST_FAILED',
         message: err instanceof Error ? err.message : 'Failed to fetch quotes',
         statusCode: 500,
-        retryable: true
+        retryable: false // Network errors are not retryable automatically
       };
       
       setError(error);
@@ -165,13 +179,19 @@ export function usePricingQuotes(shipmentDetails: ShipmentDetails | null): UsePr
     await requestQuote(shipmentDetails);
   }, [shipmentDetails, requestQuote]);
 
-  // Auto-fetch quotes when shipment details change
+  // Auto-fetch quotes when shipment details change (with error backoff)
   useEffect(() => {
     if (shipmentDetails && !loading) {
+      // Don't auto-retry if there's a non-retryable error or 5xx server error
+      if (error && (!error.retryable || error.statusCode >= 500)) {
+        console.log('[usePricingQuotes] Skipping auto-fetch due to server error', error);
+        return;
+      }
+      
       console.log('[usePricingQuotes] Auto-fetching quotes for shipment details change');
       requestQuote(shipmentDetails);
     }
-  }, [shipmentDetails, requestQuote, loading]);
+  }, [shipmentDetails, requestQuote, loading, error]);
 
   return {
     quotes,
