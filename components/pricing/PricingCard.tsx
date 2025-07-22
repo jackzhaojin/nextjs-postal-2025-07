@@ -6,7 +6,9 @@
 import React, { useState, useCallback, memo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Plane, Package, Clock, Leaf, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Truck, Plane, Package, Clock, Leaf, Shield, Plus, Check } from 'lucide-react';
 import { PricingCardProps } from './types';
 import { PricingOption } from '@/lib/types';
 import PricingBreakdown from './PricingBreakdown';
@@ -19,7 +21,12 @@ export const PricingCard = memo(function PricingCard({
   comparisonMode = false,
   highlightFeatures = [],
   disabled = false,
-  variant = 'default'
+  variant = 'default',
+  // New props for comparison functionality
+  inComparison = false,
+  onAddToComparison,
+  onRemoveFromComparison,
+  comparisonDisabled = false
 }: PricingCardProps) {
   
   const [breakdownExpanded, setBreakdownExpanded] = useState(false);
@@ -39,10 +46,36 @@ export const PricingCard = memo(function PricingCard({
       return;
     }
     
+    // Don't handle selection if clicking on comparison controls
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-comparison-control]')) {
+      return;
+    }
+    
     event.preventDefault();
     console.log('[PricingCard] Card selected', { id: quote.id, serviceType: quote.serviceType });
     onSelect(quote);
   }, [quote, onSelect, disabled]);
+
+  // Handle comparison toggle
+  const handleComparisonToggle = useCallback((checked: boolean) => {
+    if (comparisonDisabled) {
+      console.log('[PricingCard] Comparison toggle blocked - disabled');
+      return;
+    }
+
+    console.log('[PricingCard] Comparison toggled', { 
+      id: quote.id, 
+      checked, 
+      previousInComparison: inComparison 
+    });
+
+    if (checked && onAddToComparison) {
+      onAddToComparison(quote);
+    } else if (!checked && onRemoveFromComparison) {
+      onRemoveFromComparison(quote);
+    }
+  }, [quote, inComparison, onAddToComparison, onRemoveFromComparison, comparisonDisabled]);
 
   // Handle keyboard interaction
   const handleKeyPress = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -166,11 +199,33 @@ export const PricingCard = memo(function PricingCard({
             </div>
           </div>
           
-          {selected && (
-            <Badge variant="secondary" className="ml-2">
-              Selected
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {selected && (
+              <Badge variant="secondary">
+                Selected
+              </Badge>
+            )}
+            
+            {/* Comparison checkbox */}
+            {(onAddToComparison || onRemoveFromComparison) && (
+              <div 
+                className="flex items-center" 
+                data-comparison-control
+                onClick={e => e.stopPropagation()}
+              >
+                <Checkbox
+                  checked={inComparison}
+                  onCheckedChange={handleComparisonToggle}
+                  disabled={comparisonDisabled}
+                  aria-label={`${inComparison ? 'Remove from' : 'Add to'} comparison`}
+                  className="h-4 w-4"
+                />
+                <span className="ml-1 text-xs text-muted-foreground">
+                  Compare
+                </span>
+              </div>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
 

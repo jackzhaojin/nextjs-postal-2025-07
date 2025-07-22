@@ -36,6 +36,11 @@ export interface PricingCardProps {
   readonly highlightFeatures: readonly string[];
   readonly disabled?: boolean;
   readonly variant: 'default' | 'featured' | 'compact';
+  // Comparison functionality
+  readonly inComparison?: boolean;
+  readonly onAddToComparison?: (quote: PricingOption) => void;
+  readonly onRemoveFromComparison?: (quote: PricingOption) => void;
+  readonly comparisonDisabled?: boolean;
 }
 
 export interface PricingBreakdownProps {
@@ -121,4 +126,61 @@ export interface RefreshResult {
   readonly success: boolean;
   readonly updatedQuotes: PricingOption[];
   readonly errors: ApiClientError[];
+}
+
+// Task 5.2 - New component types
+export interface SelectedOptionSummaryProps {
+  readonly selectedOption: PricingOption | null;
+  readonly onChangeSelection: () => void;
+  readonly onCompareWithOthers: () => void;
+  readonly onProceedToPayment: () => void;
+  readonly canProceed: boolean;
+  readonly comparisonCount?: number;
+}
+
+export interface PricingComparisonProps {
+  readonly options: PricingOption[];
+  readonly selectedOption: PricingOption | null;
+  readonly onSelectOption: (option: PricingOption) => void;
+  readonly onRemoveOption: (option: PricingOption) => void;
+  readonly maxOptions?: number;
+  readonly showFeatureMatrix?: boolean;
+}
+
+export interface PricingFiltersState {
+  readonly maxPrice?: number;
+  readonly maxTransitDays?: number;
+  readonly carriers?: readonly string[];
+  readonly features?: readonly string[];
+  readonly categories?: readonly string[];
+  readonly ecoFriendly?: boolean;
+  readonly excludeHazmat?: boolean;
+}
+
+export interface PricingFiltersProps {
+  readonly filters: PricingFiltersState;
+  readonly onFiltersChange: (filters: PricingFiltersState) => void;
+  readonly options: PricingOption[];
+  readonly activeFilterCount: number;
+  readonly isMobile?: boolean;
+}
+
+export type SortOption = 'price-asc' | 'price-desc' | 'speed-asc' | 'speed-desc' | 'rating-desc' | 'carbon-asc';
+
+export interface PricingSortingProps {
+  readonly sortBy: SortOption;
+  readonly onSortChange: (sortBy: SortOption) => void;
+  readonly resultCount: number;
+  readonly isCompact?: boolean;
+}
+
+export interface QuoteComparisonModalProps {
+  readonly isOpen: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly comparisonOptions: PricingOption[];
+  readonly selectedOption: PricingOption | null;
+  readonly onSelectOption: (option: PricingOption) => void;
+  readonly onRemoveFromComparison: (option: PricingOption) => void;
+  readonly isMobile?: boolean;
+  readonly maxComparisons?: number;
 }
