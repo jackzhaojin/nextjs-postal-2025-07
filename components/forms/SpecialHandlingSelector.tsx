@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { SpecialHandlingType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { 
@@ -178,25 +178,125 @@ const bundleDiscounts: BundleDiscount[] = [
   }
 ];
 
+export interface ValidationResult<T> {
+  readonly isValid: boolean;
+  readonly data: T | null;
+  readonly errors: ValidationError[];
+  readonly warnings: ValidationWarning[];
+}
+
+export interface ValidationError {
+  readonly field: string;
+  readonly message: string;
+  readonly code: string;
+}
+
+export interface ValidationWarning {
+  readonly field: string;
+  readonly message: string;
+  readonly code: string;
+}
+
 interface SpecialHandlingSelectorProps {
-  value: SpecialHandlingType[];
-  onChange: (handling: SpecialHandlingType[]) => void;
-  packageWeight: number;
-  packageType: string;
-  className?: string;
+  readonly value: SpecialHandlingType[];
+  readonly onChange: (handling: SpecialHandlingType[]) => void;
+  readonly packageWeight?: number;
+  readonly packageType?: string;
+  readonly showFees?: boolean;
+  readonly showCompatibility?: boolean;
+  readonly validationMode?: 'strict' | 'lenient' | 'disabled';
+  readonly onValidationChange?: (result: ValidationResult<SpecialHandlingType[]>) => void;
+  readonly className?: string;
+  readonly label?: string;
+  readonly error?: string;
+  readonly disabled?: boolean;
+}
+
+// Enhanced validation class
+class SpecialHandlingValidator {
+  validateCompatibility(selectedOptions: SpecialHandlingType[], packageType: string): ValidationResult<SpecialHandlingType[]> {
+    console.log('SpecialHandlingValidator: Validating compatibility', { selectedOptions, packageType });
+    const errors: ValidationError[] = [];
+    const warnings: ValidationWarning[] = [];
+    
+    // Check for incompatible combinations
+    selectedOptions.forEach(option => {
+      const optionData = specialHandlingCatalog.find(opt => opt.type === option);
+      if (optionData) {
+        const incompatible = optionData.incompatibleWith.filter(inc => selectedOptions.includes(inc));
+        if (incompatible.length > 0) {
+          errors.push({
+            field: 'specialHandling',
+            message: `${optionData.label} cannot be combined with ${incompatible.join(', ')}`,
+            code: 'OPTIONS_INCOMPATIBLE'
+          });
+        }
+      }
+    });
+    
+    // Warnings for high-cost combinations
+    const totalFee = this.calculateTotalFee(selectedOptions);
+    if (totalFee > 200) {
+      warnings.push({
+        field: 'specialHandling',
+        message: `High special handling fees may significantly increase shipping cost`,
+        code: 'HIGH_FEES_WARNING'
+      });
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      data: errors.length === 0 ? selectedOptions : null,
+      errors,
+      warnings
+    };
+  }
+  
+  calculateTotalFee(selectedOptions: SpecialHandlingType[]): number {
+    return selectedOptions.reduce((total, option) => {
+      const optionData = specialHandlingCatalog.find(opt => opt.type === option);
+      return total + (optionData?.fee || 0);
+    }, 0);
+  }
 }
 
 export function SpecialHandlingSelector({
   value,
   onChange,
-  packageWeight,
-  packageType,
-  className
+  packageWeight = 0,
+  packageType = 'medium',
+  showFees = true,
+  showCompatibility = true,
+  validationMode = 'strict',
+  onValidationChange,
+  className,
+  label = 'Special Handling Requirements',
+  error,
+  disabled = false
 }: SpecialHandlingSelectorProps) {
+  console.log('SpecialHandlingSelector: Rendering with value:', value, 'packageType:', packageType);
   const [totalFees, setTotalFees] = useState(0);
   const [appliedDiscounts, setAppliedDiscounts] = useState<BundleDiscount[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [expandedOptions, setExpandedOptions] = useState<Set<SpecialHandlingType>>(new Set());
+  
+  const validator = useMemo(() => new SpecialHandlingValidator(), []);
+  
+  // Enhanced validation result
+  const validationResult = useMemo(() => {
+    if (validationMode === 'disabled') {
+      return { isValid: true, data: value, errors: [], warnings: [] };
+    }
+    
+    return validator.validateCompatibility(value, packageType);
+  }, [value, packageType, validator, validationMode]);
+  
+  // Notify parent of validation changes
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(validationResult);
+    }
+  }, [validationResult, onValidationChange]);
 
   console.log('[SpecialHandlingSelector] Rendering with:', {
     value,
@@ -309,9 +409,44 @@ export function SpecialHandlingSelector({
   return (
     <div className={cn('space-y-6', className)}>
       <div>
+        {/* Enhanced Label */}
         <label className="block text-sm font-medium text-gray-700 mb-4">
-          Special Handling Requirements
+          <div className="flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            {label}
+            {showFees && value.length > 0 && (
+              <span className="text-xs text-gray-500 ml-2">
+                (Total: ${totalFees.toFixed(2)})
+              </span>
+            )}
+          </div>
         </label>
+        
+        {/* Enhanced Validation Messages */}
+        {validationResult.errors.length > 0 && (
+          <div className="mb-4 space-y-1">
+            {validationResult.errors.map((error, index) => (
+              <p key={index} className="text-red-600 text-sm">
+                {error.message}
+              </p>
+            ))}
+          </div>
+        )}
+        
+        {validationResult.warnings.length > 0 && (
+          <div className="mb-4 space-y-1">
+            {validationResult.warnings.map((warning, index) => (
+              <p key={index} className="text-yellow-600 text-sm">
+                {warning.message}
+              </p>
+            ))}
+          </div>
+        )}
+        
+        {/* External Error */}
+        {error && (
+          <p className="text-red-600 text-sm mb-4">{error}</p>
+        )}
         
         <div className="space-y-4">
           {specialHandlingCatalog.map((option) => {

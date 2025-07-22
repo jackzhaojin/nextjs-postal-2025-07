@@ -9,6 +9,11 @@ import { ContextualHelp } from '@/components/ui/ContextualHelp';
 import { ProgressiveDisclosureProvider, DisclosureSection, ModeToggle } from '@/components/ui/ProgressiveDisclosure';
 import { PerformanceProvider, PerformanceMonitor, useComponentPerformance } from '@/components/ui/PerformanceOptimizer';
 import { AnalyticsProvider, AnalyticsDashboard, useFieldAnalytics } from '@/components/ui/UserAnalytics';
+import { PackageTypeSelector } from '@/components/forms/PackageTypeSelector';
+import { WeightInput } from '@/components/forms/WeightInput';
+import { DimensionsInput } from '@/components/forms/DimensionsInput';
+import { DeclaredValueInput } from '@/components/forms/DeclaredValueInput';
+import { SpecialHandlingSelector } from '@/components/forms/SpecialHandlingSelector';
 
 // Default values for the form
 const defaultContactInfo: ContactInfo = {
@@ -188,114 +193,71 @@ function ShipmentDetailsContent() {
             className="bg-white rounded-3xl p-6 shadow-sm"
           >
             <div className="space-y-6">
-              {/* Basic Package Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Weight (lbs)
-                    <ContextualHelp
-                      fieldId="package-weight"
-                      fieldLabel="Package Weight"
-                      onHelpUsed={handleHelpUsed}
-                      size="sm"
-                      className="ml-1"
-                      data-testid="help-package-weight"
-                    />
-                  </label>
-                  <input
-                    type="number"
-                    name="package.weight.value"
-                    step="0.1"
-                    min="0.1"
-                    placeholder="Enter weight"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={shipmentDetails.package?.weight?.value || ''}
-                    onChange={(e) => updatePackage({
-                      weight: { ...shipmentDetails.package?.weight, value: parseFloat(e.target.value) || 0 }
-                    })}
-                    data-testid="package-weight-input"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Declared Value ($)
-                    <ContextualHelp
-                      fieldId="declared-value"
-                      fieldLabel="Declared Value"
-                      onHelpUsed={handleHelpUsed}
-                      size="sm"
-                      className="ml-1"
-                    />
-                  </label>
-                  <input
-                    type="number"
-                    name="package.declaredValue"
-                    step="1"
-                    min="1"
-                    placeholder="Enter value"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={shipmentDetails.package?.declaredValue || ''}
-                    onChange={(e) => updatePackage({
-                      declaredValue: parseFloat(e.target.value) || 0
-                    })}
-                  />
-                </div>
+              {/* Package Type Selector */}
+              <div>
+                <PackageTypeSelector
+                  value={shipmentDetails.package?.type || null}
+                  onChange={(type) => updatePackage({ type })}
+                  className="mb-6"
+                />
               </div>
 
-              {/* Dimensions */}
+              {/* Weight Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dimensions (L × W × H in inches)
-                  <ContextualHelp
-                    fieldId="package-dimensions"
-                    fieldLabel="Package Dimensions"
-                    onHelpUsed={handleHelpUsed}
-                    size="sm"
-                    className="ml-1"
-                  />
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    type="number"
-                    name="package.dimensions.length"
-                    placeholder="Length"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={shipmentDetails.package?.dimensions?.length || ''}
-                    onChange={(e) => updatePackage({
-                      dimensions: { 
-                        ...shipmentDetails.package?.dimensions, 
-                        length: parseFloat(e.target.value) || 0 
-                      }
-                    })}
-                  />
-                  <input
-                    type="number"
-                    name="package.dimensions.width"
-                    placeholder="Width"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={shipmentDetails.package?.dimensions?.width || ''}
-                    onChange={(e) => updatePackage({
-                      dimensions: { 
-                        ...shipmentDetails.package?.dimensions, 
-                        width: parseFloat(e.target.value) || 0 
-                      }
-                    })}
-                  />
-                  <input
-                    type="number"
-                    name="package.dimensions.height"
-                    placeholder="Height"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={shipmentDetails.package?.dimensions?.height || ''}
-                    onChange={(e) => updatePackage({
-                      dimensions: { 
-                        ...shipmentDetails.package?.dimensions, 
-                        height: parseFloat(e.target.value) || 0 
-                      }
-                    })}
-                  />
-                </div>
+                <WeightInput
+                  value={shipmentDetails.package?.weight || { value: 0, unit: 'lbs' }}
+                  onChange={(weight) => updatePackage({ weight })}
+                  packageType={shipmentDetails.package?.type || null}
+                  showBillingWeight={true}
+                  dimensionalWeight={
+                    shipmentDetails.package?.dimensions 
+                      ? (shipmentDetails.package.dimensions.length * 
+                         shipmentDetails.package.dimensions.width * 
+                         shipmentDetails.package.dimensions.height) / 166
+                      : 0
+                  }
+                  className="mb-6"
+                />
+              </div>
+
+              {/* Dimensions Input */}
+              <div>
+                <DimensionsInput
+                  value={shipmentDetails.package?.dimensions || { length: 0, width: 0, height: 0, unit: 'in' }}
+                  onChange={(dimensions) => updatePackage({ dimensions })}
+                  packageType={shipmentDetails.package?.type || null}
+                  actualWeight={shipmentDetails.package?.weight?.value || 0}
+                  showVolume={true}
+                  showDimensionalWeight={true}
+                  className="mb-6"
+                />
+              </div>
+
+              {/* Declared Value Input */}
+              <div>
+                <DeclaredValueInput
+                  value={shipmentDetails.package?.declaredValue || 0}
+                  currency={shipmentDetails.package?.currency || 'USD'}
+                  onValueChange={(value) => updatePackage({ declaredValue: value })}
+                  onCurrencyChange={(currency) => updatePackage({ currency })}
+                  packageType={shipmentDetails.package?.type || null}
+                  showInsurance={true}
+                  showCurrencySelector={true}
+                  className="mb-6"
+                />
+              </div>
+
+              {/* Special Handling Selector */}
+              <div>
+                <SpecialHandlingSelector
+                  value={shipmentDetails.package?.specialHandling || []}
+                  onChange={(specialHandling) => updatePackage({ specialHandling })}
+                  packageWeight={shipmentDetails.package?.weight?.value || 0}
+                  packageType={shipmentDetails.package?.type || 'medium'}
+                  showFees={true}
+                  showCompatibility={true}
+                  className="mb-6"
+                />
               </div>
             </div>
           </DisclosureSection>
