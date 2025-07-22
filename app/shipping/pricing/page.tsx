@@ -1,12 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Truck, Plane, Package } from 'lucide-react';
 import { useShipping } from '@/components/providers/ShippingProvider';
+import { PricingGrid } from '@/components/pricing';
+import { PricingOption } from '@/lib/types';
+import { ShippingTransactionManager } from '@/lib/localStorage';
 
 export default function PricingPage() {
   const { transaction } = useShipping();
+
+  console.log('[PricingPage] Component rendered', {
+    hasShipmentDetails: !!transaction.shipmentDetails,
+    hasSelectedOption: !!transaction.selectedOption,
+    transactionStatus: transaction.status
+  });
+
+  // Handle quote selection
+  const handleQuoteSelected = useCallback((quote: PricingOption) => {
+    console.log('[PricingPage] Quote selected, updating transaction', {
+      quoteId: quote.id,
+      serviceType: quote.serviceType,
+      total: quote.pricing.total
+    });
+
+    // Update the transaction with selected option
+    const updatedTransaction = {
+      ...transaction,
+      selectedOption: quote,
+      status: 'pricing' as const
+    };
+
+    // Save to localStorage
+    const result = ShippingTransactionManager.save(updatedTransaction);
+    if (!result.success) {
+      console.error('[PricingPage] Failed to save updated transaction', result.error);
+    }
+  }, [transaction]);
 
   return (
     <main className="space-y-6">
@@ -57,60 +87,12 @@ export default function PricingPage() {
         </Card>
       )}
 
-      {/* Mock Pricing Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-2 hover:border-blue-200 cursor-pointer transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-blue-600" />
-              Ground Service
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-blue-600">$24.99</div>
-              <div className="text-sm text-muted-foreground">3-5 business days</div>
-              <div className="text-sm">Standard ground delivery</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 hover:border-green-200 cursor-pointer transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-green-600" />
-              Express Service
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-green-600">$39.99</div>
-              <div className="text-sm text-muted-foreground">2-3 business days</div>
-              <div className="text-sm">Faster delivery</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 hover:border-purple-200 cursor-pointer transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plane className="h-5 w-5 text-purple-600" />
-              Overnight
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-purple-600">$59.99</div>
-              <div className="text-sm text-muted-foreground">Next business day</div>
-              <div className="text-sm">Premium delivery</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="text-center text-muted-foreground">
-        Pricing page - Step 2 implementation in progress
-      </div>
+      {/* Pricing Grid */}
+      <PricingGrid
+        shipmentDetails={transaction.shipmentDetails || null}
+        onQuoteSelected={handleQuoteSelected}
+        initialSelectedQuote={transaction.selectedOption || null}
+      />
     </main>
   );
 }
