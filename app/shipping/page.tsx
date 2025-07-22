@@ -8,7 +8,6 @@ import { PackageSummary } from '@/components/ui/PackageSummary';
 import { ContextualHelp } from '@/components/ui/ContextualHelp';
 import { ProgressiveDisclosureProvider, DisclosureSection, ModeToggle } from '@/components/ui/ProgressiveDisclosure';
 import { PerformanceProvider, PerformanceMonitor, useComponentPerformance } from '@/components/ui/PerformanceOptimizer';
-import { AnalyticsProvider, AnalyticsDashboard, useFieldAnalytics } from '@/components/ui/UserAnalytics';
 import { PackageTypeSelector } from '@/components/forms/PackageTypeSelector';
 import { WeightInput } from '@/components/forms/WeightInput';
 import { DimensionsInput } from '@/components/forms/DimensionsInput';
@@ -54,32 +53,17 @@ function ShipmentDetailsContent() {
     isLoading
   } = useShipmentDetailsForm();
 
-  // Analytics for origin address
-  const originAnalytics = useFieldAnalytics('origin-address');
-  const destinationAnalytics = useFieldAnalytics('destination-address');
-
   console.log('ShipmentDetailsContent: Form state - isDirty:', isDirty, 'progress:', progress.percentage, 'renders:', renderCount);
 
   const handleOriginChange = useCallback((address: Address) => {
     console.log('ShipmentDetailsContent: Origin address changed:', address);
     updateOrigin(address);
-    originAnalytics.handleChange(address);
-  }, [updateOrigin, originAnalytics]);
+  }, [updateOrigin]);
 
   const handleDestinationChange = useCallback((address: Address) => {
     console.log('ShipmentDetailsContent: Destination address changed:', address);
     updateDestination(address);
-    destinationAnalytics.handleChange(address);
-  }, [updateDestination, destinationAnalytics]);
-
-  const handleHelpUsed = useCallback((fieldId: string, helpId: string) => {
-    console.log('ShipmentDetailsContent: Help used:', fieldId, helpId);
-    if (fieldId === 'origin-address') {
-      originAnalytics.handleHelpUsed(helpId);
-    } else if (fieldId === 'destination-address') {
-      destinationAnalytics.handleHelpUsed(helpId);
-    }
-  }, [originAnalytics, destinationAnalytics]);
+  }, [updateDestination]);
 
   return (
     <main className="min-h-screen bg-gray-50 py-8">
@@ -138,14 +122,11 @@ function ShipmentDetailsContent() {
                   required={true}
                   showContactInfo={true}
                   type="origin"
-                  onFocus={originAnalytics.handleFocus}
-                  onBlur={originAnalytics.handleBlur}
                 />
               </div>
               <ContextualHelp
                 fieldId="origin-address"
                 fieldLabel="Origin Address"
-                onHelpUsed={handleHelpUsed}
                 data-testid="help-origin-address"
               />
             </div>
@@ -172,14 +153,11 @@ function ShipmentDetailsContent() {
                   required={true}
                   showContactInfo={true}
                   type="destination"
-                  onFocus={destinationAnalytics.handleFocus}
-                  onBlur={destinationAnalytics.handleBlur}
                 />
               </div>
               <ContextualHelp
                 fieldId="destination-address"
                 fieldLabel="Destination Address"
-                onHelpUsed={handleHelpUsed}
                 data-testid="help-destination-address"
               />
             </div>
@@ -329,20 +307,6 @@ function ShipmentDetailsContent() {
             </div>
           </div>
 
-          {/* Analytics Dashboard */}
-          <DisclosureSection
-            title="Usage Analytics"
-            level="expert"
-            fieldId="analytics-section"
-            defaultExpanded={false}
-          >
-            <AnalyticsDashboard 
-              showFieldDetails={true} 
-              showExportButton={false}
-              data-testid="analytics-dashboard"
-            />
-          </DisclosureSection>
-
           {/* Validation Warnings */}
           {Object.keys(validation.warnings).length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-3xl p-6">
@@ -375,21 +339,19 @@ export default function ShipmentDetailsPage() {
   console.log('ShipmentDetailsPage: Initializing with providers');
   
   return (
-    <AnalyticsProvider enabled={true}>
-      <PerformanceProvider enableMonitoring={true}>
-        <ProgressiveDisclosureProvider initialMode="basic" initialUserLevel="beginner">
-          <Suspense fallback={
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading shipping form...</p>
-              </div>
+    <PerformanceProvider enableMonitoring={true}>
+      <ProgressiveDisclosureProvider initialMode="basic" initialUserLevel="beginner">
+        <Suspense fallback={
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading shipping form...</p>
             </div>
-          }>
-            <ShipmentDetailsContent />
-          </Suspense>
-        </ProgressiveDisclosureProvider>
-      </PerformanceProvider>
-    </AnalyticsProvider>
+          </div>
+        }>
+          <ShipmentDetailsContent />
+        </Suspense>
+      </ProgressiveDisclosureProvider>
+    </PerformanceProvider>
   );
 }

@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDownIcon, MapPinIcon, PhoneIcon, MailIcon, BuildingIcon, CheckIcon } from 'lucide-react';
 
@@ -33,6 +32,15 @@ interface AddressSuggestion {
   isCommercial?: boolean;
 }
 
+const LOCATION_TYPE_OPTIONS = [
+  { value: 'commercial', label: 'Commercial', desc: 'Business address' },
+  { value: 'residential', label: 'Residential', desc: 'Home address' },
+  { value: 'industrial', label: 'Industrial', desc: 'Factory/warehouse' },
+  { value: 'warehouse', label: 'Warehouse', desc: 'Storage facility' },
+  { value: 'construction', label: 'Construction', desc: 'Job site' },
+  { value: 'other', label: 'Other', desc: 'Specify below' }
+] as const;
+
 export function AddressInput({
   value,
   onChange,
@@ -52,6 +60,12 @@ export function AddressInput({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const valueRef = useRef(value);
+
+  // Keep valueRef in sync with value prop
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   console.log('AddressInput: Current state - suggestions:', suggestions.length, 'showSuggestions:', showSuggestions);
 
@@ -89,13 +103,14 @@ export function AddressInput({
     }
   }, [type]);
 
-  // Handle address field change with debounced search
+  // Handle address field change with debounced search - use ref to get current value
   const handleAddressChange = useCallback((newAddress: string) => {
     console.log('AddressInput: Address field changed:', newAddress);
     setSearchTerm(newAddress);
     
+    const currentValue = valueRef.current;
     onChange({
-      ...value,
+      ...currentValue,
       address: newAddress
     });
 
@@ -108,14 +123,15 @@ export function AddressInput({
     timeoutRef.current = setTimeout(() => {
       searchAddresses(newAddress);
     }, 300);
-  }, [value, onChange, searchAddresses]);
+  }, [onChange, searchAddresses]); // Only onChange and searchAddresses in dependencies
 
-  // Handle suggestion selection
+  // Handle suggestion selection - use ref to get current value
   const handleSuggestionSelect = useCallback((suggestion: AddressSuggestion) => {
     console.log('AddressInput: Suggestion selected:', suggestion);
     
+    const currentValue = valueRef.current;
     const updatedAddress: Address = {
-      ...value,
+      ...currentValue,
       address: suggestion.address,
       city: suggestion.city,
       state: suggestion.state,
@@ -129,7 +145,7 @@ export function AddressInput({
     setSearchTerm(suggestion.address);
     setShowSuggestions(false);
     setSuggestions([]);
-  }, [value, onChange]);
+  }, [onChange]); // Only onChange in dependencies
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -173,27 +189,60 @@ export function AddressInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle location type change
+  // Handle location type change - use ref to get current value
   const handleLocationTypeChange = useCallback((locationType: Address['locationType']) => {
     console.log('AddressInput: Location type changed:', locationType);
+    const currentValue = valueRef.current;
     onChange({
-      ...value,
+      ...currentValue,
       locationType,
       isResidential: locationType === 'residential'
     });
-  }, [value, onChange]);
+  }, [onChange]); // Only onChange in dependencies
 
-  // Handle contact info change
+  // Handle contact info change - use ref to get current value
   const handleContactInfoChange = useCallback((field: keyof ContactInfo, fieldValue: string) => {
     console.log('AddressInput: Contact info changed:', field, fieldValue);
+    const currentValue = valueRef.current;
     onChange({
-      ...value,
+      ...currentValue,
       contactInfo: {
-        ...value.contactInfo,
+        ...currentValue.contactInfo,
         [field]: fieldValue
       }
     });
-  }, [value, onChange]);
+  }, [onChange]); // Only onChange in dependencies
+
+  // Create stable handlers for all form fields using valueRef
+  const handleSuiteChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, suite: e.target.value });
+  }, [onChange]);
+
+  const handleCityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, city: e.target.value });
+  }, [onChange]);
+
+  const handleStateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, state: e.target.value });
+  }, [onChange]);
+
+  const handleZipChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, zip: e.target.value });
+  }, [onChange]);
+
+  const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, country: e.target.value });
+  }, [onChange]);
+
+  const handleLocationDescChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentValue = valueRef.current;
+    onChange({ ...currentValue, locationDescription: e.target.value });
+  }, [onChange]);
 
   return (
     <Card className="rounded-3xl shadow-[0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]">
@@ -275,7 +324,7 @@ export function AddressInput({
           <Input
             id={`${type}-suite`}
             value={value.suite || ''}
-            onChange={(e) => onChange({ ...value, suite: e.target.value })}
+            onChange={handleSuiteChange}
             placeholder="Suite, unit, or apartment number"
             className="rounded-xl"
             autoComplete="address-line2"
@@ -291,7 +340,7 @@ export function AddressInput({
             <Input
               id={`${type}-city`}
               value={value.city}
-              onChange={(e) => onChange({ ...value, city: e.target.value })}
+              onChange={handleCityChange}
               placeholder="City"
               className={`rounded-xl ${errors.city ? 'border-red-500' : ''}`}
               autoComplete="address-level2"
@@ -308,7 +357,7 @@ export function AddressInput({
             <Input
               id={`${type}-state`}
               value={value.state}
-              onChange={(e) => onChange({ ...value, state: e.target.value })}
+              onChange={handleStateChange}
               placeholder="State"
               className={`rounded-xl ${errors.state ? 'border-red-500' : ''}`}
               autoComplete="address-level1"
@@ -325,7 +374,7 @@ export function AddressInput({
             <Input
               id={`${type}-zip`}
               value={value.zip}
-              onChange={(e) => onChange({ ...value, zip: e.target.value })}
+              onChange={handleZipChange}
               placeholder="ZIP Code"
               className={`rounded-xl ${errors.zip ? 'border-red-500' : ''}`}
               autoComplete="postal-code"
@@ -344,7 +393,7 @@ export function AddressInput({
           <Input
             id={`${type}-country`}
             value={value.country}
-            onChange={(e) => onChange({ ...value, country: e.target.value })}
+            onChange={handleCountryChange}
             placeholder="Country"
             className={`rounded-xl ${errors.country ? 'border-red-500' : ''}`}
             autoComplete="country-name"
@@ -354,26 +403,23 @@ export function AddressInput({
           )}
         </div>
 
-        {/* Location Type */}
+        {/* Location Type - Custom Radio Buttons */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">
             Location Type {required && <span className="text-red-500">*</span>}
           </Label>
-          <RadioGroup
-            value={value.locationType}
-            onValueChange={handleLocationTypeChange}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-          >
-            {[
-              { value: 'commercial', label: 'Commercial', desc: 'Business address' },
-              { value: 'residential', label: 'Residential', desc: 'Home address' },
-              { value: 'industrial', label: 'Industrial', desc: 'Factory/warehouse' },
-              { value: 'warehouse', label: 'Warehouse', desc: 'Storage facility' },
-              { value: 'construction', label: 'Construction', desc: 'Job site' },
-              { value: 'other', label: 'Other', desc: 'Specify below' }
-            ].map((option) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {LOCATION_TYPE_OPTIONS.map((option) => (
               <div key={option.value} className="flex items-center space-x-2 p-3 border rounded-xl hover:bg-gray-50">
-                <RadioGroupItem value={option.value} id={`${type}-${option.value}`} />
+                <input
+                  type="radio"
+                  name={`${type}-location-type`}
+                  value={option.value}
+                  id={`${type}-${option.value}`}
+                  checked={value.locationType === option.value}
+                  onChange={(e) => handleLocationTypeChange(e.target.value as Address['locationType'])}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
                 <div className="flex-1">
                   <Label 
                     htmlFor={`${type}-${option.value}`} 
@@ -385,7 +431,7 @@ export function AddressInput({
                 </div>
               </div>
             ))}
-          </RadioGroup>
+          </div>
           {errors.locationType && (
             <p className="text-sm text-red-600 mt-1">{errors.locationType}</p>
           )}
@@ -400,7 +446,7 @@ export function AddressInput({
             <Input
               id={`${type}-location-desc`}
               value={value.locationDescription || ''}
-              onChange={(e) => onChange({ ...value, locationDescription: e.target.value })}
+              onChange={handleLocationDescChange}
               placeholder="Describe the location type"
               className="rounded-xl"
             />

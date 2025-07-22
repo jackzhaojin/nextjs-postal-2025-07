@@ -147,39 +147,6 @@ test.describe('Task 4.5: Enhanced User Experience Features', () => {
     }
   });
 
-  test('User Analytics tracks field interactions', async ({ page }) => {
-    console.log('Test: User Analytics tracking');
-    
-    // Fill out some form fields to generate analytics data
-    const originAddress = page.locator('input[name="origin.address"]');
-    await originAddress.focus();
-    await originAddress.fill('123 Test Street');
-    await originAddress.blur();
-    
-    const originCity = page.locator('input[name="origin.city"]');
-    await originCity.focus();
-    await originCity.fill('Test City');
-    await originCity.blur();
-    
-    // Wait a bit for analytics to process
-    await page.waitForTimeout(1000);
-    
-    // Check if analytics dashboard is available
-    const analyticsDashboard = page.locator('[data-testid="analytics-dashboard"]');
-    
-    if (await analyticsDashboard.isVisible()) {
-      // Should show interaction count
-      await expect(analyticsDashboard.locator('text=Interactions')).toBeVisible();
-      
-      // Should show fields tracked
-      await expect(analyticsDashboard.locator('text=Fields Tracked')).toBeVisible();
-      
-      console.log('Test passed: User analytics tracks interactions');
-    } else {
-      console.log('Test skipped: Analytics dashboard not visible');
-    }
-  });
-
   test('Enhanced form experience with auto-save and validation feedback', async ({ page }) => {
     console.log('Test: Enhanced form experience');
     
@@ -310,7 +277,7 @@ test.describe('Enhanced UX Features Integration', () => {
     await page.goto('/shipping');
     await page.waitForLoadState('networkidle');
     
-    // Test package summary with help and analytics
+    // Test package summary with help
     await page.fill('input[name="package.weight.value"]', '15');
     await page.fill('input[name="package.dimensions.length"]', '20');
     await page.fill('input[name="package.dimensions.width"]', '15');

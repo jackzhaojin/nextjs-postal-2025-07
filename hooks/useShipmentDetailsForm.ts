@@ -178,7 +178,15 @@ export function useShipmentDetailsForm(
   // Refs for managing auto-save and conflict detection
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
+  
+  // Ref to track current shipment details for stable access in callbacks
+  const shipmentDetailsRef = useRef<ShipmentDetails>(shipmentDetails);
   const instanceIdRef = useRef<string>(Math.random().toString(36).substr(2, 9));
+
+  // Keep ref updated
+  useEffect(() => {
+    shipmentDetailsRef.current = shipmentDetails;
+  }, [shipmentDetails]);
 
   console.log('useShipmentDetailsForm: Current state - isDirty:', isDirty, 'isValid:', validation.isValid);
 
@@ -275,18 +283,23 @@ export function useShipmentDetailsForm(
   const validateField = useCallback((fieldPath: string) => {
     console.log('useShipmentDetailsForm: Validating field:', fieldPath);
     
-    const value = getNestedValue(shipmentDetails, fieldPath);
-    const fieldValidation = ShipmentValidator.validateField(fieldPath, value, shipmentDetails);
-    
-    setValidation(prev => ({
-      ...prev,
-      errors: { ...prev.errors, ...fieldValidation.errors },
-      warnings: { ...prev.warnings, ...fieldValidation.warnings },
-      fieldValidation: { ...prev.fieldValidation, ...fieldValidation.fieldValidation }
-    }));
+    // Use callback to get fresh state at validation time
+    setValidation(prev => {
+      // Get the current shipment details from the latest state
+      const currentShipmentDetails = shipmentDetailsRef.current;
+      const value = getNestedValue(currentShipmentDetails, fieldPath);
+      const fieldValidation = ShipmentValidator.validateField(fieldPath, value, currentShipmentDetails);
+      
+      return {
+        ...prev,
+        errors: { ...prev.errors, ...fieldValidation.errors },
+        warnings: { ...prev.warnings, ...fieldValidation.warnings },
+        fieldValidation: { ...prev.fieldValidation, ...fieldValidation.fieldValidation }
+      };
+    });
 
-    console.log('useShipmentDetailsForm: Field validation result:', fieldValidation);
-  }, [shipmentDetails]);
+    console.log('useShipmentDetailsForm: Field validation completed for:', fieldPath);
+  }, []);
 
   const validateAll = useCallback(() => {
     console.log('useShipmentDetailsForm: Running comprehensive validation');
@@ -333,8 +346,7 @@ export function useShipmentDetailsForm(
   const setFieldValue = useCallback((fieldPath: string, value: any) => {
     console.log('useShipmentDetailsForm: Setting field value:', fieldPath, '=', value);
     
-    const newShipmentDetails = setNestedValue(shipmentDetails, fieldPath, value);
-    setShipmentDetails(newShipmentDetails);
+    setShipmentDetails(prev => setNestedValue(prev, fieldPath, value));
     setIsDirty(true);
 
     // Mark field as touched
@@ -347,13 +359,15 @@ export function useShipmentDetailsForm(
     if (validateOnChange) {
       setTimeout(() => validateField(fieldPath), 0);
     }
-  }, [shipmentDetails, validateOnChange, validateField]);
+  }, [validateOnChange, validateField]);
 
   // Specific update functions
   const updateOrigin = useCallback((address: Partial<Address>) => {
     console.log('useShipmentDetailsForm: Updating origin address:', address);
-    const newOrigin = { ...shipmentDetails.origin, ...address };
-    setShipmentDetails(prev => ({ ...prev, origin: newOrigin }));
+    setShipmentDetails(prev => ({ 
+      ...prev, 
+      origin: { ...prev.origin, ...address }
+    }));
     setIsDirty(true);
 
     if (validateOnChange) {
@@ -363,12 +377,14 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [shipmentDetails.origin, validateOnChange, validateField]);
+  }, [validateOnChange, validateField]);
 
   const updateDestination = useCallback((address: Partial<Address>) => {
     console.log('useShipmentDetailsForm: Updating destination address:', address);
-    const newDestination = { ...shipmentDetails.destination, ...address };
-    setShipmentDetails(prev => ({ ...prev, destination: newDestination }));
+    setShipmentDetails(prev => ({ 
+      ...prev, 
+      destination: { ...prev.destination, ...address }
+    }));
     setIsDirty(true);
 
     if (validateOnChange) {
@@ -378,12 +394,14 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [shipmentDetails.destination, validateOnChange, validateField]);
+  }, [validateOnChange, validateField]);
 
   const updatePackage = useCallback((packageInfo: Partial<PackageInfo>) => {
     console.log('useShipmentDetailsForm: Updating package info:', packageInfo);
-    const newPackage = { ...shipmentDetails.package, ...packageInfo };
-    setShipmentDetails(prev => ({ ...prev, package: newPackage }));
+    setShipmentDetails(prev => ({ 
+      ...prev, 
+      package: { ...prev.package, ...packageInfo }
+    }));
     setIsDirty(true);
 
     if (validateOnChange) {
@@ -393,14 +411,16 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [shipmentDetails.package, validateOnChange, validateField]);
+  }, [validateOnChange, validateField]);
 
   const updateDeliveryPreferences = useCallback((preferences: Partial<DeliveryPreferences>) => {
     console.log('useShipmentDetailsForm: Updating delivery preferences:', preferences);
-    const newPreferences = { ...shipmentDetails.deliveryPreferences, ...preferences };
-    setShipmentDetails(prev => ({ ...prev, deliveryPreferences: newPreferences }));
+    setShipmentDetails(prev => ({ 
+      ...prev, 
+      deliveryPreferences: { ...prev.deliveryPreferences, ...preferences }
+    }));
     setIsDirty(true);
-  }, [shipmentDetails.deliveryPreferences]);
+  }, []);
 
   // Set field as touched
   const setFieldTouched = useCallback((field: string, touched: boolean = true) => {
