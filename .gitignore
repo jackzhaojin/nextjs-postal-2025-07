@@ -79,6 +79,7 @@ out/
 ai-docs
 /*AGENT*.md  
 /*CLAUDE*.md
+/*GEMINI*.md
 /*release*.mdc
 /*PRD*.md
 /.clauderc

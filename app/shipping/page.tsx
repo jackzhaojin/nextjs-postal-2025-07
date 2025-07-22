@@ -38,8 +38,6 @@ const defaultAddress: Address = {
 
 function ShipmentDetailsContent() {
   console.log('ShipmentDetailsContent: Rendering');
-  
-  const { renderCount } = useComponentPerformance('ShipmentDetailsContent');
 
   // Initialize form state
   const {
@@ -53,7 +51,7 @@ function ShipmentDetailsContent() {
     isLoading
   } = useShipmentDetailsForm();
 
-  console.log('ShipmentDetailsContent: Form state - isDirty:', isDirty, 'progress:', progress.percentage, 'renders:', renderCount);
+  console.log('ShipmentDetailsContent: Form state - isDirty:', isDirty, 'progress:', progress.percentage);
 
   const handleOriginChange = useCallback((address: Address) => {
     console.log('ShipmentDetailsContent: Origin address changed:', address);

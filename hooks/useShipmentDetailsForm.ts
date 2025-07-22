@@ -192,7 +192,7 @@ export function useShipmentDetailsForm(
 
   // Calculate progress state
   const progress = useMemo(() => {
-    const progressData = ShipmentValidator.calculateCompletionProgress(shipmentDetails, 'shipment-details');
+    const progressData = ShipmentValidator.calculateCompletionProgress(shipmentDetailsRef.current, 'shipment-details');
     
     // More lenient approach: allow progression if no errors are showing OR if all required fields are complete
     const hasNoVisibleErrors = Object.keys(validation.errors).length === 0;
@@ -203,7 +203,7 @@ export function useShipmentDetailsForm(
       requiredFieldsComplete: hasNoVisibleErrors || progressData.requiredFieldsComplete,
       canAdvanceToNextStep
     };
-  }, [shipmentDetails, validation.isValid, validation.errors]);
+  }, [validation.isValid, validation.errors]);
 
   // Multi-tab conflict detection
   const detectConflicts = useCallback(() => {
@@ -214,7 +214,7 @@ export function useShipmentDetailsForm(
       const storedInstanceId = localStorage.getItem(`${storageKey}_instance`);
       
       if (stored && storedInstanceId !== instanceIdRef.current) {
-        const currentSerialized = JSON.stringify(shipmentDetails);
+        const currentSerialized = JSON.stringify(shipmentDetailsRef.current);
         if (stored !== lastSavedDataRef.current && stored !== currentSerialized) {
           console.log('useShipmentDetailsForm: Conflict detected with another tab');
           setAutoSaveState(prev => ({ ...prev, conflictDetected: true }));
@@ -226,11 +226,15 @@ export function useShipmentDetailsForm(
     }
     
     return false;
-  }, [enableConflictResolution, storageKey, shipmentDetails]);
+  }, [enableConflictResolution, storageKey]);
 
   // Auto-save functionality with conflict resolution
   const triggerAutoSave = useCallback(async () => {
-    if (!autoSave || !isDirty || autoSaveState.isAutoSaving) return;
+    if (!autoSave || !isDirty) return;
+    
+    // Check current autoSave state via ref to avoid dependency
+    const currentAutoSaveState = autoSaveState;
+    if (currentAutoSaveState.isAutoSaving) return;
 
     console.log('useShipmentDetailsForm: Triggering auto-save');
     
@@ -247,7 +251,7 @@ export function useShipmentDetailsForm(
           return;
         }
 
-        const serialized = JSON.stringify(shipmentDetails);
+        const serialized = JSON.stringify(shipmentDetailsRef.current);
         
         // Simulate network delay for realistic auto-save behavior
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -277,7 +281,7 @@ export function useShipmentDetailsForm(
         }));
       }
     }, autoSaveDelay);
-  }, [autoSave, autoSaveDelay, isDirty, shipmentDetails, storageKey, autoSaveState.isAutoSaving, detectConflicts]);
+  }, [autoSave, autoSaveDelay, isDirty, storageKey, detectConflicts]);
 
   // Enhanced validation with real-time feedback
   const validateField = useCallback((fieldPath: string) => {
@@ -304,7 +308,7 @@ export function useShipmentDetailsForm(
   const validateAll = useCallback(() => {
     console.log('useShipmentDetailsForm: Running comprehensive validation');
     
-    const fullValidation = ShipmentValidator.validateShipmentDetails(shipmentDetails);
+    const fullValidation = ShipmentValidator.validateShipmentDetails(shipmentDetailsRef.current);
     
     setValidation(prev => ({
       ...prev,
@@ -316,7 +320,7 @@ export function useShipmentDetailsForm(
 
     console.log('useShipmentDetailsForm: Full validation result:', fullValidation);
     return fullValidation.isValid;
-  }, [shipmentDetails]);
+  }, []);
 
   // Helper function to get nested values
   const getNestedValue = (obj: any, path: string): any => {
@@ -359,7 +363,7 @@ export function useShipmentDetailsForm(
     if (validateOnChange) {
       setTimeout(() => validateField(fieldPath), 0);
     }
-  }, [validateOnChange, validateField]);
+  }, [validateOnChange]);
 
   // Specific update functions
   const updateOrigin = useCallback((address: Partial<Address>) => {
@@ -377,7 +381,7 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [validateOnChange, validateField]);
+  }, [validateOnChange]);
 
   const updateDestination = useCallback((address: Partial<Address>) => {
     console.log('useShipmentDetailsForm: Updating destination address:', address);
@@ -394,7 +398,7 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [validateOnChange, validateField]);
+  }, [validateOnChange]);
 
   const updatePackage = useCallback((packageInfo: Partial<PackageInfo>) => {
     console.log('useShipmentDetailsForm: Updating package info:', packageInfo);
@@ -411,7 +415,7 @@ export function useShipmentDetailsForm(
         });
       }, 0);
     }
-  }, [validateOnChange, validateField]);
+  }, [validateOnChange]);
 
   const updateDeliveryPreferences = useCallback((preferences: Partial<DeliveryPreferences>) => {
     console.log('useShipmentDetailsForm: Updating delivery preferences:', preferences);
@@ -432,7 +436,7 @@ export function useShipmentDetailsForm(
     if (touched && validateOnBlur) {
       validateField(field);
     }
-  }, [validateOnBlur, validateField]);
+  }, [validateOnBlur]);
 
   // Manual save function
   const save = useCallback(async () => {
@@ -451,7 +455,7 @@ export function useShipmentDetailsForm(
         throw new Error('Conflict detected - please resolve before saving');
       }
 
-      const serialized = JSON.stringify(shipmentDetails);
+      const serialized = JSON.stringify(shipmentDetailsRef.current);
       
       // Save to localStorage
       localStorage.setItem(storageKey, serialized);
@@ -474,7 +478,7 @@ export function useShipmentDetailsForm(
     } finally {
       setIsLoading(false);
     }
-  }, [shipmentDetails, storageKey, validateAll, detectConflicts]);
+  }, [storageKey, validateAll, detectConflicts]);
 
   // Reset form to default state
   const reset = useCallback(() => {
@@ -542,7 +546,7 @@ export function useShipmentDetailsForm(
           
         case 'merge':
           // Merge non-conflicting fields (simplified merge strategy)
-          const merged = { ...remoteData, ...shipmentDetails };
+          const merged = { ...remoteData, ...shipmentDetailsRef.current };
           setShipmentDetails(merged);
           setIsDirty(true);
           break;
@@ -554,7 +558,7 @@ export function useShipmentDetailsForm(
       console.error('useShipmentDetailsForm: Conflict resolution failed:', error);
       throw error;
     }
-  }, [storageKey, shipmentDetails, save]);
+  }, [storageKey, save]);
 
   // Navigation helpers
   const canNavigateNext = useCallback(() => {
@@ -578,12 +582,12 @@ export function useShipmentDetailsForm(
   useEffect(() => {
     // Only validate if we have touched fields or if the form has data from localStorage
     const hasTouchedFields = Object.keys(validation.touched).length > 0;
-    const hasExistingData = JSON.stringify(shipmentDetails) !== JSON.stringify(defaultShipmentDetails);
+    const hasExistingData = JSON.stringify(shipmentDetailsRef.current) !== JSON.stringify(defaultShipmentDetails);
     
     if (hasTouchedFields || hasExistingData) {
       validateAll();
     }
-  }, [validateAll, validation.touched, shipmentDetails]);
+  }, [validateAll, validation.touched]);
 
   // Conflict detection on focus
   useEffect(() => {
