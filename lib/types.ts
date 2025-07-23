@@ -161,12 +161,12 @@ export interface PricingBreakdown {
 
 export interface PaymentInfo {
   method: 'po' | 'bol' | 'thirdparty' | 'net' | 'corporate';
-  reference: string;
-  billingContact: ContactInfo;
-  companyInfo: CompanyInfo;
-  billingAddress: Address;
-  invoicePreferences: InvoicePreferences;
-  paymentDetails: PaymentMethodDetails;
+  reference?: string;
+  billingContact?: ContactInfo;
+  companyInfo?: CompanyInfo;
+  billingAddress?: Address;
+  invoicePreferences?: InvoicePreferences;
+  paymentDetails?: PaymentMethodDetails;
 }
 
 export interface CompanyInfo {
