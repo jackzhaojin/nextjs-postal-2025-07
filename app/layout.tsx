@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { LocalStorageInitializer } from '@/components/LocalStorageInitializer';
+import { DemoProvider } from '@/lib/demo/demo-context';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,8 +37,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LocalStorageInitializer />
-        {children}
+        <DemoProvider>
+          <LocalStorageInitializer />
+          {children}
+        </DemoProvider>
       </body>
     </html>
   );

@@ -61,7 +61,7 @@ async function setupShipmentForPricing(page: any) {
   await page.goto(PRICING_PAGE_URL);
   
   // Inject the mock data
-  await page.evaluate((mockData) => {
+  await page.evaluate((mockData: any) => {
     localStorage.setItem('currentShippingTransaction', JSON.stringify(mockData));
   }, mockShipmentData);
   
