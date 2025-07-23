@@ -24,27 +24,152 @@ const testZipCodes = {
   invalid: '00000'
 };
 
+// Helper function to create consistent test data
+function createTestShipmentDetails(zipCode: string) {
+  return {
+    origin: { 
+      zip: zipCode, 
+      address: '123 Test St', 
+      city: 'New York', 
+      state: 'NY', 
+      country: 'US', 
+      isResidential: false, 
+      locationType: 'commercial', 
+      contactInfo: { 
+        name: 'Test User', 
+        phone: '555-1234', 
+        email: 'test@test.com' 
+      }
+    },
+    destination: { 
+      zip: '90210', 
+      address: '456 Test Ave', 
+      city: 'Los Angeles', 
+      state: 'CA', 
+      country: 'US', 
+      isResidential: false, 
+      locationType: 'commercial', 
+      contactInfo: { 
+        name: 'Test Recipient', 
+        phone: '555-5678', 
+        email: 'test2@test.com' 
+      }
+    },
+    package: { 
+      type: 'medium', 
+      dimensions: { length: 12, width: 8, height: 6, unit: 'in' }, 
+      weight: { value: 5, unit: 'lbs' }, 
+      declaredValue: 100, 
+      currency: 'USD', 
+      contents: 'Test Item', 
+      contentsCategory: 'electronics', 
+      specialHandling: [] 
+    },
+    deliveryPreferences: { 
+      signatureRequired: false, 
+      adultSignatureRequired: false, 
+      smsConfirmation: true, 
+      photoProof: false, 
+      saturdayDelivery: false, 
+      holdAtLocation: false, 
+      serviceLevel: 'reliable' 
+    }
+  };
+}
+
+// Helper function to setup test data in localStorage
+async function setupTestData(page: Page, zipCode: string) {
+  await page.evaluate((shipmentDetails) => {
+    localStorage.setItem('currentShipmentDetails', JSON.stringify(shipmentDetails));
+  }, createTestShipmentDetails(zipCode));
+}
+
 // Mock API helper
 async function mockPickupAvailabilityAPI(page: Page) {
-  await page.route('**/api/shipping/pickup/availability**', async (route: Route) => {
+  await page.route('**/api/pickup-availability**', async (route: Route) => {
+    const url = new URL(route.request().url());
+    const zip = url.searchParams.get('zip') || '10001';
+    
     const mockData = {
-      availableDates: Array.from({ length: 15 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() + i + 1);
-        return {
-          date: date.toISOString().split('T')[0],
-          availability: i % 3 === 0 ? 'limited' : i % 7 === 0 ? 'unavailable' : 'available',
-          timeSlots: i % 7 !== 0 ? [
-            { id: 'morning', window: 'Morning (8AM-12PM)', price: 0, available: true },
-            { id: 'afternoon', window: 'Afternoon (12PM-5PM)', price: 0, available: true },
-            { id: 'evening', window: 'Evening (5PM-8PM)', price: 25, available: i % 2 === 0 }
-          ] : []
-        };
-      }),
-      serviceArea: 'Los Angeles Metro',
-      coverage: 'full'
+      success: true,
+      data: {
+        availableDates: Array.from({ length: 15 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() + i + 1);
+          return {
+            date: date.toISOString().split('T')[0],
+            dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'long' }),
+            isBusinessDay: date.getDay() >= 1 && date.getDay() <= 5,
+            availability: i % 3 === 0 ? 'limited' : i % 7 === 0 ? 'unavailable' : 'available',
+            timeSlots: i % 7 !== 0 ? [
+              { 
+                id: 'morning', 
+                label: 'Morning Pickup',
+                startTime: '08:00',
+                endTime: '12:00',
+                availability: 'available',
+                additionalFee: 0,
+                capacity: 'high'
+              },
+              { 
+                id: 'afternoon', 
+                label: 'Afternoon Pickup',
+                startTime: '12:00',
+                endTime: '17:00',
+                availability: 'available',
+                additionalFee: 0,
+                capacity: 'medium'
+              },
+              { 
+                id: 'evening', 
+                label: 'Evening Pickup',
+                startTime: '17:00',
+                endTime: '19:00',
+                availability: i % 2 === 0 ? 'available' : 'limited',
+                additionalFee: 25,
+                capacity: 'low'
+              }
+            ] : []
+          };
+        }),
+        restrictions: [], // Add missing restrictions field
+        serviceArea: {
+          zone: zip === '10001' ? 'Metropolitan' : zip === '12345' ? 'Standard' : 'Limited',
+          coverage: 'full',
+          description: 'Full service area with standard pickup options'
+        },
+        cutoffTime: '15:00',
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          validUntil: new Date(Date.now() + 3600000).toISOString(),
+          minimumLeadTime: 3,
+          maxAdvanceBooking: 21
+        }
+      }
     };
-    await route.fulfill({ json: mockData });
+    
+    await route.fulfill({ 
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(mockData)
+    });
+  });
+}
+
+// Mock API helper for error scenarios
+async function mockPickupAvailabilityAPIError(page: Page) {
+  await page.route('**/api/pickup-availability**', async (route: Route) => {
+    await route.fulfill({ 
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: false,
+        error: {
+          message: 'Failed to load pickup availability',
+          code: 'AVAILABILITY_ERROR'
+        }
+      })
+    });
   });
 }
 
@@ -64,6 +189,9 @@ test.describe('Task 7.1: Pickup Calendar Interface', () => {
       localStorage.clear();
       sessionStorage.clear();
     });
+
+    // Set up API mock for all tests by default
+    await mockPickupAvailabilityAPI(page);
   });
 
   test.describe('Page Navigation and Layout', () => {
@@ -173,21 +301,9 @@ test.describe('Task 7.1: Pickup Calendar Interface', () => {
     test('should display calendar with availability indicators', async ({ page }) => {
       console.log('🧪 Testing calendar availability display...');
       
-      // Mock the API first
-      await mockPickupAvailabilityAPI(page);
-      
-      // Setup test data
+      // Setup test data using helper
       await page.goto(`${baseURL}/shipping/pickup`);
-      await page.evaluate((zipCode) => {
-        const shipmentDetails = {
-          origin: { zip: zipCode, address: '123 Test St', city: 'New York', state: 'NY', country: 'US', isResidential: false, locationType: 'commercial', contactInfo: { name: 'Test', phone: '555-1234', email: 'test@test.com' }},
-          destination: { zip: '90210', address: '456 Test Ave', city: 'LA', state: 'CA', country: 'US', isResidential: false, locationType: 'commercial', contactInfo: { name: 'Test2', phone: '555-5678', email: 'test2@test.com' }},
-          package: { type: 'medium', dimensions: { length: 12, width: 8, height: 6, unit: 'in' }, weight: { value: 5, unit: 'lbs' }, declaredValue: 100, currency: 'USD', contents: 'Test', contentsCategory: 'electronics', specialHandling: [] },
-          deliveryPreferences: { signatureRequired: false, adultSignatureRequired: false, smsConfirmation: true, photoProof: false, saturdayDelivery: false, holdAtLocation: false, serviceLevel: 'reliable' }
-        };
-        localStorage.setItem('currentShipmentDetails', JSON.stringify(shipmentDetails));
-      }, testZipCodes.metro);
-      
+      await setupTestData(page, testZipCodes.metro);
       await page.reload();
       
       // Wait for calendar to load with availability data
@@ -211,21 +327,9 @@ test.describe('Task 7.1: Pickup Calendar Interface', () => {
     test('should allow date selection and load time slots', async ({ page }) => {
       console.log('🧪 Testing date selection and time slot loading...');
       
-      // Mock the API first
-      await mockPickupAvailabilityAPI(page);
-      
-      // Setup test data
+      // Setup test data using helper
       await page.goto(`${baseURL}/shipping/pickup`);
-      await page.evaluate((zipCode) => {
-        const shipmentDetails = {
-          origin: { zip: zipCode, address: '123 Test St', city: 'New York', state: 'NY', country: 'US', isResidential: false, locationType: 'commercial', contactInfo: { name: 'Test', phone: '555-1234', email: 'test@test.com' }},
-          destination: { zip: '90210', address: '456 Test Ave', city: 'LA', state: 'CA', country: 'US', isResidential: false, locationType: 'commercial', contactInfo: { name: 'Test2', phone: '555-5678', email: 'test2@test.com' }},
-          package: { type: 'medium', dimensions: { length: 12, width: 8, height: 6, unit: 'in' }, weight: { value: 5, unit: 'lbs' }, declaredValue: 100, currency: 'USD', contents: 'Test', contentsCategory: 'electronics', specialHandling: [] },
-          deliveryPreferences: { signatureRequired: false, adultSignatureRequired: false, smsConfirmation: true, photoProof: false, saturdayDelivery: false, holdAtLocation: false, serviceLevel: 'reliable' }
-        };
-        localStorage.setItem('currentShipmentDetails', JSON.stringify(shipmentDetails));
-      }, testZipCodes.metro);
-      
+      await setupTestData(page, testZipCodes.metro);
       await page.reload();
       await page.waitForSelector('[data-testid="pickup-calendar"]', { timeout: 15000 });
       
@@ -425,6 +529,9 @@ test.describe('Task 7.1: Pickup Calendar Interface', () => {
 
     test('should handle API errors gracefully', async ({ page }) => {
       console.log('🧪 Testing API error handling...');
+      
+      // Override with error mock for this test
+      await mockPickupAvailabilityAPIError(page);
       
       await page.goto(`${baseURL}/shipping/pickup`);
       await page.evaluate((zipCode) => {
@@ -631,8 +738,8 @@ test.describe('Task 7.1: Pickup Calendar Interface', () => {
       
       await page.reload();
       
-      // Check progress bar shows Step 4 of 6 active
-      await expect(page.locator('text=Step 4 of 6')).toBeVisible();
+      // Check progress bar shows Step 4 of 6 active - use more specific selector
+      await expect(page.locator('.flex.items-center.space-x-2:has-text("Step 4 of 6")').first()).toBeVisible();
       
       // Check progress bar percentage (should be ~66.7% for step 4)
       const progressBar = page.locator('[data-testid="progress-bar"]');
