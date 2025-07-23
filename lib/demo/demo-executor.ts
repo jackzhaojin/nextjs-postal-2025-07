@@ -71,6 +71,11 @@ export class WebDemoExecutor implements DemoExecutor {
   }
 
   private async fillAction(action: DemoAction): Promise<void> {
+    if (!action.target) {
+      console.warn('Fill action requires a target selector');
+      return;
+    }
+    
     const element = document.querySelector(action.target) as HTMLInputElement;
     if (element && action.value) {
       // Simulate typing animation
@@ -85,6 +90,11 @@ export class WebDemoExecutor implements DemoExecutor {
   }
 
   private async clickAction(action: DemoAction): Promise<void> {
+    if (!action.target) {
+      console.warn('Click action requires a target selector');
+      return;
+    }
+    
     const element = document.querySelector(action.target) as HTMLElement;
     if (element) {
       // Highlight the element briefly before clicking
@@ -94,6 +104,11 @@ export class WebDemoExecutor implements DemoExecutor {
   }
 
   private async selectAction(action: DemoAction): Promise<void> {
+    if (!action.target) {
+      console.warn('Select action requires a target selector');
+      return;
+    }
+    
     const element = document.querySelector(action.target) as HTMLSelectElement;
     if (element && action.value) {
       element.value = action.value;
@@ -107,6 +122,11 @@ export class WebDemoExecutor implements DemoExecutor {
   }
 
   private async highlightAction(action: DemoAction): Promise<void> {
+    if (!action.target) {
+      console.warn('Highlight action requires a target selector');
+      return;
+    }
+    
     const element = document.querySelector(action.target) as HTMLElement;
     if (element) {
       const duration = action.duration || 2000;
