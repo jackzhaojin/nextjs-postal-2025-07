@@ -15,7 +15,7 @@ export interface DemoConfig {
 
 export interface DemoAction {
   type: 'navigate' | 'fill' | 'click' | 'select' | 'wait' | 'highlight';
-  target: string;
+  target?: string; // Optional for wait actions
   value?: string;
   duration?: number;
   animation?: 'typing' | 'fade' | 'slide';
