@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { WebDemoExecutor } from './demo-executor';
 
@@ -101,6 +101,24 @@ export const DemoProvider = ({ children }: DemoProviderProps) => {
   const [demoConfig, setDemoConfig] = useState<DemoConfig | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   
+  // Use refs to track state that needs to be accessed in closures
+  const isDemoRunningRef = useRef(false);
+  const currentScenarioRef = useRef<DemoScenario | null>(null);
+  const currentStepIndexRef = useRef(0);
+  
+  // Update refs whenever state changes
+  React.useEffect(() => {
+    isDemoRunningRef.current = isDemoRunning;
+  }, [isDemoRunning]);
+  
+  React.useEffect(() => {
+    currentScenarioRef.current = currentScenario;
+  }, [currentScenario]);
+  
+  React.useEffect(() => {
+    currentStepIndexRef.current = currentStepIndex;
+  }, [currentStepIndex]);
+  
   const demoProgress: DemoProgress = {
     currentStep: currentStepIndex + 1,
     totalSteps: currentScenario?.steps.length ?? 0,
@@ -116,22 +134,45 @@ export const DemoProvider = ({ children }: DemoProviderProps) => {
       return;
     }
     
+    // Use ref to check current running state
+    const isCurrentlyRunning = isDemoRunningRef.current;
+    
     // Only check isDemoRunning after the first step, or if forceRun is false
-    if (!forceRun && !isDemoRunning) {
-      console.log('[DEMO] Demo paused, stopping execution');
+    if (!forceRun && !isCurrentlyRunning) {
+      console.log('[DEMO] Demo paused, stopping execution. Current state:', {
+        stepIndex,
+        isDemoRunning: isCurrentlyRunning,
+        forceRun,
+        stepTitle: scenario.steps[stepIndex]?.title
+      });
       return;
     }
     
     try {
       console.log(`[DEMO] Executing step ${stepIndex + 1}/${scenario.steps.length}: ${scenario.steps[stepIndex].title}`);
+      console.log(`[DEMO] Demo state before execution:`, { 
+        isDemoRunning: isCurrentlyRunning, 
+        stepIndex, 
+        totalSteps: scenario.steps.length,
+        forceRun 
+      });
+      
       setCurrentStepIndex(stepIndex);
       
       const executor = new WebDemoExecutor(router);
       await executor.executeStep(scenario.steps[stepIndex]);
       
-      // Auto-advance to next step after delay
+      console.log(`[DEMO] Step ${stepIndex + 1} completed, scheduling next step`);
+      
+      // Auto-advance to next step after delay, but check if still running
       setTimeout(() => {
-        executeAllSteps(scenario, stepIndex + 1, false);
+        const stillRunning = isDemoRunningRef.current;
+        console.log(`[DEMO] Auto-advancing to step ${stepIndex + 2}, currently running: ${stillRunning}`);
+        if (stillRunning) {
+          executeAllSteps(scenario, stepIndex + 1, false);
+        } else {
+          console.log('[DEMO] Demo was paused, not advancing');
+        }
       }, 3000);
     } catch (error) {
       console.error(`[DEMO] Error executing step ${stepIndex + 1}:`, error);
@@ -173,6 +214,19 @@ export const DemoProvider = ({ children }: DemoProviderProps) => {
     resumeDemo: async () => {
       console.log('[DEMO] Resuming demo');
       setIsDemoRunning(true);
+      
+      // If we have a current scenario and step, continue execution
+      const scenario = currentScenarioRef.current;
+      const stepIndex = currentStepIndexRef.current;
+      
+      if (scenario && stepIndex < scenario.steps.length) {
+        console.log(`[DEMO] Resuming execution from step ${stepIndex + 1}/${scenario.steps.length}`);
+        setTimeout(() => {
+          executeAllSteps(scenario, stepIndex, true);
+        }, 500);
+      } else {
+        console.log('[DEMO] No scenario to resume or all steps completed');
+      }
     },
     resetDemo: async () => {
       console.log('[DEMO] Resetting demo');

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { LocalStorageInitializer } from '@/components/LocalStorageInitializer';
 import { DemoProvider } from '@/lib/demo/demo-context';
+import { DemoControlPanel } from '@/app/demo/components/DemoControlPanel';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,6 +41,7 @@ export default function RootLayout({
         <DemoProvider>
           <LocalStorageInitializer />
           {children}
+          <DemoControlPanel />
         </DemoProvider>
       </body>
     </html>
