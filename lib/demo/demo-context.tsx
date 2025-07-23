@@ -1,5 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { WebDemoExecutor } from './demo-executor';
 
 // Core Demo Interfaces from documentation
 export interface DemoConfig {
@@ -92,18 +94,48 @@ interface DemoProviderProps {
 
 // Demo Provider Component
 export const DemoProvider = ({ children }: DemoProviderProps) => {
+  const router = useRouter();
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [isDemoRunning, setIsDemoRunning] = useState(false);
   const [currentScenario, setCurrentScenario] = useState<DemoScenario | null>(null);
   const [demoConfig, setDemoConfig] = useState<DemoConfig | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-
+  
   const demoProgress: DemoProgress = {
     currentStep: currentStepIndex + 1,
     totalSteps: currentScenario?.steps.length ?? 0,
     percentComplete: currentScenario ? ((currentStepIndex + 1) / currentScenario.steps.length) * 100 : 0,
     timeElapsed: 0, // Placeholder
     estimatedTimeRemaining: 0, // Placeholder
+  };
+
+  // Function to execute all steps in sequence
+  const executeAllSteps = async (scenario: DemoScenario, stepIndex: number, forceRun = false) => {
+    if (stepIndex >= scenario.steps.length) {
+      console.log('[DEMO] All steps completed');
+      return;
+    }
+    
+    // Only check isDemoRunning after the first step, or if forceRun is false
+    if (!forceRun && !isDemoRunning) {
+      console.log('[DEMO] Demo paused, stopping execution');
+      return;
+    }
+    
+    try {
+      console.log(`[DEMO] Executing step ${stepIndex + 1}/${scenario.steps.length}: ${scenario.steps[stepIndex].title}`);
+      setCurrentStepIndex(stepIndex);
+      
+      const executor = new WebDemoExecutor(router);
+      await executor.executeStep(scenario.steps[stepIndex]);
+      
+      // Auto-advance to next step after delay
+      setTimeout(() => {
+        executeAllSteps(scenario, stepIndex + 1, false);
+      }, 3000);
+    } catch (error) {
+      console.error(`[DEMO] Error executing step ${stepIndex + 1}:`, error);
+    }
   };
 
   const demoController: DemoController = {
@@ -122,7 +154,17 @@ export const DemoProvider = ({ children }: DemoProviderProps) => {
         ...config,
       });
       setCurrentStepIndex(0);
-      // Here you would typically navigate to the starting page and execute the first step
+      
+      // Start executing the demo steps
+      if (scenario.steps.length > 0) {
+        // Navigate to shipping page first
+        router.push('/shipping');
+        
+        // Start the demo step execution sequence
+        setTimeout(() => {
+          executeAllSteps(scenario, 0, true); // Force run the first step
+        }, 1500);
+      }
     },
     pauseDemo: async () => {
       console.log('[DEMO] Pausing demo');
@@ -142,8 +184,17 @@ export const DemoProvider = ({ children }: DemoProviderProps) => {
     },
     nextStep: async () => {
       if (currentScenario && currentStepIndex < currentScenario.steps.length - 1) {
-        console.log(`[DEMO] Advancing to next step: ${currentStepIndex + 2}`);
-        setCurrentStepIndex(prev => prev + 1);
+        const nextIndex = currentStepIndex + 1;
+        console.log(`[DEMO] Advancing to next step: ${nextIndex + 1}`);
+        setCurrentStepIndex(nextIndex);
+        
+        // Execute the next step
+        try {
+          const executor = new WebDemoExecutor(router);
+          await executor.executeStep(currentScenario.steps[nextIndex]);
+        } catch (error) {
+          console.error('[DEMO] Error executing next step:', error);
+        }
       }
     },
     previousStep: async () => {
