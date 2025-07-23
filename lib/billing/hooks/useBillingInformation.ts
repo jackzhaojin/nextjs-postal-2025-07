@@ -6,7 +6,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { 
   BillingInfo, UseBillingInformationReturn, BillingValidationStatus,
-  BillingSectionType, SectionValidationStatus, BillingValidationError,
+  BillingSectionType, BillingSectionStatus, SectionValidationStatus, BillingValidationError,
   SmartDefaults, SmartDefaultsConfidence
 } from '../types';
 import { validateBillingInfo, validateSection, validateCrossSection } from '../validation';
@@ -340,10 +340,18 @@ export function useBillingInformation(
       
       const completionPercentage = calculateBillingCompleteness(billingInfo);
       
+      // Convert section statuses to the expected format
+      const sectionsComplete: BillingSectionStatus = {
+        billingAddress: sectionStatuses['billing-address'],
+        accountsPayableContact: sectionStatuses['accounts-payable-contact'],
+        companyInformation: sectionStatuses['company-information'],
+        invoicePreferences: sectionStatuses['invoice-preferences']
+      };
+      
       const newValidationStatus: BillingValidationStatus = {
         isValid: result.isValid,
         completionPercentage,
-        sectionsComplete: sectionStatuses,
+        sectionsComplete,
         validationErrors: result.errors,
         lastValidated: new Date().toISOString(),
         requiresReview: result.errors.some(e => e.severity === 'error' && e.isBlocking)

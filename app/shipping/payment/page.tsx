@@ -157,7 +157,8 @@ export default function PaymentPage() {
     if (!formState.selectedMethod) return null;
 
     const commonProps = {
-      data: paymentInfo,
+      method: formState.selectedMethod,
+      data: paymentInfo || undefined,
       onChange: handleFormDataUpdate,
       errors: validationErrors,
       isSubmitting: isValidating,

@@ -4,7 +4,8 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { PaymentFormProps, ThirdPartyBillingInfo, ContactInfo, Address, MonetaryAmount } from '@/lib/payment/types';
+import type { PaymentFormProps, ThirdPartyBillingInfo, MonetaryAmount } from '@/lib/payment/types';
+import type { ContactInfo, Address } from '@/lib/types';
 import { formatCurrency, validateFileUpload, formatFileSize } from '@/lib/payment/utils';
 
 export default function ThirdPartyBillingForm({

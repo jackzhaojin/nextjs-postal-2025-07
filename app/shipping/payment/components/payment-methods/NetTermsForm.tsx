@@ -167,7 +167,7 @@ export default function NetTermsForm({
       if (fileType === 'credit') {
         handleFieldChange('creditApplication', uploadedFile);
       } else {
-        handleFieldChange('financialStatements', [...localData.financialStatements, uploadedFile]);
+        handleFieldChange('financialStatements', [...(localData.financialStatements || []), uploadedFile]);
       }
       
       console.log('File uploaded successfully:', uploadedFile);
@@ -703,13 +703,13 @@ export default function NetTermsForm({
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
-                  {localData.financialStatements.length > 0 ? (
+                  {(localData.financialStatements?.length || 0) > 0 ? (
                     <div>
                       <svg className="mx-auto h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div className="text-sm text-gray-600">
-                        <p className="font-medium">{localData.financialStatements.length} file(s) uploaded</p>
+                        <p className="font-medium">{localData.financialStatements?.length || 0} file(s) uploaded</p>
                       </div>
                     </div>
                   ) : (

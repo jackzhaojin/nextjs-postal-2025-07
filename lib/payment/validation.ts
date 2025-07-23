@@ -183,7 +183,13 @@ export const thirdPartyBillingSchema = z.object({
 
 // Net Terms Validation Schema
 export const netTermsSchema = z.object({
-  period: z.enum([15, 30, 45, 60, 90]),
+  period: z.union([
+    z.literal(15),
+    z.literal(30),
+    z.literal(45),
+    z.literal(60),
+    z.literal(90)
+  ]),
   
   creditApplication: fileUploadSchema.optional(),
   
@@ -344,7 +350,7 @@ export function validatePaymentMethodByType(method: PaymentMethodType, data: any
   switch (method) {
     case 'po':
       const poResult = purchaseOrderSchema.safeParse(data.purchaseOrder);
-      if (!poResult.success) return { isValid: false, errors: poResult.error.errors };
+      if (!poResult.success) return { isValid: false, errors: poResult.error.issues };
       
       if (!validatePOAmount(data.purchaseOrder.poAmount, shipmentTotal)) {
         return {
@@ -360,12 +366,12 @@ export function validatePaymentMethodByType(method: PaymentMethodType, data: any
       
     case 'bol':
       const bolResult = billOfLadingSchema.safeParse(data.billOfLading);
-      if (!bolResult.success) return { isValid: false, errors: bolResult.error.errors };
+      if (!bolResult.success) return { isValid: false, errors: bolResult.error.issues };
       break;
       
     case 'thirdparty':
       const thirdPartyResult = thirdPartyBillingSchema.safeParse(data.thirdPartyBilling);
-      if (!thirdPartyResult.success) return { isValid: false, errors: thirdPartyResult.error.errors };
+      if (!thirdPartyResult.success) return { isValid: false, errors: thirdPartyResult.error.issues };
       
       if (!validateAccountLuhn(data.thirdPartyBilling.accountNumber)) {
         return {
@@ -381,12 +387,12 @@ export function validatePaymentMethodByType(method: PaymentMethodType, data: any
       
     case 'net':
       const netResult = netTermsSchema.safeParse(data.netTerms);
-      if (!netResult.success) return { isValid: false, errors: netResult.error.errors };
+      if (!netResult.success) return { isValid: false, errors: netResult.error.issues };
       break;
       
     case 'corporate':
       const corporateResult = corporateAccountSchema.safeParse(data.corporateAccount);
-      if (!corporateResult.success) return { isValid: false, errors: corporateResult.error.errors };
+      if (!corporateResult.success) return { isValid: false, errors: corporateResult.error.issues };
       break;
       
     default:

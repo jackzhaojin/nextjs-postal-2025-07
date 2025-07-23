@@ -4,7 +4,8 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { PaymentFormProps, CorporateAccountInfo, ContactInfo, MonetaryAmount } from '@/lib/payment/types';
+import type { PaymentFormProps, CorporateAccountInfo, MonetaryAmount } from '@/lib/payment/types';
+import type { ContactInfo } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/payment/utils';
 
 export default function CorporateAccountForm({

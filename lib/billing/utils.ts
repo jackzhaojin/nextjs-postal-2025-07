@@ -375,7 +375,7 @@ export const getInvoiceFormatLabel = (format: string): string => {
     'edi-810': 'EDI 810 (Invoice)'
   };
   
-  return labels[format] || format;
+  return (labels as Record<string, string>)[format] || format;
 };
 
 export const validateInvoiceDeliverySetup = (preferences: InvoicePreferences): BillingValidationError[] => {

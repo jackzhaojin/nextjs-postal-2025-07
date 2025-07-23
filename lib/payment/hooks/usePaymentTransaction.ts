@@ -212,7 +212,7 @@ export function usePaymentTransaction(options: UsePaymentTransactionOptions): Us
         shipmentTotal
       );
 
-      const errors: PaymentValidationError[] = validationResult.errors.map(error => ({
+      const errors: PaymentValidationError[] = validationResult.errors.map((error: any) => ({
         field: Array.isArray(error.path) ? error.path.join('.') : error.path || 'unknown',
         code: error.code || 'VALIDATION_ERROR',
         message: error.message || 'Validation failed',

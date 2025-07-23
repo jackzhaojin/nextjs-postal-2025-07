@@ -83,6 +83,10 @@ async function processPaymentMethod(paymentInfo: PaymentInfo): Promise<Omit<Paym
 async function authorizePurchaseOrder(paymentInfo: PaymentInfo): Promise<Omit<PaymentAuthorizationResult, 'processingTime' | 'method'>> {
   console.log('📋 [PAYMENT-AUTH] Authorizing Purchase Order...');
   
+  if (!paymentInfo.paymentDetails) {
+    throw new Error('Payment details are required');
+  }
+  
   const poDetails = paymentInfo.paymentDetails.purchaseOrder;
   if (!poDetails) {
     throw new Error('Purchase Order details are required');
@@ -138,6 +142,10 @@ async function authorizePurchaseOrder(paymentInfo: PaymentInfo): Promise<Omit<Pa
 async function authorizeBillOfLading(paymentInfo: PaymentInfo): Promise<Omit<PaymentAuthorizationResult, 'processingTime' | 'method'>> {
   console.log('📄 [PAYMENT-AUTH] Authorizing Bill of Lading...');
   
+  if (!paymentInfo.paymentDetails) {
+    throw new Error('Payment details are required');
+  }
+  
   const bolDetails = paymentInfo.paymentDetails.billOfLading;
   if (!bolDetails) {
     throw new Error('Bill of Lading details are required');
@@ -191,6 +199,10 @@ async function authorizeBillOfLading(paymentInfo: PaymentInfo): Promise<Omit<Pay
  */
 async function authorizeThirdParty(paymentInfo: PaymentInfo): Promise<Omit<PaymentAuthorizationResult, 'processingTime' | 'method'>> {
   console.log('🏢 [PAYMENT-AUTH] Authorizing Third Party billing...');
+  
+  if (!paymentInfo.paymentDetails) {
+    throw new Error('Payment details are required');
+  }
   
   const thirdPartyDetails = paymentInfo.paymentDetails.thirdParty;
   if (!thirdPartyDetails) {
@@ -246,6 +258,10 @@ async function authorizeThirdParty(paymentInfo: PaymentInfo): Promise<Omit<Payme
 async function authorizeNetTerms(paymentInfo: PaymentInfo): Promise<Omit<PaymentAuthorizationResult, 'processingTime' | 'method'>> {
   console.log('🏦 [PAYMENT-AUTH] Authorizing Net Terms...');
   
+  if (!paymentInfo.paymentDetails) {
+    throw new Error('Payment details are required');
+  }
+  
   const netTermsDetails = paymentInfo.paymentDetails.netTerms;
   if (!netTermsDetails) {
     throw new Error('Net Terms details are required');
@@ -299,6 +315,10 @@ async function authorizeNetTerms(paymentInfo: PaymentInfo): Promise<Omit<Payment
  */
 async function authorizeCorporateAccount(paymentInfo: PaymentInfo): Promise<Omit<PaymentAuthorizationResult, 'processingTime' | 'method'>> {
   console.log('🏛️ [PAYMENT-AUTH] Authorizing Corporate Account...');
+  
+  if (!paymentInfo.paymentDetails) {
+    throw new Error('Payment details are required');
+  }
   
   const corporateDetails = paymentInfo.paymentDetails.corporate;
   if (!corporateDetails) {

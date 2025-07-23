@@ -605,15 +605,28 @@ export const validateField = (
           const isCompanyField = field.startsWith('companyInformation.');
           const fieldName = field.replace(isCompanyField ? 'companyInformation.' : 'taxId.', '');
           const schema = isCompanyField ? CompanyInformationSchema : TaxIdSchema;
-          schema.pick({ [fieldName]: true } as any).parse({ [fieldName]: value });
+          // Create a minimal object for validation
+          const testData = { [fieldName]: value };
+          try {
+            schema.partial().parse(testData);
+          } catch (error) {
+            // Re-throw the error for the outer catch block to handle
+            throw error;
+          }
         }
         break;
         
       case 'invoice-preferences':
         if (field.startsWith('invoicePreferences.')) {
           const fieldName = field.replace('invoicePreferences.', '');
-          const schema = InvoicePreferencesSchema.pick({ [fieldName]: true } as any);
-          schema.parse({ [fieldName]: value });
+          // Create a minimal object for validation
+          const testData = { [fieldName]: value };
+          try {
+            InvoicePreferencesSchema.partial().parse(testData);
+          } catch (error) {
+            // Re-throw the error for the outer catch block to handle
+            throw error;
+          }
         }
         break;
     }

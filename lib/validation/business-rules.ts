@@ -353,6 +353,15 @@ async function validatePaymentCompatibility(transaction: ShippingTransaction, er
   const shipmentTotal = transaction.selectedOption?.pricing.total || 0;
   
   // Validate payment method specific rules
+  if (!transaction.paymentInfo.paymentDetails) {
+    errors.push({
+      field: 'paymentInfo.paymentDetails',
+      message: 'Payment details are required',
+      code: 'PAYMENT_DETAILS_MISSING'
+    });
+    return; // Early return since we can't validate further without payment details
+  }
+
   switch (method) {
     case 'po':
       if (transaction.paymentInfo.paymentDetails.purchaseOrder) {
