@@ -82,6 +82,7 @@ ai-docs
 /*GEMINI*.md
 /*release*.mdc
 /*PRD*.md
+/*prd*.md
 /.clauderc
 /*TECHNICAL*.md
 .github/*copilot*.md
