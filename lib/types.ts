@@ -17,6 +17,7 @@ export interface ShipmentDetails {
   destination: Address;
   package: PackageInfo;
   deliveryPreferences: DeliveryPreferences;
+  pickupDetails?: PickupDetails;
 }
 
 export interface Address {
@@ -356,18 +357,50 @@ export interface PickupAvailability {
   availableDates: Array<{
     date: string;
     dayOfWeek: string;
+    isBusinessDay: boolean;
     timeSlots: TimeSlot[];
+    notes?: string[];
+    restrictions?: string[];
   }>;
-  restrictions: string[];
+  restrictions: Array<{
+    type: 'weather' | 'capacity' | 'equipment' | 'geographic' | 'seasonal';
+    message: string;
+    affectedDates?: string[];
+    severity: 'info' | 'warning' | 'error';
+  }>;
   cutoffTime: string;
+  serviceArea: {
+    zone: string;
+    coverage: 'full' | 'limited' | 'remote';
+    description: string;
+  };
   weekendOptions?: {
     available: boolean;
     additionalFee: number;
+    conditions?: string[];
+    timeSlots?: TimeSlot[];
   };
   holidayOptions?: {
     available: boolean;
     additionalFee: number;
+    conditions?: string[];
+    timeSlots?: TimeSlot[];
   };
+  metadata: {
+    generatedAt: string;
+    validUntil: string;
+    minimumLeadTime: number;
+    maxAdvanceBooking: number;
+  };
+}
+
+export interface AvailableDate {
+  date: string;
+  dayOfWeek: string;
+  isBusinessDay: boolean;
+  timeSlots: TimeSlot[];
+  notes?: string[];
+  restrictions?: string[];
 }
 
 export interface SubmissionResponse {

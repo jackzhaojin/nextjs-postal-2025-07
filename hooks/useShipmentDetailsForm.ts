@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { Address, ShipmentDetails, ContactInfo, PackageInfo, DeliveryPreferences } from '@/lib/types';
+import { Address, ShipmentDetails, ContactInfo, PackageInfo, DeliveryPreferences, PickupDetails } from '@/lib/types';
 import { AddressValidator } from '@/lib/validation/addressValidation';
 import { ShipmentValidator } from '@/lib/validation/shipmentValidation';
 
@@ -55,6 +55,7 @@ interface UseShipmentDetailsFormReturn {
   updateDestination: (address: Partial<Address>) => void;
   updatePackage: (packageInfo: Partial<PackageInfo>) => void;
   updateDeliveryPreferences: (preferences: Partial<DeliveryPreferences>) => void;
+  updatePickupDetails: (pickupDetails: Partial<PickupDetails>) => Promise<void>;
   
   // Field-level actions
   setFieldValue: (fieldPath: string, value: any) => void;
@@ -449,6 +450,28 @@ export function useShipmentDetailsForm(
     setIsDirty(true);
   }, []);
 
+  const updatePickupDetails = useCallback(async (pickupDetails: Partial<PickupDetails>) => {
+    console.log('useShipmentDetailsForm: Updating pickup details:', pickupDetails);
+    setShipmentDetails(prev => ({ 
+      ...prev, 
+      pickupDetails: prev.pickupDetails 
+        ? { ...prev.pickupDetails, ...pickupDetails } 
+        : pickupDetails as PickupDetails
+    }));
+    setIsDirty(true);
+
+    // Save immediately after state update
+    setTimeout(async () => {
+      try {
+        const serialized = JSON.stringify(shipmentDetailsRef.current);
+        localStorage.setItem(storageKey, serialized);
+        console.log('useShipmentDetailsForm: Pickup details auto-saved successfully');
+      } catch (error) {
+        console.error('useShipmentDetailsForm: Failed to auto-save pickup details:', error);
+      }
+    }, 100);
+  }, [storageKey]);
+
   // Set field as touched
   const setFieldTouched = useCallback((field: string, touched: boolean = true) => {
     setValidation(prev => ({
@@ -663,6 +686,7 @@ export function useShipmentDetailsForm(
     updateDestination,
     updatePackage,
     updateDeliveryPreferences,
+    updatePickupDetails,
     setFieldValue,
     setFieldTouched,
     validateField,
