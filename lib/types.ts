@@ -227,6 +227,90 @@ export interface TradeReference {
   relationship: string;
 }
 
+// Task 7.2: Pickup Location and Requirements Types
+
+export type LocationType = 
+  | 'loading-dock' 
+  | 'ground-level' 
+  | 'residential' 
+  | 'storage-facility' 
+  | 'construction-site' 
+  | 'other';
+
+export interface LocationTypeOption {
+  value: LocationType;
+  label: string;
+  description: string;
+  icon?: string;
+  requiresDockNumber?: boolean;
+  pricingImpact?: 'none' | 'residential-surcharge' | 'special-handling';
+}
+
+export interface AccessRequirement {
+  id: string;
+  type: 'security' | 'equipment' | 'special' | 'timing';
+  label: string;
+  description: string;
+  additionalFee?: number;
+  conflictsWith?: string[];
+  requiresFields?: string[];
+}
+
+export interface BusinessHours {
+  monday: { open: string; close: string; closed?: boolean };
+  tuesday: { open: string; close: string; closed?: boolean };
+  wednesday: { open: string; close: string; closed?: boolean };
+  thursday: { open: string; close: string; closed?: boolean };
+  friday: { open: string; close: string; closed?: boolean };
+  saturday: { open: string; close: string; closed?: boolean };
+  sunday: { open: string; close: string; closed?: boolean };
+}
+
+export interface LocationInfo {
+  type: LocationType;
+  dockNumber?: string;
+  accessRequirements: string[]; // Array of AccessRequirement IDs
+  gateCode?: string;
+  securityContact?: ContactInfo;
+  specialInstructions?: string;
+  availableEquipment: string[]; // Array of EquipmentType IDs
+  operatingHours?: BusinessHours;
+  description?: string; // For 'other' location type
+}
+
+export interface FeeCalculation {
+  id: string;
+  label: string;
+  amount: number;
+  reason: string;
+}
+
+export type EquipmentType = 
+  | 'standard-dolly' 
+  | 'appliance-dolly' 
+  | 'furniture-pads' 
+  | 'straps' 
+  | 'pallet-jack' 
+  | 'two-person-team';
+
+export interface EquipmentOption {
+  id: EquipmentType;
+  label: string;
+  description: string;
+  additionalFee?: number;
+  requiresCompatibilityCheck?: boolean;
+}
+
+export interface AccessRequirementOption {
+  id: string;
+  label: string;
+  description: string;
+  type: 'security' | 'equipment' | 'special' | 'timing';
+  additionalFee?: number;
+  conflictsWith?: string[];
+  requiresFields?: ('gateCode' | 'securityContact' | 'specialInstructions')[];
+}
+
 export interface PickupDetails {
   date: string;
   timeSlot: TimeSlot;
@@ -237,6 +321,7 @@ export interface PickupDetails {
     name: string;
     phone: string;
   };
+  locationInfo?: LocationInfo;
   accessInstructions: PickupAccessInstructions;
   equipmentRequirements: EquipmentRequirements;
   notificationPreferences: NotificationPreferences;
