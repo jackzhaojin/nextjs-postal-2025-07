@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { PickupCalendarInterface } from '@/components/pickup/PickupCalendarInterface';
 import { PickupLocationForm } from '@/components/pickup/PickupLocationForm';
+import { PickupContactForm } from '@/components/pickup/PickupContactForm';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, CheckCircle, Clock, MapPin, Calendar } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, MapPin, Calendar, User } from 'lucide-react';
 import { useShipmentDetailsForm } from '@/hooks/useShipmentDetailsForm';
-import { LocationInfo, ValidationError } from '@/lib/types';
+import { LocationInfo, ValidationError, PickupContactInfo, PickupInstructionSet } from '@/lib/types';
 import Link from 'next/link';
 
 /**
@@ -15,7 +16,8 @@ import Link from 'next/link';
  * 
  * Features:
  * - Interactive pickup calendar interface (Task 7.1)
- * - Pickup location and requirements form (Task 7.2)
+ * - Pickup location and requirements form (Task 7.2) 
+ * - Pickup contact and instructions form (Task 7.3)
  * - Tabbed interface for better organization
  * - Real-time availability data
  * - Integration with form state management
@@ -30,6 +32,8 @@ export default function PickupPage() {
   const [activeTab, setActiveTab] = useState('location');
   const [locationValid, setLocationValid] = useState(false);
   const [locationErrors, setLocationErrors] = useState<ValidationError[]>([]);
+  const [contactValid, setContactValid] = useState(false);
+  const [contactErrors, setContactErrors] = useState<ValidationError[]>([]);
 
   // Handle location info updates
   const handleLocationInfoChange = async (locationInfo: LocationInfo) => {
@@ -49,6 +53,34 @@ export default function PickupPage() {
     console.log('📍 [PICKUP-PAGE] Location validation:', { isValid, errorCount: errors.length });
     setLocationValid(isValid);
     setLocationErrors(errors);
+  };
+
+  // Handle contact and instructions data updates (Task 7.3)
+  const handleContactDataUpdate = async (data: {
+    primaryContact: PickupContactInfo;
+    backupContact?: PickupContactInfo;
+    instructions: PickupInstructionSet;
+    equipmentRequirements: any;
+  }) => {
+    console.log('👤 [PICKUP-PAGE] Contact data updated:', data);
+    
+    try {
+      await updatePickupDetails({
+        primaryContact: data.primaryContact,
+        backupContact: data.backupContact,
+        instructionSet: data.instructions,
+        equipmentRequirements: data.equipmentRequirements
+      });
+    } catch (error) {
+      console.error('❌ [PICKUP-PAGE] Failed to update contact data:', error);
+    }
+  };
+
+  // Handle contact validation
+  const handleContactValidation = (isValid: boolean, errors: ValidationError[]) => {
+    console.log('👤 [PICKUP-PAGE] Contact validation:', { isValid, errorCount: errors.length });
+    setContactValid(isValid);
+    setContactErrors(errors);
   };
 
   // Check if we have required data
@@ -146,6 +178,18 @@ export default function PickupPage() {
             >
               <Calendar className="h-4 w-4" />
               <span>Date & Time</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('contact')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'contact'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="tab-contact"
+            >
+              <User className="h-4 w-4" />
+              <span>Contact & Instructions</span>
             </button>
           </div>
         </div>
@@ -254,6 +298,22 @@ export default function PickupPage() {
                 </div>
               </Card>
             </div>
+          </div>
+        )}
+
+        {/* Task 7.3: Contact & Instructions Tab */}
+        {activeTab === 'contact' && (
+          <div className="space-y-6">
+            <PickupContactForm
+              primaryContact={shipmentDetails.pickupDetails?.primaryContact}
+              backupContact={shipmentDetails.pickupDetails?.backupContact}
+              instructions={shipmentDetails.pickupDetails?.instructionSet}
+              equipmentRequirements={shipmentDetails.pickupDetails?.equipmentRequirements}
+              locationType={shipmentDetails.pickupDetails?.locationInfo?.type || 'ground-level'}
+              packageInfo={shipmentDetails.package}
+              onDataUpdate={handleContactDataUpdate}
+              validationErrors={contactErrors}
+            />
           </div>
         )}
 

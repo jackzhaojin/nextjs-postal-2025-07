@@ -256,6 +256,47 @@ export interface AccessRequirement {
   requiresFields?: string[];
 }
 
+// Task 7.3: Pickup Contact and Instructions Types
+
+export interface PickupContactInfo {
+  name: string;
+  jobTitle?: string;
+  mobilePhone: string;
+  alternativePhone?: string;
+  email: string;
+  workingHours?: BusinessHours;
+  preferredContactMethod: 'phone' | 'email' | 'text';
+  authorizationLevel: 'full' | 'limited' | 'notification-only';
+}
+
+export interface PickupInstructionSet {
+  gateAccess?: string;
+  parkingLoading?: string;
+  packageLocation?: string;
+  driverInstructions?: string;
+  specialConsiderations?: string;
+  safetyRequirements?: string[];
+}
+
+export interface InstructionTemplate {
+  id: string;
+  name: string;
+  category: 'access' | 'parking' | 'location' | 'driver' | 'safety';
+  locationType: LocationType[];
+  template: string;
+  variables?: string[];
+}
+
+export interface EquipmentRequirementOption {
+  id: string;
+  type: EquipmentType;
+  required: boolean;
+  additionalFee?: number;
+  description: string;
+  compatibility: string[];
+  recommendedFor?: ('heavy' | 'fragile' | 'large' | 'multiple')[];
+}
+
 export interface BusinessHours {
   monday: { open: string; close: string; closed?: boolean };
   tuesday: { open: string; close: string; closed?: boolean };
@@ -315,12 +356,11 @@ export interface PickupDetails {
   date: string;
   timeSlot: TimeSlot;
   instructions: string;
-  contactPerson: string;
-  phone: string;
-  backupContact?: {
-    name: string;
-    phone: string;
-  };
+  // Task 7.3: Enhanced contact information
+  primaryContact: PickupContactInfo;
+  backupContact?: PickupContactInfo;
+  // Task 7.3: Structured instruction set
+  instructionSet?: PickupInstructionSet;
   locationInfo?: LocationInfo;
   accessInstructions: PickupAccessInstructions;
   equipmentRequirements: EquipmentRequirements;
@@ -328,6 +368,9 @@ export interface PickupDetails {
   readyTime: string;
   authorizedPersonnel: string[];
   specialAuthorization?: SpecialAuthorization;
+  // Legacy fields for backward compatibility
+  contactPerson?: string;
+  phone?: string;
 }
 
 export interface TimeSlot {
