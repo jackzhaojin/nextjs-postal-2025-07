@@ -149,7 +149,7 @@ export function LocationTypeSelector({
     }
 
     onValidation?.(isValid, errors);
-  }, [selectedType, dockNumber, description, onValidation]);
+  }, [selectedType, dockNumber, description]);
 
   const handleTypeSelect = (type: LocationType) => {
     console.log('📍 [LOCATION-TYPE-SELECTOR] Type selected:', type);

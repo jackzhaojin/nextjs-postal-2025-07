@@ -191,7 +191,7 @@ export function PickupLocationForm({
     setIsValid(overallValid);
     
     onValidation?.(overallValid, allErrors);
-  }, [locationTypeValid, locationTypeErrors, onValidation]);
+  }, [locationTypeValid, locationTypeErrors]);
 
   const totalAdditionalFees = additionalFees.reduce((sum, fee) => sum + fee.amount, 0);
 
