@@ -42,6 +42,10 @@ import {
 import { TrackingInfoSection } from '@/components/tracking/TrackingInfoSection';
 import { PackageDocumentationSection } from '@/components/documentation/PackageDocumentationSection';
 import { CustomerSupportSection } from '@/components/support/CustomerSupportSection';
+import NextStepsSection from '@/components/confirmation/NextStepsSection';
+import AdditionalServicesSection from '@/components/confirmation/AdditionalServicesSection';
+import RecordKeepingSection from '@/components/confirmation/RecordKeepingSection';
+import FutureShippingSection from '@/components/confirmation/FutureShippingSection';
 
 interface ConfirmationSectionProps {
   title: string;
@@ -918,6 +922,50 @@ export default function ConfirmationPage() {
             defaultExpanded={false}
           >
             <CustomerSupportSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.3: Next Steps and Preparation */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Next Steps & Preparation" 
+            icon={<CheckCircle className="h-5 w-5 text-blue-600" />} 
+            defaultExpanded={true}
+          >
+            <NextStepsSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.3: Additional Services */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Additional Services" 
+            icon={<Shield className="h-5 w-5 text-green-600" />} 
+            defaultExpanded={false}
+          >
+            <AdditionalServicesSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.3: Record Keeping & Documentation */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Record Keeping & Documentation" 
+            icon={<FileText className="h-5 w-5 text-orange-600" />} 
+            defaultExpanded={false}
+          >
+            <RecordKeepingSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.3: Future Shipping & Engagement */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Future Shipping & Engagement" 
+            icon={<Package className="h-5 w-5 text-purple-600" />} 
+            defaultExpanded={false}
+          >
+            <FutureShippingSection transaction={transaction} />
           </ConfirmationSection>
         )}
 

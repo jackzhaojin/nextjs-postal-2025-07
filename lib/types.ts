@@ -1143,3 +1143,571 @@ export interface EscalationInfo {
   readonly automaticEscalation: boolean;
   readonly escalationTriggers: ReadonlyArray<string>;
 }
+
+// Task 9.3: Next Steps and Additional Services Interfaces
+
+export interface NextStepsConfiguration {
+  readonly prePickupChecklist: ReadonlyArray<ChecklistItem>;
+  readonly postPickupProcess: ProcessMilestone[];
+  readonly timelineEstimates: ProcessTimeline;
+  readonly emergencyContacts: EmergencyContactInfo;
+}
+
+export interface ChecklistItem {
+  readonly id: string;
+  readonly category: ChecklistCategory;
+  readonly title: string;
+  readonly description: string;
+  readonly completed: boolean;
+  readonly required: boolean;
+  readonly dependencies: ReadonlyArray<string>;
+  readonly estimatedTime: number;
+  readonly helpResources: ReadonlyArray<HelpResource>;
+}
+
+export type ChecklistCategory = 
+  | 'package-preparation'
+  | 'documentation'
+  | 'authorization'
+  | 'access-coordination'
+  | 'final-verification';
+
+export interface ProcessMilestone {
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly estimatedCompletion: Date;
+  readonly status: 'pending' | 'in-progress' | 'completed' | 'overdue';
+  readonly dependencies: ReadonlyArray<string>;
+  readonly notifications: ReadonlyArray<NotificationEvent>;
+}
+
+export interface ProcessTimeline {
+  readonly trackingNumberAvailability: number; // hours after pickup
+  readonly deliveryConfirmationProcess: string;
+  readonly invoiceProcessingTimeline: number; // hours
+  readonly followUpCommunicationSchedule: ReadonlyArray<CommunicationSchedule>;
+}
+
+export interface NotificationEvent {
+  readonly type: 'email' | 'sms' | 'push' | 'phone';
+  readonly timing: number; // hours relative to milestone
+  readonly template: string;
+  readonly recipient: string;
+}
+
+export interface CommunicationSchedule {
+  readonly milestone: string;
+  readonly timing: number; // hours from booking
+  readonly channels: ReadonlyArray<CommunicationChannel>;
+  readonly content: string;
+}
+
+export interface EmergencyContactInfo {
+  readonly support24x7: ContactInfo;
+  readonly claimsDepartment: ContactInfo;
+  readonly regulatoryCompliance: ContactInfo;
+  readonly legalInsurance: ContactInfo;
+}
+
+export interface HelpResource {
+  readonly type: 'article' | 'video' | 'checklist' | 'contact';
+  readonly title: string;
+  readonly url: string;
+  readonly description: string;
+  readonly estimatedTime?: number;
+}
+
+export interface AdditionalServicesPortfolio {
+  readonly availableServices: ReadonlyArray<AdditionalService>;
+  readonly recommendations: ReadonlyArray<ServiceRecommendation>;
+  readonly bundleOffers: ReadonlyArray<ServiceBundle>;
+  readonly limitations: ServiceLimitations;
+}
+
+export interface AdditionalService {
+  readonly serviceId: string;
+  readonly serviceName: string;
+  readonly category: ServiceCategory;
+  readonly description: string;
+  readonly pricing: ServicePricing;
+  readonly availability: ServiceAvailability;
+  readonly requirements: ReadonlyArray<ServiceRequirement>;
+  readonly benefits: ReadonlyArray<string>;
+}
+
+export type ServiceCategory = 
+  | 'insurance-enhancement'
+  | 'delivery-modification'
+  | 'convenience-services'
+  | 'value-added-services'
+  | 'emergency-services';
+
+export interface ServicePricing {
+  readonly basePrice: number;
+  readonly currency: string;
+  readonly discounts: ReadonlyArray<ServiceDiscount>;
+  readonly calculationMethod: 'fixed' | 'percentage' | 'tiered' | 'custom';
+  readonly priceBreakdown: ReadonlyArray<PriceComponent>;
+}
+
+export interface ServiceDiscount {
+  readonly type: 'volume' | 'loyalty' | 'promotional' | 'bundle';
+  readonly amount: number;
+  readonly conditions: ReadonlyArray<string>;
+  readonly validUntil?: Date;
+}
+
+export interface PriceComponent {
+  readonly label: string;
+  readonly amount: number;
+  readonly type: 'base' | 'fee' | 'tax' | 'discount';
+}
+
+export interface ServiceAvailability {
+  readonly available: boolean;
+  readonly timeConstraints: TimeConstraints;
+  readonly locationConstraints: ReadonlyArray<string>;
+  readonly capacityLimits: CapacityLimits;
+  readonly seasonalAvailability: ReadonlyArray<SeasonalPeriod>;
+}
+
+export interface TimeConstraints {
+  readonly cutoffTime: string; // hours after booking
+  readonly businessHoursOnly: boolean;
+  readonly excludedDays: ReadonlyArray<string>;
+  readonly processingTime: number; // hours
+}
+
+export interface CapacityLimits {
+  readonly dailyLimit: number;
+  readonly currentBookings: number;
+  readonly nextAvailableSlot: Date;
+  readonly waitlistAvailable: boolean;
+}
+
+export interface SeasonalPeriod {
+  readonly startDate: Date;
+  readonly endDate: Date;
+  readonly availability: 'available' | 'limited' | 'unavailable';
+  readonly specialConditions: ReadonlyArray<string>;
+}
+
+export interface ServiceRequirement {
+  readonly type: 'shipment' | 'customer' | 'geographic' | 'timing';
+  readonly condition: string;
+  readonly value: string | number | boolean;
+  readonly operator: 'equals' | 'greater' | 'less' | 'contains' | 'matches';
+}
+
+export interface ServiceRecommendation {
+  readonly serviceId: string;
+  readonly recommendationScore: number;
+  readonly reasonCode: RecommendationReason;
+  readonly personalizedMessage: string;
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export type RecommendationReason = 
+  | 'shipping-history'
+  | 'geographic-risk'
+  | 'value-optimization'
+  | 'compliance-requirement'
+  | 'seasonal-promotion';
+
+export interface ServiceBundle {
+  readonly bundleId: string;
+  readonly bundleName: string;
+  readonly services: ReadonlyArray<string>; // service IDs
+  readonly totalPrice: number;
+  readonly savings: number;
+  readonly description: string;
+  readonly benefits: ReadonlyArray<string>;
+  readonly limitations: ReadonlyArray<string>;
+}
+
+export interface ServiceLimitations {
+  readonly geographicRestrictions: ReadonlyArray<string>;
+  readonly shipmentTypeRestrictions: ReadonlyArray<string>;
+  readonly customerTypeRestrictions: ReadonlyArray<string>;
+  readonly timeRestrictions: ReadonlyArray<TimeRestriction>;
+}
+
+export interface TimeRestriction {
+  readonly type: 'booking-window' | 'service-window' | 'blackout-period';
+  readonly startTime?: string;
+  readonly endTime?: string;
+  readonly description: string;
+}
+
+export interface RecordKeepingOptions {
+  readonly documentFormats: ReadonlyArray<DocumentFormat>;
+  readonly exportOptions: ReadonlyArray<ExportOption>;
+  readonly storageOptions: ReadonlyArray<StorageOption>;
+  readonly integrationOptions: ReadonlyArray<IntegrationOption>;
+}
+
+export interface DocumentFormat {
+  readonly format: 'pdf' | 'csv' | 'json' | 'xml' | 'ics';
+  readonly displayName: string;
+  readonly description: string;
+  readonly useCase: string;
+  readonly customizationOptions: ReadonlyArray<CustomizationOption>;
+}
+
+export interface CustomizationOption {
+  readonly type: 'branding' | 'layout' | 'content' | 'language';
+  readonly options: ReadonlyArray<string>;
+  readonly defaultValue: string;
+  readonly premium: boolean;
+}
+
+export interface ExportOption {
+  readonly exportId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly formats: ReadonlyArray<string>;
+  readonly dataInclusion: DataInclusion;
+  readonly schedulingOptions: SchedulingOptions;
+}
+
+export interface DataInclusion {
+  readonly shipmentDetails: boolean;
+  readonly pricingBreakdown: boolean;
+  readonly trackingInformation: boolean;
+  readonly documentation: boolean;
+  readonly customFields: ReadonlyArray<string>;
+}
+
+export interface SchedulingOptions {
+  readonly immediate: boolean;
+  readonly scheduled: boolean;
+  readonly recurring: boolean;
+  readonly triggers: ReadonlyArray<ExportTrigger>;
+}
+
+export interface ExportTrigger {
+  readonly event: 'pickup-completion' | 'delivery-completion' | 'milestone-reached' | 'time-based';
+  readonly conditions: ReadonlyArray<string>;
+  readonly delay: number; // minutes
+}
+
+export interface StorageOption {
+  readonly storageId: string;
+  readonly provider: string;
+  readonly type: 'cloud' | 'local' | 'hybrid';
+  readonly capacity: string;
+  readonly retention: RetentionPolicy;
+  readonly security: SecurityFeatures;
+}
+
+export interface RetentionPolicy {
+  readonly period: number; // days
+  readonly archival: boolean;
+  readonly automaticDeletion: boolean;
+  readonly complianceRequirements: ReadonlyArray<string>;
+}
+
+export interface SecurityFeatures {
+  readonly encryption: boolean;
+  readonly accessControl: boolean;
+  readonly auditLogging: boolean;
+  readonly backupPolicy: BackupPolicy;
+}
+
+export interface BackupPolicy {
+  readonly frequency: 'daily' | 'weekly' | 'monthly';
+  readonly retention: number; // days
+  readonly geographicDistribution: boolean;
+  readonly verificationSchedule: string;
+}
+
+export interface IntegrationOption {
+  readonly integrationId: string;
+  readonly name: string;
+  readonly type: 'api' | 'webhook' | 'file-transfer' | 'direct-connection';
+  readonly description: string;
+  readonly supportedFormats: ReadonlyArray<string>;
+  readonly authenticationMethods: ReadonlyArray<AuthMethod>;
+  readonly rateLimits: RateLimits;
+}
+
+export interface AuthMethod {
+  readonly method: 'api-key' | 'oauth' | 'basic-auth' | 'certificate';
+  readonly description: string;
+  readonly securityLevel: 'basic' | 'standard' | 'enhanced' | 'enterprise';
+}
+
+export interface RateLimits {
+  readonly requestsPerMinute: number;
+  readonly requestsPerHour: number;
+  readonly dataLimitMB: number;
+  readonly concurrentConnections: number;
+}
+
+export interface FutureShippingTools {
+  readonly shipmentTemplates: ReadonlyArray<ShipmentTemplate>;
+  readonly savedAddresses: ReadonlyArray<SavedAddress>;
+  readonly quickReorderOptions: ReadonlyArray<ReorderOption>;
+  readonly preferenceSettings: UserPreferences;
+}
+
+export interface ShipmentTemplate {
+  readonly templateId: string;
+  readonly templateName: string;
+  readonly description: string;
+  readonly shipmentDetails: Partial<ShipmentDetails>;
+  readonly defaultServices: ReadonlyArray<string>;
+  readonly usageCount: number;
+  readonly lastUsed: Date;
+  readonly createdDate: Date;
+  readonly tags: ReadonlyArray<string>;
+}
+
+export interface SavedAddress {
+  readonly addressId: string;
+  readonly nickname: string;
+  readonly address: Address;
+  readonly usageFrequency: number;
+  readonly lastUsed: Date;
+  readonly verified: boolean;
+  readonly addressType: 'origin' | 'destination' | 'both';
+  readonly defaultForType: boolean;
+}
+
+export interface ReorderOption {
+  readonly reorderId: string;
+  readonly baseShipment: ShippingTransaction;
+  readonly modifications: ReadonlyArray<ReorderModification>;
+  readonly estimatedPrice: number;
+  readonly availability: ServiceAvailability;
+  readonly quickOrderEnabled: boolean;
+}
+
+export interface ReorderModification {
+  readonly field: string;
+  readonly originalValue: any;
+  readonly suggestedValue: any;
+  readonly reason: string;
+  readonly required: boolean;
+}
+
+export interface UserPreferences {
+  readonly defaultOrigin: string; // address ID
+  readonly defaultPackageType: string;
+  readonly preferredServiceLevel: string;
+  readonly communicationChannels: ReadonlyArray<CommunicationChannel>;
+  readonly notificationSettings: NotificationSettings;
+  readonly displayPreferences: DisplayPreferences;
+  readonly privacySettings: PrivacySettings;
+}
+
+export interface NotificationSettings {
+  readonly emailEnabled: boolean;
+  readonly smsEnabled: boolean;
+  readonly pushEnabled: boolean;
+  readonly frequency: 'all' | 'important' | 'minimal';
+  readonly businessHoursOnly: boolean;
+  readonly languagePreference: string;
+}
+
+export interface DisplayPreferences {
+  readonly theme: 'light' | 'dark' | 'auto';
+  readonly density: 'compact' | 'comfortable' | 'spacious';
+  readonly units: 'imperial' | 'metric';
+  readonly currency: string;
+  readonly timezone: string;
+}
+
+export interface PrivacySettings {
+  readonly dataCollection: 'essential' | 'functional' | 'all';
+  readonly analyticsOptIn: boolean;
+  readonly marketingOptIn: boolean;
+  readonly thirdPartySharing: boolean;
+  readonly dataRetentionPeriod: number; // days
+}
+
+export interface CustomerEngagementData {
+  readonly feedbackCollection: FeedbackCollection;
+  readonly loyaltyProgram: LoyaltyProgram;
+  readonly recommendationEngine: RecommendationEngine;
+  readonly communicationHistory: ReadonlyArray<CommunicationRecord>;
+}
+
+export interface FeedbackCollection {
+  readonly overallRating: number;
+  readonly serviceQuality: number;
+  readonly deliveryPerformance: number;
+  readonly customerSatisfaction: number;
+  readonly detailedFeedback: ReadonlyArray<FeedbackItem>;
+  readonly improvementSuggestions: ReadonlyArray<string>;
+  readonly submissionDate: Date;
+}
+
+export interface FeedbackItem {
+  readonly category: FeedbackCategory;
+  readonly rating: number;
+  readonly comment: string;
+  readonly severity: 'positive' | 'neutral' | 'negative' | 'critical';
+}
+
+export type FeedbackCategory = 
+  | 'booking-experience'
+  | 'pickup-service'
+  | 'tracking-communication'
+  | 'delivery-service'
+  | 'customer-support'
+  | 'pricing-value';
+
+export interface LoyaltyProgram {
+  readonly programId: string;
+  readonly membershipLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
+  readonly pointsBalance: number;
+  readonly pointsEarned: number;
+  readonly pointsRedeemed: number;
+  readonly tierProgress: TierProgress;
+  readonly availableRewards: ReadonlyArray<LoyaltyReward>;
+  readonly memberBenefits: ReadonlyArray<MemberBenefit>;
+}
+
+export interface TierProgress {
+  readonly currentTier: string;
+  readonly nextTier: string;
+  readonly progressPercentage: number;
+  readonly requirementsRemaining: ReadonlyArray<TierRequirement>;
+}
+
+export interface TierRequirement {
+  readonly type: 'shipping-volume' | 'spending-amount' | 'frequency' | 'referrals';
+  readonly target: number;
+  readonly current: number;
+  readonly timeframe: string;
+}
+
+export interface LoyaltyReward {
+  readonly rewardId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly pointCost: number;
+  readonly category: 'shipping-discount' | 'service-upgrade' | 'merchandise' | 'experience';
+  readonly availability: ServiceAvailability;
+  readonly terms: ReadonlyArray<string>;
+}
+
+export interface MemberBenefit {
+  readonly benefitId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly type: 'discount' | 'priority' | 'exclusive-access' | 'waived-fee';
+  readonly value: string;
+  readonly applicability: ReadonlyArray<string>;
+}
+
+export interface RecommendationEngine {
+  readonly personalizedServices: ReadonlyArray<ServiceRecommendation>;
+  readonly shippingOptimizations: ReadonlyArray<OptimizationSuggestion>;
+  readonly costSavingOpportunities: ReadonlyArray<CostSavingOption>;
+  readonly trendAnalysis: TrendAnalysis;
+}
+
+export interface OptimizationSuggestion {
+  readonly suggestionId: string;
+  readonly type: 'service-level' | 'packaging' | 'timing' | 'routing';
+  readonly description: string;
+  readonly potentialSavings: number;
+  readonly implementationEffort: 'low' | 'medium' | 'high';
+  readonly confidence: number;
+}
+
+export interface CostSavingOption {
+  readonly optionId: string;
+  readonly description: string;
+  readonly annualSavings: number;
+  readonly requirements: ReadonlyArray<string>;
+  readonly implementation: ImplementationPlan;
+}
+
+export interface ImplementationPlan {
+  readonly steps: ReadonlyArray<ImplementationStep>;
+  readonly timeline: string;
+  readonly resources: ReadonlyArray<string>;
+  readonly supportRequired: boolean;
+}
+
+export interface ImplementationStep {
+  readonly stepId: string;
+  readonly description: string;
+  readonly estimatedTime: string;
+  readonly dependencies: ReadonlyArray<string>;
+  readonly responsible: string;
+}
+
+export interface TrendAnalysis {
+  readonly shippingPatterns: ReadonlyArray<ShippingPattern>;
+  readonly seasonalTrends: ReadonlyArray<SeasonalTrend>;
+  readonly performanceMetrics: PerformanceMetrics;
+  readonly benchmarking: BenchmarkData;
+}
+
+export interface ShippingPattern {
+  readonly patternType: 'volume' | 'destination' | 'service-level' | 'timing';
+  readonly trend: 'increasing' | 'decreasing' | 'stable' | 'seasonal';
+  readonly confidence: number;
+  readonly recommendation: string;
+}
+
+export interface SeasonalTrend {
+  readonly season: string;
+  readonly volumeChange: number;
+  readonly costImpact: number;
+  readonly servicePreferences: ReadonlyArray<string>;
+  readonly recommendations: ReadonlyArray<string>;
+}
+
+export interface PerformanceMetrics {
+  readonly onTimeDelivery: number;
+  readonly costPerShipment: number;
+  readonly customerSatisfaction: number;
+  readonly claimRate: number;
+  readonly benchmarkComparison: BenchmarkComparison;
+}
+
+export interface BenchmarkData {
+  readonly industryAverage: PerformanceMetrics;
+  readonly peerComparison: PerformanceMetrics;
+  readonly topPerformers: PerformanceMetrics;
+  readonly improvementOpportunities: ReadonlyArray<string>;
+}
+
+export interface BenchmarkComparison {
+  readonly betterThanIndustry: ReadonlyArray<string>;
+  readonly worseThanIndustry: ReadonlyArray<string>;
+  readonly improvementTargets: ReadonlyArray<ImprovementTarget>;
+}
+
+export interface ImprovementTarget {
+  readonly metric: string;
+  readonly currentValue: number;
+  readonly targetValue: number;
+  readonly timeframe: string;
+  readonly actionItems: ReadonlyArray<string>;
+}
+
+export interface CommunicationRecord {
+  readonly recordId: string;
+  readonly timestamp: Date;
+  readonly channel: CommunicationChannel;
+  readonly type: 'inbound' | 'outbound';
+  readonly subject: string;
+  readonly summary: string;
+  readonly category: 'support' | 'sales' | 'billing' | 'notification';
+  readonly resolution: CommunicationResolution;
+}
+
+export interface CommunicationResolution {
+  readonly status: 'resolved' | 'pending' | 'escalated' | 'closed';
+  readonly resolutionTime: number; // minutes
+  readonly satisfactionRating?: number;
+  readonly followUpRequired: boolean;
+  readonly nextAction?: string;
+}
