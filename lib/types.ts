@@ -845,3 +845,62 @@ export const SPECIAL_HANDLING_FEES: Record<string, number> = {
   'liftgate-pickup': 35,
   'liftgate-delivery': 35
 };
+
+// Terms and Submission Interfaces
+
+export interface TermsAcknowledgment {
+  declaredValueAccuracy: boolean;
+  insuranceRequirements: boolean;
+  packageContentsCompliance: boolean;
+  carrierAuthorization: boolean;
+  hazmatCertification?: boolean; // Only required for hazmat shipments
+  internationalCompliance?: boolean; // Only required for international shipments
+  customsDocumentation?: boolean; // Only required for international shipments
+}
+
+export interface SubmissionValidationError {
+  field: string;
+  message: string;
+  severity: 'error' | 'warning';
+  navigationPath?: string;
+  resolutionHint?: string;
+}
+
+export interface SubmissionValidationResult {
+  isValid: boolean;
+  errors: SubmissionValidationError[];
+  warnings: SubmissionValidationError[];
+  missingAcknowledgments: string[];
+  conflictingRequirements: string[];
+}
+
+export interface FinalSubmissionRequest {
+  transaction: ShippingTransaction;
+  termsAcknowledgment: TermsAcknowledgment;
+  submissionTimestamp: string;
+  clientId: string;
+  userAgent: string;
+}
+
+export interface TermsOfService {
+  standardLiability: {
+    coverage: string;
+    limits: string;
+    exclusions: string[];
+  };
+  maximumLiability: {
+    amount: number;
+    currency: string;
+    conditions: string[];
+  };
+  claimsProcess: {
+    timeLimit: string;
+    requiredDocumentation: string[];
+    contactInfo: string;
+  };
+  serviceConditions: {
+    deliveryAttempts: number;
+    weatherDelays: string;
+    forceMAjeure: string[];
+  };
+}

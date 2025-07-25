@@ -3,12 +3,37 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShippingForm } from '@/hooks/useShippingForm';
-import { ShippingTransaction, PricingBreakdown as PricingBreakdownType } from '@/lib/types';
+import { 
+  ShippingTransaction, 
+  PricingBreakdown as PricingBreakdownType, 
+  TermsAcknowledgment,
+  SubmissionValidationResult,
+  FinalSubmissionRequest,
+  SubmissionResponse
+} from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight, Edit, MapPin, Package, CreditCard, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Edit, 
+  MapPin, 
+  Package, 
+  CreditCard, 
+  Clock, 
+  ChevronDown, 
+  ChevronUp, 
+  Save, 
+  Printer, 
+  RefreshCw,
+  RotateCcw,
+  CheckCircle,
+  AlertTriangle
+} from 'lucide-react';
+import { TermsAndConditions } from '@/components/forms/TermsAndConditions';
+import { ValidationErrors } from '@/components/forms/ValidationErrors';
+import { SubmissionValidator } from '@/lib/validation/submissionValidation';
 
 interface ReviewSectionProps {
   title: string;
@@ -595,6 +620,21 @@ export default function ReviewPage() {
     pickup: false
   });
 
+  // Terms and submission state
+  const [termsAcknowledgment, setTermsAcknowledgment] = useState<TermsAcknowledgment>({
+    declaredValueAccuracy: false,
+    insuranceRequirements: false,
+    packageContentsCompliance: false,
+    carrierAuthorization: false,
+    hazmatCertification: false,
+    internationalCompliance: false,
+    customsDocumentation: false
+  });
+
+  const [validationResult, setValidationResult] = useState<SubmissionValidationResult | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
   console.log('ReviewPage - transaction:', transaction, 'isLoading:', isLoading);
 
   useEffect(() => {
@@ -605,6 +645,16 @@ export default function ReviewPage() {
     }
   }, [transaction, isLoading, router]);
 
+  // Validate submission when terms acknowledgment changes
+  useEffect(() => {
+    if (transaction && transaction.shipmentDetails && transaction.id) {
+      console.log('ReviewPage - Running validation due to acknowledgment change');
+      const result = SubmissionValidator.validateSubmission(transaction as ShippingTransaction, termsAcknowledgment);
+      setValidationResult(result);
+      console.log('ReviewPage - Validation result:', result);
+    }
+  }, [transaction, termsAcknowledgment]);
+
   const toggleSection = (section: string) => {
     console.log(`ReviewPage - toggling section: ${section}`);
     setOpenSections(prev => ({
@@ -613,10 +663,82 @@ export default function ReviewPage() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleRetryValidation = () => {
+    console.log('ReviewPage - Retrying validation');
+    if (transaction && transaction.shipmentDetails && transaction.id) {
+      const result = SubmissionValidator.validateSubmission(transaction as ShippingTransaction, termsAcknowledgment);
+      setValidationResult(result);
+    }
+  };
+
+  const handleSaveDraft = () => {
+    console.log('ReviewPage - Saving draft');
+    // TODO: Implement draft saving functionality
+    // This would save the current state to localStorage or API
+  };
+
+  const handlePrintSummary = () => {
+    console.log('ReviewPage - Printing summary');
+    window.print();
+  };
+
+  const handleStartOver = () => {
+    console.log('ReviewPage - Starting over');
+    if (confirm('Are you sure you want to start over? All current shipment data will be lost.')) {
+      // Clear localStorage and redirect to start
+      localStorage.removeItem('shipping-transaction');
+      router.push('/shipping');
+    }
+  };
+
+  const handleSubmit = async () => {
     console.log('ReviewPage - handleSubmit called');
-    // TODO: Implement submission logic
-    router.push('/shipping/confirmation');
+    
+    if (!transaction || !transaction.id || !validationResult?.isValid) {
+      console.log('ReviewPage - Cannot submit: invalid transaction or validation failed');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionError(null);
+
+    try {
+      const submissionRequest: FinalSubmissionRequest = {
+        transaction: transaction as ShippingTransaction,
+        termsAcknowledgment,
+        submissionTimestamp: new Date().toISOString(),
+        clientId: 'web-client-' + Date.now(),
+        userAgent: navigator.userAgent
+      };
+
+      console.log('ReviewPage - Submitting request:', submissionRequest);
+
+      const response = await fetch('/api/shipments/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionRequest),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Submission failed');
+      }
+
+      const submissionResponse: SubmissionResponse = await response.json();
+      console.log('ReviewPage - Submission successful:', submissionResponse);
+
+      // Store confirmation data and redirect
+      localStorage.setItem('shipping-confirmation', JSON.stringify(submissionResponse));
+      router.push('/shipping/confirmation');
+
+    } catch (error) {
+      console.error('ReviewPage - Submission error:', error);
+      setSubmissionError(error instanceof Error ? error.message : 'Submission failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -727,29 +849,116 @@ export default function ReviewPage() {
           </ReviewSection>
         </div>
 
-        <div className="mt-8 pt-6 border-t">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={() => router.push('/shipping')}>
-                Edit Shipment
-              </Button>
-              <Button variant="outline">
-                Save as Draft
-              </Button>
-              <Button variant="outline">
-                Print Summary
-              </Button>
-            </div>
-            <div className="flex gap-4">
-              <Button variant="outline">
-                Start Over
-              </Button>
-              <Button onClick={handleSubmit} className="gap-2">
-                Submit Shipment
-                <ArrowRight className="h-4 w-4" />
+        {/* Terms and Conditions Section */}
+        <TermsAndConditions
+          transaction={fullTransaction}
+          acknowledgment={termsAcknowledgment}
+          onAcknowledgmentChange={setTermsAcknowledgment}
+          errors={validationResult?.errors.reduce((acc, error) => {
+            acc[error.field] = error.message;
+            return acc;
+          }, {} as Record<string, string>)}
+        />
+
+        {/* Validation Results */}
+        {validationResult && (
+          <ValidationErrors
+            validationResult={validationResult}
+            onRetryValidation={handleRetryValidation}
+          />
+        )}
+
+        {/* Submission Error */}
+        {submissionError && (
+          <div className="mb-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <h3 className="font-semibold text-red-800">Submission Failed</h3>
+              </div>
+              <p className="text-red-700 mt-1">{submissionError}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSubmissionError(null)}
+                className="mt-3"
+              >
+                Dismiss
               </Button>
             </div>
           </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/shipping')}
+                className="gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Shipment
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleSaveDraft}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Save as Draft
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handlePrintSummary}
+                className="gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Print Summary
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                variant="outline" 
+                onClick={handleStartOver}
+                className="gap-2"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Start Over
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={!validationResult?.isValid || isSubmitting}
+                className="gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : validationResult?.isValid ? (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    Submit Shipment
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    Resolve Issues First
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Submission Status */}
+          {validationResult && !validationResult.isValid && (
+            <div className="mt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                {SubmissionValidator.getErrorSummary(validationResult)}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
