@@ -22,7 +22,7 @@ import { PackageReadiness } from './PackageReadiness';
 import { AuthorizationManagement } from './AuthorizationManagement';
 import { PremiumServices } from './PremiumServices';
 import { 
-  type NotificationPreferences as NotificationPreferencesType, 
+  type PickupNotificationPreferences as NotificationPreferencesType, 
   PackageReadinessSettings, 
   AuthorizationSettings, 
   PremiumServiceOptions,

@@ -15,7 +15,7 @@ import {
   PickupContactInfo, 
   PickupInstructionSet,
   ContactInfo,
-  type NotificationPreferences,
+  type PickupNotificationPreferences,
   PackageReadinessSettings,
   AuthorizationSettings,
   PremiumServiceOptions
@@ -98,7 +98,7 @@ export default function PickupPage() {
 
   // Handle notification and authorization data updates (Task 7.4)
   const handleNotificationAuthorizationUpdate = async (data: {
-    notificationPreferences: NotificationPreferences;
+    notificationPreferences: PickupNotificationPreferences;
     packageReadiness: PackageReadinessSettings;
     authorizationSettings: AuthorizationSettings;
     premiumServices: PremiumServiceOptions;

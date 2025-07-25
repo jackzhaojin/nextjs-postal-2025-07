@@ -12,8 +12,7 @@ import {
   Calendar, 
   Clock, 
   Truck, 
-  CreditCard, 
-  Copy,
+  CreditCard,
   ExternalLink,
   Phone,
   Mail,
@@ -28,7 +27,8 @@ import {
   Shield,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Copy
 } from 'lucide-react';
 import { 
   SubmissionResponse, 
@@ -39,6 +39,9 @@ import {
   DeliveryEstimateDetails,
   ShipmentReferences 
 } from '@/lib/types';
+import { TrackingInfoSection } from '@/components/tracking/TrackingInfoSection';
+import { PackageDocumentationSection } from '@/components/documentation/PackageDocumentationSection';
+import { CustomerSupportSection } from '@/components/support/CustomerSupportSection';
 
 interface ConfirmationSectionProps {
   title: string;
@@ -237,6 +240,7 @@ function createConfirmationData(
 export default function ConfirmationPage() {
   const router = useRouter();
   const [confirmationData, setConfirmationData] = useState<ConfirmationPageData | null>(null);
+  const [transaction, setTransaction] = useState<ShippingTransaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -266,6 +270,7 @@ export default function ConfirmationPage() {
         
         const fullConfirmationData = createConfirmationData(parsedConfirmation, parsedTransaction);
         setConfirmationData(fullConfirmationData);
+        setTransaction(parsedTransaction);
         
         console.log('ConfirmationPage - Full confirmation data created:', fullConfirmationData);
       } else {
@@ -438,6 +443,7 @@ export default function ConfirmationPage() {
 
         const demoConfirmationData = createConfirmationData(mockConfirmationResponse, mockTransaction);
         setConfirmationData(demoConfirmationData);
+        setTransaction(mockTransaction);
         console.log('ConfirmationPage - Demo confirmation data created:', demoConfirmationData);
       }
     } catch (error) {
@@ -877,69 +883,43 @@ export default function ConfirmationPage() {
           </div>
         </ConfirmationSection>
 
-        {/* Contact Information */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5 text-blue-600" />
-              Customer Support & Contact Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3">24/7 Customer Support</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="font-medium">1-800-SHIP-NOW (7447)</p>
-                      <p className="text-sm text-muted-foreground">Available 24/7 for shipment assistance</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="font-medium">support@shippingsystem.com</p>
-                      <p className="text-sm text-muted-foreground">Email support with 4-hour response time</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <QrCode className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="font-medium">Live Chat Available</p>
-                      <p className="text-sm text-muted-foreground">Monday-Friday 6 AM - 10 PM EST</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-3">Important Reminders</h4>
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <ul className="text-sm space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <span>Keep your confirmation number for all inquiries</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <span>Ensure authorized personnel are available for pickup</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <span>Package must be ready at scheduled time</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <span>Changes must be made at least 2 hours in advance</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Task 9.2: Tracking Information */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Tracking Information" 
+            icon={<Truck className="h-5 w-5 text-blue-600" />} 
+            defaultExpanded={true}
+          >
+            <TrackingInfoSection 
+              transaction={transaction}
+              onUpdateNotificationPrefs={(prefs) => {
+                console.log('ConfirmationPage - Notification preferences updated:', prefs);
+              }}
+            />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.2: Package Documentation */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Package Documentation" 
+            icon={<FileText className="h-5 w-5 text-green-600" />} 
+            defaultExpanded={false}
+          >
+            <PackageDocumentationSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
+
+        {/* Task 9.2: Customer Support */}
+        {transaction && (
+          <ConfirmationSection 
+            title="Customer Support" 
+            icon={<Phone className="h-5 w-5 text-purple-600" />} 
+            defaultExpanded={false}
+          >
+            <CustomerSupportSection transaction={transaction} />
+          </ConfirmationSection>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center print:hidden">

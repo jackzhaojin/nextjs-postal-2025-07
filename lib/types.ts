@@ -364,7 +364,7 @@ export interface PickupDetails {
   locationInfo?: LocationInfo;
   accessInstructions: PickupAccessInstructions;
   equipmentRequirements: EquipmentRequirements;
-  notificationPreferences: NotificationPreferences;
+  notificationPreferences: PickupNotificationPreferences;
   readyTime: string;
   authorizedPersonnel: string[];
   specialAuthorization?: SpecialAuthorization;
@@ -409,7 +409,7 @@ export interface EquipmentRequirements {
   loadingAssistance: 'customer' | 'driver-assist' | 'full-service';
 }
 
-export interface NotificationPreferences {
+export interface PickupNotificationPreferences {
   emailReminder24h: boolean;
   smsReminder2h: boolean;
   callReminder30m: boolean;
@@ -452,6 +452,13 @@ export interface EscalationSetting {
   escalationContacts: ContactInfo[];
   timeoutMinutes: number;
   channels: CommunicationChannel[];
+}
+
+// Task 9.2: Tracking-specific notification preferences (separate from pickup preferences)
+export interface TrackingNotificationPreferences {
+  readonly email: EmailNotificationPrefs;
+  readonly sms: SMSNotificationPrefs;
+  readonly push: PushNotificationPrefs;
 }
 
 export type CommunicationChannel = 'email' | 'sms' | 'phone' | 'push';
@@ -965,3 +972,174 @@ export interface NotificationStatus {
 }
 
 export type DeliveryStatus = 'on-schedule' | 'delayed' | 'at-risk';
+
+// Task 9.2: Tracking and Support Information Interfaces
+export interface TrackingInformation {
+  readonly trackingNumber: string | null;
+  readonly estimatedAvailability: Date;
+  readonly carrierTrackingUrl: string | null;
+  readonly trackingStatus: TrackingStatus;
+  readonly milestones: ReadonlyArray<TrackingMilestone>;
+  readonly notificationPreferences: TrackingNotificationPreferences;
+}
+
+export interface TrackingStatus {
+  readonly currentStatus: 'pending' | 'in-transit' | 'out-for-delivery' | 'delivered' | 'exception';
+  readonly statusDescription: string;
+  readonly lastUpdated: Date;
+  readonly nextUpdate: Date | null;
+  readonly deliveryConfirmation: DeliveryConfirmation | null;
+}
+
+export interface TrackingMilestone {
+  readonly id: string;
+  readonly status: string;
+  readonly description: string;
+  readonly timestamp: Date;
+  readonly location: string;
+  readonly facility?: string;
+}
+
+export interface DeliveryConfirmation {
+  readonly deliveredAt: Date;
+  readonly deliveredTo: string;
+  readonly signatureName?: string;
+  readonly signatureUrl?: string;
+  readonly photoUrl?: string;
+}
+
+export interface TrackingNotificationPreferences {
+  readonly email: EmailNotificationPrefs;
+  readonly sms: SMSNotificationPrefs;
+  readonly push: PushNotificationPrefs;
+}
+
+export interface EmailNotificationPrefs {
+  readonly enabled: boolean;
+  readonly address: string;
+  readonly milestones: ReadonlyArray<string>;
+  readonly frequency: 'all' | 'major' | 'delivery-only';
+}
+
+export interface SMSNotificationPrefs {
+  readonly enabled: boolean;
+  readonly phoneNumber: string;
+  readonly milestones: ReadonlyArray<string>;
+}
+
+export interface PushNotificationPrefs {
+  readonly enabled: boolean;
+  readonly milestones: ReadonlyArray<string>;
+}
+
+export interface PackageDocumentation {
+  readonly shippingLabel: LabelInformation;
+  readonly requiredDocuments: ReadonlyArray<RequiredDocument>;
+  readonly complianceDocuments: ReadonlyArray<ComplianceDocument>;
+  readonly customsDocuments: ReadonlyArray<CustomsDocument>;
+}
+
+export interface LabelInformation {
+  readonly labelType: 'driver-provided' | 'pre-print' | 'mobile-display';
+  readonly format: 'thermal' | 'laser' | 'mobile';
+  readonly labelUrl?: string;
+  readonly printInstructions?: string;
+  readonly qrCodeUrl?: string;
+  readonly status?: 'pending' | 'generated' | 'printed';
+}
+
+export interface RequiredDocument {
+  readonly id: string;
+  readonly type: 'commercial-invoice' | 'packing-list' | 'bill-of-lading' | 'certificate-of-origin';
+  readonly name: string;
+  readonly description: string;
+  readonly required: boolean;
+  readonly downloadUrl?: string;
+  readonly status: 'pending' | 'generated' | 'completed';
+}
+
+export interface ComplianceDocument {
+  readonly id: string;
+  readonly type: 'hazmat-declaration' | 'export-license' | 'import-permit' | 'insurance-certificate';
+  readonly name: string;
+  readonly description: string;
+  readonly regulatoryBody: string;
+  readonly downloadUrl?: string;
+  readonly expirationDate?: Date;
+}
+
+export interface CustomsDocument {
+  readonly id: string;
+  readonly type: 'customs-declaration' | 'commercial-invoice' | 'certificate-of-origin' | 'nafta-certificate';
+  readonly name: string;
+  readonly description: string;
+  readonly country: string;
+  readonly downloadUrl?: string;
+  readonly formNumber?: string;
+}
+
+export interface CustomerSupportInfo {
+  readonly primarySupport: SupportChannel;
+  readonly accountManager: AccountManagerInfo | null;
+  readonly specializedSupport: ReadonlyArray<SpecializedSupportChannel>;
+  readonly selfServiceResources: SelfServiceResources;
+}
+
+export interface SupportChannel {
+  readonly type: 'phone' | 'email' | 'chat' | 'portal';
+  readonly contact: string;
+  readonly availability: AvailabilitySchedule;
+  readonly responseTime: ResponseTimeCommitment;
+  readonly escalationPath: EscalationInfo;
+}
+
+export interface AccountManagerInfo {
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly extension?: string;
+  readonly availability: AvailabilitySchedule;
+  readonly territory: string;
+}
+
+export interface SpecializedSupportChannel {
+  readonly type: 'claims' | 'compliance' | 'billing' | 'technical';
+  readonly name: string;
+  readonly contact: string;
+  readonly description: string;
+  readonly availability: AvailabilitySchedule;
+}
+
+export interface SelfServiceResources {
+  readonly knowledgeBaseUrl: string;
+  readonly faqUrl: string;
+  readonly trackingPortalUrl: string;
+  readonly communityForumUrl?: string;
+}
+
+export interface AvailabilitySchedule {
+  readonly timezone: string;
+  readonly hours: ReadonlyArray<SupportBusinessHours>;
+  readonly holidays: ReadonlyArray<Date>;
+  readonly emergencyContact?: string;
+}
+
+export interface SupportBusinessHours {
+  readonly dayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
+  readonly startTime: string; // HH:MM format
+  readonly endTime: string;   // HH:MM format
+}
+
+export interface ResponseTimeCommitment {
+  readonly initial: string; // e.g., "2 hours", "24 hours"
+  readonly resolution: string; // e.g., "1 business day", "48 hours"
+  readonly sla: string; // Service Level Agreement description
+}
+
+export interface EscalationInfo {
+  readonly level1: string;
+  readonly level2?: string;
+  readonly level3?: string;
+  readonly automaticEscalation: boolean;
+  readonly escalationTriggers: ReadonlyArray<string>;
+}

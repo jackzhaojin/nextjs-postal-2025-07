@@ -22,7 +22,7 @@ import {
   Users
 } from 'lucide-react';
 import { 
-  type NotificationPreferences, 
+  type PickupNotificationPreferences, 
   ReminderSettings, 
   UpdateSettings, 
   ChannelPreference, 
@@ -34,8 +34,8 @@ import {
 } from '@/lib/types';
 
 interface NotificationPreferencesProps {
-  preferences?: NotificationPreferences;
-  onPreferencesUpdate: (preferences: NotificationPreferences) => void;
+  preferences?: PickupNotificationPreferences;
+  onPreferencesUpdate: (preferences: PickupNotificationPreferences) => void;
   contactInfo: ContactInfo[];
   pickupSchedule?: { date: string; timeSlot: { startTime: string; endTime: string; } };
   availableChannels: CommunicationChannel[];
@@ -66,7 +66,7 @@ export function NotificationPreferences({
   console.log('🔔 [NOTIFICATION-PREFERENCES] Rendering notification preferences');
 
   // Default notification preferences
-  const defaultPreferences: NotificationPreferences = {
+  const defaultPreferences: PickupNotificationPreferences = {
     emailReminder24h: true,
     smsReminder2h: true,
     callReminder30m: false,
@@ -133,7 +133,7 @@ export function NotificationPreferences({
     businessHoursOnly: false
   };
 
-  const [currentPreferences, setCurrentPreferences] = useState<NotificationPreferences>(
+  const [currentPreferences, setCurrentPreferences] = useState<PickupNotificationPreferences>(
     preferences || defaultPreferences
   );
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
@@ -148,7 +148,7 @@ export function NotificationPreferences({
   }, [preferences]);
 
   // Validation logic
-  const validatePreferences = useCallback((prefs: NotificationPreferences): ValidationError[] => {
+  const validatePreferences = useCallback((prefs: PickupNotificationPreferences): ValidationError[] => {
     const errors: ValidationError[] = [];
 
     // At least one reminder should be enabled
@@ -210,7 +210,7 @@ export function NotificationPreferences({
   }, []);
 
   // Update preferences and validate
-  const updatePreferences = useCallback((newPreferences: NotificationPreferences) => {
+  const updatePreferences = useCallback((newPreferences: PickupNotificationPreferences) => {
     console.log('🔔 [NOTIFICATION-PREFERENCES] Updating preferences:', newPreferences);
     
     setCurrentPreferences(newPreferences);
