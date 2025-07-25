@@ -904,3 +904,64 @@ export interface TermsOfService {
     forceMAjeure: string[];
   };
 }
+
+// Task 9.1: Confirmation Page Types
+
+export interface ConfirmationPageData {
+  readonly confirmationNumber: string;
+  readonly bookingTimestamp: Date;
+  readonly transaction: ShippingTransaction;
+  readonly carrierInfo: CarrierAssignment;
+  readonly pickupConfirmation: PickupConfirmationDetails;
+  readonly deliveryEstimate: DeliveryEstimateDetails;
+  readonly references: ShipmentReferences;
+}
+
+export interface CarrierAssignment {
+  readonly carrierId: string;
+  readonly carrierName: string;
+  readonly carrierLogo: string;
+  readonly serviceLevel: string;
+  readonly trackingUrlTemplate: string;
+}
+
+export interface PickupConfirmationDetails {
+  readonly confirmedDate: Date;
+  readonly timeWindow: TimeWindow;
+  readonly status: 'confirmed' | 'pending' | 'error';
+  readonly instructionsSent: NotificationStatus;
+  readonly contactNotified: NotificationStatus;
+  readonly calendarInvite: NotificationStatus;
+}
+
+export interface DeliveryEstimateDetails {
+  readonly estimatedDate: Date;
+  readonly timeCommitment: string;
+  readonly deliveryStatus: 'on-schedule' | 'delayed' | 'at-risk';
+  readonly deliveryAddress: Address;
+  readonly contactPerson: ContactInfo;
+  readonly specialInstructions: ReadonlyArray<string>;
+}
+
+export interface ShipmentReferences {
+  readonly customerReference?: string;
+  readonly internalReference: string;
+  readonly carrierReference?: string;
+  readonly poNumber?: string;
+  readonly bolNumber?: string;
+}
+
+export interface TimeWindow {
+  readonly startTime: string;
+  readonly endTime: string;
+  readonly timezone: string;
+}
+
+export interface NotificationStatus {
+  readonly sent: boolean;
+  readonly timestamp?: Date;
+  readonly method: 'email' | 'sms' | 'phone' | 'system';
+  readonly recipient: string;
+}
+
+export type DeliveryStatus = 'on-schedule' | 'delayed' | 'at-risk';

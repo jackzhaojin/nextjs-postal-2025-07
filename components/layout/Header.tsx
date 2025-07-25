@@ -84,9 +84,9 @@ export function Header({
 
         {/* Center section - Page title (mobile) */}
         <div className="flex-1 text-center sm:hidden">
-          <h1 className="text-sm font-medium text-foreground truncate px-4">
+          <h2 className="text-sm font-medium text-foreground truncate px-4">
             {title}
-          </h1>
+          </h2>
         </div>
 
         {/* Right section - Action buttons */}
