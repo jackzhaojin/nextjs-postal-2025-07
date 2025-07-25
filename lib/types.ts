@@ -368,6 +368,10 @@ export interface PickupDetails {
   readyTime: string;
   authorizedPersonnel: string[];
   specialAuthorization?: SpecialAuthorization;
+  // Task 7.4: Enhanced notification and authorization
+  packageReadiness?: PackageReadinessSettings;
+  authorizationSettings?: AuthorizationSettings;
+  premiumServices?: PremiumServiceOptions;
   // Legacy fields for backward compatibility
   contactPerson?: string;
   phone?: string;
@@ -412,12 +416,164 @@ export interface NotificationPreferences {
   driverEnRoute: boolean;
   pickupCompletion: boolean;
   transitUpdates: boolean;
+  // Extended preferences for Task 7.4
+  pickupReminders: ReminderSettings[];
+  realTimeUpdates: UpdateSettings[];
+  communicationChannels: ChannelPreference[];
+  escalationProcedures: EscalationSetting[];
+  businessHoursOnly: boolean;
+}
+
+export interface ReminderSettings {
+  type: 'pickup-24h' | 'pickup-2h' | 'pickup-30m' | 'preparation';
+  enabled: boolean;
+  timing: number; // minutes before pickup
+  channels: CommunicationChannel[];
+  customMessage?: string;
+}
+
+export interface UpdateSettings {
+  type: 'driver-enroute' | 'pickup-completion' | 'package-transit' | 'delivery-confirmation';
+  enabled: boolean;
+  channels: CommunicationChannel[];
+  frequency?: 'immediate' | 'periodic' | 'milestone';
+}
+
+export interface ChannelPreference {
+  channel: CommunicationChannel;
+  primary: boolean;
+  businessHoursOnly: boolean;
+  contactInfo: string; // phone number or email
+  fallbackOrder: number;
+}
+
+export interface EscalationSetting {
+  trigger: 'failed-delivery' | 'no-response' | 'emergency';
+  escalationContacts: ContactInfo[];
+  timeoutMinutes: number;
+  channels: CommunicationChannel[];
+}
+
+export type CommunicationChannel = 'email' | 'sms' | 'phone' | 'push';
+
+export interface PackageReadinessSettings {
+  readyTime: string; // ISO time string
+  preparationTime: number; // minutes needed for preparation
+  preparationChecklist: PreparationItem[];
+  lastMinuteAdjustmentAllowed: boolean;
+  emergencyContactProtocol: EmergencyContactProtocol;
+}
+
+export interface PreparationItem {
+  id: string;
+  label: string;
+  description: string;
+  required: boolean;
+  completed: boolean;
+  category: 'labeling' | 'documentation' | 'access' | 'packaging';
+}
+
+export interface EmergencyContactProtocol {
+  enabled: boolean;
+  contacts: ContactInfo[];
+  escalationTimeMinutes: number;
+  autoReschedule: boolean;
+}
+
+export interface AuthorizationSettings {
+  primaryAuthorization: PersonnelAuthorization;
+  additionalPersonnel: PersonnelAuthorization[];
+  universalAuthorization: UniversalAuthSettings;
+  securityRequirements: SecurityProtocol[];
+  emergencyContacts: EmergencyContact[];
+}
+
+export interface PersonnelAuthorization {
+  contactInfo: ContactInfo;
+  authorizationLevel: 'full' | 'limited' | 'witness-only';
+  idVerificationRequired: boolean;
+  signatureAuthority: boolean;
+  relationship: string; // supervisor, assistant, colleague, etc.
+  authorizationScope: string[]; // array of permitted actions
+  timeBasedAuthorization?: TimeBasedAuth;
+}
+
+export interface UniversalAuthSettings {
+  anyoneAtLocation: boolean;
+  departmentLevel: boolean;
+  department?: string;
+  roleBasedAuth: boolean;
+  allowedRoles: string[];
+  timeRestrictions?: BusinessHours;
+}
+
+export interface SecurityProtocol {
+  type: 'high-value' | 'sensitive' | 'standard' | 'enhanced';
+  idVerificationRequired: boolean;
+  photoIdMatching: boolean;
+  dualAuthorization: boolean;
+  insuranceRequired: boolean;
+  auditTrailRequired: boolean;
+  customRequirements: string[];
+}
+
+export interface EmergencyContact {
+  contactInfo: ContactInfo;
+  relationship: string;
+  availabilityHours: BusinessHours;
+  escalationPriority: number;
+  communicationChannels: CommunicationChannel[];
+}
+
+export interface TimeBasedAuth {
+  validFrom: string; // ISO time
+  validUntil: string; // ISO time
+  daysOfWeek: number[]; // 0-6, Sunday=0
+  timeRanges: { start: string; end: string; }[];
+}
+
+export interface PremiumServiceOptions {
+  weekendPickup: PremiumService;
+  holidayPickup: PremiumService;
+  afterHoursPickup: PremiumService;
+  specialArrangements: CustomService[];
+}
+
+export interface PremiumService {
+  available: boolean;
+  additionalFee: number;
+  conditions: string[];
+  timeSlots: TimeSlot[];
+  advanceBookingRequired: number; // hours
+  serviceArea: 'full' | 'limited' | 'major-cities';
+}
+
+export interface CustomService {
+  id: string;
+  description: string;
+  available: boolean;
+  estimatedFee: number;
+  requiresApproval: boolean;
+  contactRequired: boolean;
+  specialConditions: string[];
 }
 
 export interface SpecialAuthorization {
   idVerificationRequired: boolean;
   signatureAuthorization: boolean;
   photoIdMatching: boolean;
+  // Extended for Task 7.4
+  authorizationSettings?: AuthorizationSettings;
+  highValueProtocol?: SecurityProtocol;
+  complianceRequirements?: ComplianceRequirement[];
+}
+
+export interface ComplianceRequirement {
+  type: 'regulatory' | 'insurance' | 'security' | 'audit';
+  description: string;
+  required: boolean;
+  documentation: string[];
+  verificationRequired: boolean;
 }
 
 // API Request/Response Types

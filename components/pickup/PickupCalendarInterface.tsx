@@ -118,7 +118,48 @@ export function PickupCalendarInterface() {
           callReminder30m: false,
           driverEnRoute: true,
           pickupCompletion: true,
-          transitUpdates: true
+          transitUpdates: true,
+          pickupReminders: [
+            {
+              type: 'pickup-24h',
+              enabled: true,
+              timing: 1440,
+              channels: ['email'],
+              customMessage: ''
+            },
+            {
+              type: 'pickup-2h',
+              enabled: true,
+              timing: 120,
+              channels: ['sms'],
+              customMessage: ''
+            }
+          ],
+          realTimeUpdates: [
+            {
+              type: 'driver-enroute',
+              enabled: true,
+              channels: ['sms', 'email'],
+              frequency: 'immediate'
+            },
+            {
+              type: 'pickup-completion',
+              enabled: true,
+              channels: ['email'],
+              frequency: 'immediate'
+            }
+          ],
+          communicationChannels: [
+            {
+              channel: 'email',
+              primary: true,
+              businessHoursOnly: false,
+              contactInfo: '',
+              fallbackOrder: 1
+            }
+          ],
+          escalationProcedures: [],
+          businessHoursOnly: false
         }
       };
 

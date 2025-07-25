@@ -4,11 +4,22 @@ import React, { useState } from 'react';
 import { PickupCalendarInterface } from '@/components/pickup/PickupCalendarInterface';
 import { PickupLocationForm } from '@/components/pickup/PickupLocationForm';
 import { PickupContactForm } from '@/components/pickup/PickupContactForm';
+import { NotificationAuthorizationForm } from '@/components/pickup/NotificationAuthorizationForm';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, CheckCircle, Clock, MapPin, Calendar, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, MapPin, Calendar, User, Bell, Shield } from 'lucide-react';
 import { useShipmentDetailsForm } from '@/hooks/useShipmentDetailsForm';
-import { LocationInfo, ValidationError, PickupContactInfo, PickupInstructionSet } from '@/lib/types';
+import { 
+  LocationInfo, 
+  ValidationError, 
+  PickupContactInfo, 
+  PickupInstructionSet,
+  ContactInfo,
+  type NotificationPreferences,
+  PackageReadinessSettings,
+  AuthorizationSettings,
+  PremiumServiceOptions
+} from '@/lib/types';
 import Link from 'next/link';
 
 /**
@@ -34,6 +45,8 @@ export default function PickupPage() {
   const [locationErrors, setLocationErrors] = useState<ValidationError[]>([]);
   const [contactValid, setContactValid] = useState(false);
   const [contactErrors, setContactErrors] = useState<ValidationError[]>([]);
+  const [notificationValid, setNotificationValid] = useState(false);
+  const [notificationErrors, setNotificationErrors] = useState<ValidationError[]>([]);
 
   // Handle location info updates
   const handleLocationInfoChange = async (locationInfo: LocationInfo) => {
@@ -81,6 +94,34 @@ export default function PickupPage() {
     console.log('👤 [PICKUP-PAGE] Contact validation:', { isValid, errorCount: errors.length });
     setContactValid(isValid);
     setContactErrors(errors);
+  };
+
+  // Handle notification and authorization data updates (Task 7.4)
+  const handleNotificationAuthorizationUpdate = async (data: {
+    notificationPreferences: NotificationPreferences;
+    packageReadiness: PackageReadinessSettings;
+    authorizationSettings: AuthorizationSettings;
+    premiumServices: PremiumServiceOptions;
+  }) => {
+    console.log('🔔🛡️ [PICKUP-PAGE] Notification & authorization data updated:', data);
+    
+    try {
+      await updatePickupDetails({
+        notificationPreferences: data.notificationPreferences,
+        packageReadiness: data.packageReadiness,
+        authorizationSettings: data.authorizationSettings,
+        premiumServices: data.premiumServices
+      });
+    } catch (error) {
+      console.error('❌ [PICKUP-PAGE] Failed to update notification & authorization data:', error);
+    }
+  };
+
+  // Handle notification validation
+  const handleNotificationValidation = (isValid: boolean, errors: ValidationError[]) => {
+    console.log('�🛡️ [PICKUP-PAGE] Notification validation:', { isValid, errorCount: errors.length });
+    setNotificationValid(isValid);
+    setNotificationErrors(errors);
   };
 
   // Check if we have required data
@@ -190,6 +231,18 @@ export default function PickupPage() {
             >
               <User className="h-4 w-4" />
               <span>Contact & Instructions</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'notifications'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="tab-notifications"
+            >
+              <Bell className="h-4 w-4" />
+              <span>Notifications & Authorization</span>
             </button>
           </div>
         </div>
@@ -313,6 +366,62 @@ export default function PickupPage() {
               packageInfo={shipmentDetails.package}
               onDataUpdate={handleContactDataUpdate}
               validationErrors={contactErrors}
+            />
+          </div>
+        )}
+
+        {/* Task 7.4: Notifications & Authorization Tab */}
+        {activeTab === 'notifications' && (
+          <div className="space-y-6">
+            {(() => {
+              console.log('🗓️ [PICKUP-PAGE] Rendering notifications tab with props:', {
+                packageInfo: shipmentDetails.package,
+                contactInfoCount: [
+                  shipmentDetails.pickupDetails?.primaryContact ? {
+                    name: shipmentDetails.pickupDetails.primaryContact.name,
+                    company: '',
+                    phone: shipmentDetails.pickupDetails.primaryContact.mobilePhone,
+                    email: shipmentDetails.pickupDetails.primaryContact.email
+                  } : shipmentDetails.origin.contactInfo,
+                  shipmentDetails.pickupDetails?.backupContact ? {
+                    name: shipmentDetails.pickupDetails.backupContact.name,
+                    company: '',
+                    phone: shipmentDetails.pickupDetails.backupContact.mobilePhone,
+                    email: shipmentDetails.pickupDetails.backupContact.email
+                  } : undefined
+                ].filter((contact): contact is ContactInfo => contact !== undefined).length,
+                hasOrigin: !!shipmentDetails.origin,
+                hasPickupDetails: !!shipmentDetails.pickupDetails
+              });
+              return null;
+            })()}
+            <NotificationAuthorizationForm
+              notificationPreferences={shipmentDetails.pickupDetails?.notificationPreferences}
+              packageReadiness={shipmentDetails.pickupDetails?.packageReadiness}
+              authorizationSettings={shipmentDetails.pickupDetails?.authorizationSettings}
+              premiumServices={shipmentDetails.pickupDetails?.premiumServices}
+              packageInfo={shipmentDetails.package}
+              contactInfo={[
+                shipmentDetails.pickupDetails?.primaryContact ? {
+                  name: shipmentDetails.pickupDetails.primaryContact.name,
+                  company: '',
+                  phone: shipmentDetails.pickupDetails.primaryContact.mobilePhone,
+                  email: shipmentDetails.pickupDetails.primaryContact.email
+                } : shipmentDetails.origin.contactInfo,
+                shipmentDetails.pickupDetails?.backupContact ? {
+                  name: shipmentDetails.pickupDetails.backupContact.name,
+                  company: '',
+                  phone: shipmentDetails.pickupDetails.backupContact.mobilePhone,
+                  email: shipmentDetails.pickupDetails.backupContact.email
+                } : undefined
+              ].filter((contact): contact is ContactInfo => contact !== undefined)}
+              pickupSchedule={shipmentDetails.pickupDetails ? {
+                date: shipmentDetails.pickupDetails.date,
+                timeSlot: shipmentDetails.pickupDetails.timeSlot
+              } : undefined}
+              serviceArea="full" // This would come from location/carrier data in real implementation
+              onDataUpdate={handleNotificationAuthorizationUpdate}
+              validationErrors={notificationErrors}
             />
           </div>
         )}
