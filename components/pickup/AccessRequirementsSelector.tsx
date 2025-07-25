@@ -145,7 +145,7 @@ export function AccessRequirementsSelector({
   // Update parent with fee calculations
   React.useEffect(() => {
     onFeeUpdate?.(additionalFees);
-  }, [additionalFees, onFeeUpdate]);
+  }, [additionalFees]);
 
   // Get requirements that need additional fields
   const requirementsNeedingFields = React.useMemo(() => {

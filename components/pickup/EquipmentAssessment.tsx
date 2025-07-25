@@ -174,7 +174,7 @@ export function EquipmentAssessment({
   // Update parent with fee calculations
   React.useEffect(() => {
     onFeeUpdate?.(additionalFees);
-  }, [additionalFees, onFeeUpdate]);
+  }, [additionalFees]);
 
   // Get relevant infrastructure considerations
   const relevantInfrastructure = React.useMemo(() => {
