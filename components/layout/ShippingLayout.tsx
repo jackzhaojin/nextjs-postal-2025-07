@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Header } from './Header';
-import { StepIndicator, type Step } from './StepIndicator';
+import { type Step } from './StepIndicator';
 import { Navigation } from './Navigation';
 import { Breadcrumbs, type BreadcrumbItem } from './Breadcrumbs';
 import { MobileMenu } from './MobileMenu';
@@ -75,31 +75,7 @@ export function ShippingLayout({
         </div>
       )}
 
-      {/* Step Indicator */}
-      {showStepIndicator && (
-        <>
-          {/* Desktop version */}
-          <div className="hidden md:block">
-            <StepIndicator
-              currentStep={currentStep}
-              steps={steps}
-              allowNavigation={allowStepNavigation}
-              onStepClick={onStepClick}
-            />
-          </div>
-          
-          {/* Mobile version */}
-          <div className="md:hidden">
-            <StepIndicator
-              currentStep={currentStep}
-              steps={steps}
-              allowNavigation={allowStepNavigation}
-              compact={true}
-              onStepClick={onStepClick}
-            />
-          </div>
-        </>
-      )}
+      {/* Step Indicator - REMOVED: Outdated progress bar replaced with modern inline progress bars */}
 
       {/* Main Content Area */}
       <main className="flex-1 container px-4 py-6">
