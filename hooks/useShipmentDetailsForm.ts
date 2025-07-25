@@ -142,21 +142,25 @@ export function useShipmentDetailsForm(
 
   // Form state
   const [shipmentDetails, setShipmentDetails] = useState<ShipmentDetails>(() => {
-    // Try to load from localStorage first, then use initial data, then defaults
+    // Always start with defaults during SSR, load from localStorage after hydration
+    return { ...defaultShipmentDetails, ...initialData };
+  });
+
+  // Load from localStorage after hydration
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem(storageKey);
         if (stored) {
           const parsed = JSON.parse(stored);
-          console.log('useShipmentDetailsForm: Loaded from localStorage:', parsed);
-          return { ...defaultShipmentDetails, ...parsed, ...initialData };
+          console.log('useShipmentDetailsForm: Loaded from localStorage after hydration:', parsed);
+          setShipmentDetails(prev => ({ ...defaultShipmentDetails, ...parsed, ...initialData }));
         }
       } catch (error) {
         console.error('useShipmentDetailsForm: Error loading from localStorage:', error);
       }
     }
-    return { ...defaultShipmentDetails, ...initialData };
-  });
+  }, [storageKey, initialData]);
 
   const [validation, setValidation] = useState<FormValidationState>({
     errors: {},

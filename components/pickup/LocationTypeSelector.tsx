@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ClientOnlyAddressDisplay } from './ClientOnlyAddressDisplay';
 import { 
   Truck, 
   Building2, 
@@ -293,19 +294,7 @@ export function LocationTypeSelector({
       )}
 
       {/* Address Confirmation */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">
-          Pickup Address Confirmation
-        </h4>
-        <div className="text-sm text-blue-800">
-          <p>{addressInfo.address}</p>
-          {addressInfo.suite && <p>Suite: {addressInfo.suite}</p>}
-          <p>{addressInfo.city}, {addressInfo.state} {addressInfo.zip}</p>
-        </div>
-        <p className="text-xs text-blue-700 mt-2">
-          This address was entered in Step 1. To modify, please return to the Shipment Details step.
-        </p>
-      </div>
+      <ClientOnlyAddressDisplay addressInfo={addressInfo} />
     </div>
   );
 }
