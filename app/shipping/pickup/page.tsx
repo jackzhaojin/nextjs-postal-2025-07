@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { PickupCalendarInterface } from '@/components/pickup/PickupCalendarInterface';
 import { PickupLocationForm } from '@/components/pickup/PickupLocationForm';
 import { PickupContactForm } from '@/components/pickup/PickupContactForm';
@@ -69,7 +69,7 @@ export default function PickupPage() {
   };
 
   // Handle contact and instructions data updates (Task 7.3)
-  const handleContactDataUpdate = async (data: {
+  const handleContactDataUpdate = useCallback(async (data: {
     primaryContact: PickupContactInfo;
     backupContact?: PickupContactInfo;
     instructions: PickupInstructionSet;
@@ -87,17 +87,17 @@ export default function PickupPage() {
     } catch (error) {
       console.error('❌ [PICKUP-PAGE] Failed to update contact data:', error);
     }
-  };
+  }, [updatePickupDetails]);
 
   // Handle contact validation
-  const handleContactValidation = (isValid: boolean, errors: ValidationError[]) => {
+  const handleContactValidation = useCallback((isValid: boolean, errors: ValidationError[]) => {
     console.log('👤 [PICKUP-PAGE] Contact validation:', { isValid, errorCount: errors.length });
     setContactValid(isValid);
     setContactErrors(errors);
-  };
+  }, []);
 
   // Handle notification and authorization data updates (Task 7.4)
-  const handleNotificationAuthorizationUpdate = async (data: {
+  const handleNotificationAuthorizationUpdate = useCallback(async (data: {
     notificationPreferences: PickupNotificationPreferences;
     packageReadiness: PackageReadinessSettings;
     authorizationSettings: AuthorizationSettings;
@@ -115,14 +115,14 @@ export default function PickupPage() {
     } catch (error) {
       console.error('❌ [PICKUP-PAGE] Failed to update notification & authorization data:', error);
     }
-  };
+  }, [updatePickupDetails]);
 
   // Handle notification validation
-  const handleNotificationValidation = (isValid: boolean, errors: ValidationError[]) => {
-    console.log('�🛡️ [PICKUP-PAGE] Notification validation:', { isValid, errorCount: errors.length });
+  const handleNotificationValidation = useCallback((isValid: boolean, errors: ValidationError[]) => {
+    console.log('🔔🛡️ [PICKUP-PAGE] Notification validation:', { isValid, errorCount: errors.length });
     setNotificationValid(isValid);
     setNotificationErrors(errors);
-  };
+  }, []);
 
   // Check if we have required data
   const hasOriginAddress = shipmentDetails?.origin;
@@ -220,6 +220,8 @@ export default function PickupPage() {
               <Calendar className="h-4 w-4" />
               <span>Date & Time</span>
             </button>
+            {/* Temporarily removed Contact & Instructions and Notifications tabs */}
+            {/*
             <button
               onClick={() => setActiveTab('contact')}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -244,6 +246,7 @@ export default function PickupPage() {
               <Bell className="h-4 w-4" />
               <span>Notifications & Authorization</span>
             </button>
+            */}
           </div>
         </div>
 
@@ -354,7 +357,11 @@ export default function PickupPage() {
           </div>
         )}
 
-        {/* Task 7.3: Contact & Instructions Tab */}
+        {/* Contact & Instructions and Notifications tabs temporarily removed 
+            These will be handled in the review stage instead */}
+        
+        {/* Removed tabs - contact and notifications will be part of review
+        
         {activeTab === 'contact' && (
           <div className="space-y-6">
             <PickupContactForm
@@ -370,7 +377,6 @@ export default function PickupPage() {
           </div>
         )}
 
-        {/* Task 7.4: Notifications & Authorization Tab */}
         {activeTab === 'notifications' && (
           <div className="space-y-6">
             {(() => {
@@ -425,6 +431,8 @@ export default function PickupPage() {
             />
           </div>
         )}
+        
+        End of removed notifications tab content */}
 
         {/* Navigation */}
         <div className="mt-8 flex justify-between">

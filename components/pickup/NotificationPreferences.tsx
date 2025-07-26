@@ -122,11 +122,11 @@ export function NotificationPreferences({
         frequency: 'immediate'
       }
     ],
-    communicationChannels: availableChannels.map((channel, index) => ({
+    communicationChannels: (availableChannels || []).map((channel, index) => ({
       channel,
       primary: index === 0,
       businessHoursOnly: channel === 'phone',
-      contactInfo: contactInfo[0]?.email || contactInfo[0]?.phone || '',
+      contactInfo: (contactInfo && contactInfo[0]) ? (contactInfo[0]?.email || contactInfo[0]?.phone || '') : '',
       fallbackOrder: index + 1
     })),
     escalationProcedures: [],
@@ -352,7 +352,7 @@ export function NotificationPreferences({
                     <div>
                       <Label className="text-sm text-gray-600">Channels</Label>
                       <div className="flex gap-2 mt-1">
-                        {availableChannels.map(channel => (
+                        {(availableChannels || []).map(channel => (
                           <Button
                             key={channel}
                             variant={reminder.channels.includes(channel) ? "default" : "outline"}
@@ -437,7 +437,7 @@ export function NotificationPreferences({
                   <div>
                     <Label className="text-sm text-gray-600">Channels</Label>
                     <div className="flex gap-2 mt-1">
-                      {availableChannels.map(channel => (
+                      {(availableChannels || []).map(channel => (
                         <Button
                           key={channel}
                           variant={update.channels.includes(channel) ? "default" : "outline"}

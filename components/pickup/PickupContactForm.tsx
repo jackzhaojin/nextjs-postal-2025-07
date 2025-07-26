@@ -107,7 +107,7 @@ export function PickupContactForm({
     equipment: 0
   });
 
-  // Calculate form completion percentage
+  // Calculate form completion percentage (stable function, no state updates)
   const calculateCompletion = useCallback(() => {
     console.log('📋 [PICKUP-CONTACT-FORM] Calculating form completion');
     
@@ -130,16 +130,21 @@ export function PickupContactForm({
     // Equipment completion (always 100% since defaults are valid)
     const equipmentScore = 100;
 
-    setCompletionState({
+    const newCompletionState = {
       contact: contactScore,
       instructions: instructionsScore,
       equipment: equipmentScore
-    });
+    };
+
+    // Only update state if it actually changed
+    if (JSON.stringify(newCompletionState) !== JSON.stringify(completionState)) {
+      setCompletionState(newCompletionState);
+    }
 
     return Math.round((contactScore + instructionsScore + equipmentScore) / 3);
-  }, [formData]);
+  }, [formData, completionState]);
 
-  // Validate form sections
+  // Validate form sections (stable function, no state updates in calculation)
   const validateForm = useCallback(() => {
     console.log('📋 [PICKUP-CONTACT-FORM] Validating form');
     
@@ -160,9 +165,13 @@ export function PickupContactForm({
 
     // Equipment validation (always valid since defaults are acceptable)
     
-    setValidationState(errors);
+    // Only update state if it actually changed
+    if (JSON.stringify(errors) !== JSON.stringify(validationState)) {
+      setValidationState(errors);
+    }
+    
     return errors;
-  }, [formData]);
+  }, [formData, validationState]);
 
   // Handle contact information updates
   const handleContactUpdate = useCallback((primary: PickupContactInfo, backup?: PickupContactInfo) => {
@@ -198,11 +207,14 @@ export function PickupContactForm({
   // Update parent component when form data changes
   useEffect(() => {
     console.log('📋 [PICKUP-CONTACT-FORM] Form data changed, updating parent');
-    
     onDataUpdate(formData);
+  }, [formData, onDataUpdate]);
+
+  // Run validation and completion calculation when formData changes
+  useEffect(() => {
     validateForm();
     calculateCompletion();
-  }, [formData, onDataUpdate, validateForm, calculateCompletion]);
+  }, [formData]); // Only depend on formData, not the functions
 
   // Handle save action
   const handleSave = useCallback(async () => {
