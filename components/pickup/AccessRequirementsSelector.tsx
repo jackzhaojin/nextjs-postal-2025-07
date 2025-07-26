@@ -142,10 +142,14 @@ export function AccessRequirementsSelector({
     return fees;
   }, [selectedRequirements, packageInfo.weight.value]);
 
-  // Update parent with fee calculations
+  // Update parent with fee calculations (throttled to prevent infinite loops)
   React.useEffect(() => {
-    onFeeUpdate?.(additionalFees);
-  }, [additionalFees]);
+    const timeoutId = setTimeout(() => {
+      onFeeUpdate?.(additionalFees);
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [onFeeUpdate, additionalFees]);
 
   // Get requirements that need additional fields
   const requirementsNeedingFields = React.useMemo(() => {

@@ -164,23 +164,23 @@ export function PickupLocationForm({
   };
 
   // Handle fee updates from child components
-  const handleAccessFeeUpdate = (fees: FeeCalculation[]) => {
+  const handleAccessFeeUpdate = React.useCallback((fees: FeeCalculation[]) => {
     setAdditionalFees(prevFees => {
       // Remove existing access fees and add new ones
       const nonAccessFees = prevFees.filter(fee => !fee.id.startsWith('access-'));
       const accessFees = fees.map(fee => ({ ...fee, id: `access-${fee.id}` }));
       return [...nonAccessFees, ...accessFees];
     });
-  };
+  }, []);
 
-  const handleEquipmentFeeUpdate = (fees: FeeCalculation[]) => {
+  const handleEquipmentFeeUpdate = React.useCallback((fees: FeeCalculation[]) => {
     setAdditionalFees(prevFees => {
       // Remove existing equipment fees and add new ones
       const nonEquipmentFees = prevFees.filter(fee => !fee.id.startsWith('equipment-'));
       const equipmentFees = fees.map(fee => ({ ...fee, id: `equipment-${fee.id}` }));
       return [...nonEquipmentFees, ...equipmentFees];
     });
-  };
+  }, []);
 
   // Overall validation
   React.useEffect(() => {

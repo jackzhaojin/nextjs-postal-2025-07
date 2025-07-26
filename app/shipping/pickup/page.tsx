@@ -21,6 +21,8 @@ import {
   PremiumServiceOptions
 } from '@/lib/types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ShippingTransactionManager } from '@/lib/localStorage';
 
 /**
  * Step 4: Pickup Scheduling Page
@@ -39,6 +41,7 @@ export default function PickupPage() {
   console.log('🗓️ [PICKUP-PAGE] Rendering pickup scheduling page');
 
   const { shipmentDetails, updatePickupDetails } = useShipmentDetailsForm();
+  const router = useRouter();
   
   const [activeTab, setActiveTab] = useState('location');
   const [locationValid, setLocationValid] = useState(false);
@@ -123,6 +126,78 @@ export default function PickupPage() {
     setNotificationValid(isValid);
     setNotificationErrors(errors);
   }, []);
+
+  // Handle Continue to Review button - save current pickup state before navigating
+  const handleContinueToReview = useCallback(async () => {
+    console.log('🚀 [PICKUP-PAGE] Continue to Review clicked - saving pickup state');
+    
+    try {
+      // Save current pickup details even if schedule is not complete
+      // This ensures that location details, access requirements, etc. are preserved
+      const pickupDetails = {
+        // Preserve existing pickup details
+        ...shipmentDetails.pickupDetails,
+        // Add default values if schedule is not yet selected
+        locationInfo: shipmentDetails.pickupDetails?.locationInfo || {
+          type: 'ground-level',
+          accessInstructions: {
+            securityRequired: false,
+            appointmentRequired: false,
+            limitedParking: false,
+            forkliftAvailable: false,
+            liftgateRequired: false,
+            parkingInstructions: '',
+            packageLocation: '',
+            driverInstructions: ''
+          },
+          equipmentRequirements: {
+            dolly: false,
+            applianceDolly: false,
+            furniturePads: false,
+            straps: false,
+            palletJack: false,
+            twoPersonTeam: false,
+            loadingAssistance: 'customer'
+          }
+        },
+        // Add pickup status indicator
+        status: shipmentDetails.pickupDetails?.date && shipmentDetails.pickupDetails?.timeSlot ? 'scheduled' : 'incomplete'
+      };
+
+      await updatePickupDetails(pickupDetails);
+      
+      // Also save to shipping transaction for review page compatibility
+      try {
+        const existingTransaction = ShippingTransactionManager.load();
+        if (existingTransaction.success && existingTransaction.data) {
+          const updatedTransaction = {
+            ...existingTransaction.data,
+            pickupDetails: pickupDetails,
+            shipmentDetails: {
+              ...existingTransaction.data.shipmentDetails,
+              ...shipmentDetails
+            }
+          };
+          
+          const saveResult = ShippingTransactionManager.save(updatedTransaction);
+          if (saveResult.success) {
+            console.log('✅ [PICKUP-PAGE] Also saved to shipping transaction');
+          } else {
+            console.warn('⚠️ [PICKUP-PAGE] Failed to save to shipping transaction:', saveResult.error);
+          }
+        }
+      } catch (transactionError) {
+        console.warn('⚠️ [PICKUP-PAGE] Failed to update shipping transaction:', transactionError);
+      }
+      
+      console.log('✅ [PICKUP-PAGE] Pickup state saved successfully, navigating to review');
+      router.push('/shipping/review');
+    } catch (error) {
+      console.error('❌ [PICKUP-PAGE] Failed to save pickup state:', error);
+      // Still navigate to review even if save fails, but log the error
+      router.push('/shipping/review');
+    }
+  }, [shipmentDetails.pickupDetails, updatePickupDetails, router]);
 
   // Check if we have required data
   const hasOriginAddress = shipmentDetails?.origin;
@@ -443,12 +518,13 @@ export default function PickupPage() {
             </Button>
           </Link>
           
-          <Link href="/shipping/review">
-            <Button className="flex items-center space-x-2">
-              <span>Continue to Review</span>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleContinueToReview}
+            className="flex items-center space-x-2"
+          >
+            <span>Continue to Review</span>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, CheckCircle, Calendar, Clock, DollarSign } from 'lucide-react';
 import type { TimeSlot, PickupDetails } from '@/lib/types';
+import { ShippingTransactionManager } from '@/lib/localStorage';
 
 /**
  * Main Pickup Calendar Interface Component
@@ -30,6 +31,7 @@ export function PickupCalendarInterface() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | undefined>();
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   // Extract origin ZIP for availability API
   const originZip = shipmentDetails?.origin?.zip || '';
@@ -165,7 +167,37 @@ export function PickupCalendarInterface() {
 
       await updatePickupDetails(pickupDetails);
       
+      // Also save to shipping transaction for review page compatibility
+      try {
+        const existingTransaction = ShippingTransactionManager.load();
+        if (existingTransaction.success && existingTransaction.data) {
+          const updatedTransaction = {
+            ...existingTransaction.data,
+            pickupDetails: pickupDetails,
+            shipmentDetails: {
+              ...existingTransaction.data.shipmentDetails,
+              ...shipmentDetails
+            }
+          };
+          
+          const saveResult = ShippingTransactionManager.save(updatedTransaction);
+          if (saveResult.success) {
+            console.log('✅ [PICKUP-CALENDAR-INTERFACE] Also saved to shipping transaction');
+          } else {
+            console.warn('⚠️ [PICKUP-CALENDAR-INTERFACE] Failed to save to shipping transaction:', saveResult.error);
+          }
+        }
+      } catch (transactionError) {
+        console.warn('⚠️ [PICKUP-CALENDAR-INTERFACE] Failed to update shipping transaction:', transactionError);
+      }
+      
+      setIsConfirmed(true);
       console.log('✅ [PICKUP-CALENDAR-INTERFACE] Pickup confirmed successfully');
+      
+      // Reset confirmed state after 3 seconds to allow for re-selection if needed
+      setTimeout(() => {
+        setIsConfirmed(false);
+      }, 3000);
     } catch (error) {
       console.error('💥 [PICKUP-CALENDAR-INTERFACE] Failed to confirm pickup:', error);
     } finally {
@@ -341,12 +373,17 @@ export function PickupCalendarInterface() {
             <Button 
               onClick={handleConfirmPickup}
               disabled={isConfirming}
-              className="ml-4"
+              className={`ml-4 ${isConfirmed ? 'bg-green-600 hover:bg-green-700' : ''}`}
             >
               {isConfirming ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Confirming...
+                </>
+              ) : isConfirmed ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Pickup Confirmed!
                 </>
               ) : (
                 'Confirm Pickup'

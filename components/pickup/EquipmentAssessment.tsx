@@ -171,10 +171,14 @@ export function EquipmentAssessment({
     return fees;
   }, [selectedEquipment]);
 
-  // Update parent with fee calculations
+  // Update parent with fee calculations (throttled to prevent infinite loops)
   React.useEffect(() => {
-    onFeeUpdate?.(additionalFees);
-  }, [additionalFees]);
+    const timeoutId = setTimeout(() => {
+      onFeeUpdate?.(additionalFees);
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [onFeeUpdate, additionalFees]);
 
   // Get relevant infrastructure considerations
   const relevantInfrastructure = React.useMemo(() => {
