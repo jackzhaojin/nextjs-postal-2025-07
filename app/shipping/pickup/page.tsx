@@ -17,6 +17,7 @@ import {
   ContactInfo,
   type PickupNotificationPreferences,
   PackageReadinessSettings,
+  PickupDetails,
   AuthorizationSettings,
   PremiumServiceOptions
 } from '@/lib/types';
@@ -139,26 +140,9 @@ export default function PickupPage() {
         ...shipmentDetails.pickupDetails,
         // Add default values if schedule is not yet selected
         locationInfo: shipmentDetails.pickupDetails?.locationInfo || {
-          type: 'ground-level',
-          accessInstructions: {
-            securityRequired: false,
-            appointmentRequired: false,
-            limitedParking: false,
-            forkliftAvailable: false,
-            liftgateRequired: false,
-            parkingInstructions: '',
-            packageLocation: '',
-            driverInstructions: ''
-          },
-          equipmentRequirements: {
-            dolly: false,
-            applianceDolly: false,
-            furniturePads: false,
-            straps: false,
-            palletJack: false,
-            twoPersonTeam: false,
-            loadingAssistance: 'customer'
-          }
+          type: 'ground-level' as const,
+          accessRequirements: [],
+          availableEquipment: []
         },
         // Add pickup status indicator
         status: shipmentDetails.pickupDetails?.date && shipmentDetails.pickupDetails?.timeSlot ? 'scheduled' : 'incomplete'
@@ -170,20 +154,23 @@ export default function PickupPage() {
       try {
         const existingTransaction = ShippingTransactionManager.load();
         if (existingTransaction.success && existingTransaction.data) {
-          const updatedTransaction = {
-            ...existingTransaction.data,
-            pickupDetails: pickupDetails,
-            shipmentDetails: {
-              ...existingTransaction.data.shipmentDetails,
-              ...shipmentDetails
+          // Only update the transaction if we have complete pickup details
+          if (pickupDetails.date && pickupDetails.timeSlot) {
+            const updatedTransaction = {
+              ...existingTransaction.data,
+              pickupDetails: pickupDetails as PickupDetails,
+              shipmentDetails: {
+                ...existingTransaction.data.shipmentDetails,
+                ...shipmentDetails
+              }
+            };
+            
+            const saveResult = ShippingTransactionManager.save(updatedTransaction);
+            if (saveResult.success) {
+              console.log('✅ [PICKUP-PAGE] Also saved to shipping transaction');
+            } else {
+              console.warn('⚠️ [PICKUP-PAGE] Failed to save to shipping transaction:', saveResult.error);
             }
-          };
-          
-          const saveResult = ShippingTransactionManager.save(updatedTransaction);
-          if (saveResult.success) {
-            console.log('✅ [PICKUP-PAGE] Also saved to shipping transaction');
-          } else {
-            console.warn('⚠️ [PICKUP-PAGE] Failed to save to shipping transaction:', saveResult.error);
           }
         }
       } catch (transactionError) {

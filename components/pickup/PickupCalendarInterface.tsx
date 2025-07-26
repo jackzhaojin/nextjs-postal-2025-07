@@ -171,20 +171,23 @@ export function PickupCalendarInterface() {
       try {
         const existingTransaction = ShippingTransactionManager.load();
         if (existingTransaction.success && existingTransaction.data) {
-          const updatedTransaction = {
-            ...existingTransaction.data,
-            pickupDetails: pickupDetails,
-            shipmentDetails: {
-              ...existingTransaction.data.shipmentDetails,
-              ...shipmentDetails
+          // Only update the transaction if we have complete pickup details
+          if (pickupDetails.date && pickupDetails.timeSlot) {
+            const updatedTransaction = {
+              ...existingTransaction.data,
+              pickupDetails: pickupDetails as PickupDetails,
+              shipmentDetails: {
+                ...existingTransaction.data.shipmentDetails,
+                ...shipmentDetails
+              }
+            };
+            
+            const saveResult = ShippingTransactionManager.save(updatedTransaction);
+            if (saveResult.success) {
+              console.log('✅ [PICKUP-CALENDAR-INTERFACE] Also saved to shipping transaction');
+            } else {
+              console.warn('⚠️ [PICKUP-CALENDAR-INTERFACE] Failed to save to shipping transaction:', saveResult.error);
             }
-          };
-          
-          const saveResult = ShippingTransactionManager.save(updatedTransaction);
-          if (saveResult.success) {
-            console.log('✅ [PICKUP-CALENDAR-INTERFACE] Also saved to shipping transaction');
-          } else {
-            console.warn('⚠️ [PICKUP-CALENDAR-INTERFACE] Failed to save to shipping transaction:', saveResult.error);
           }
         }
       } catch (transactionError) {
