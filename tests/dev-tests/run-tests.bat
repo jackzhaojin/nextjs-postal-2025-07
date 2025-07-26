@@ -10,37 +10,37 @@ if "%1"=="" goto usage
 
 if "%1"=="pickup-debug" (
     echo Running: pickup-scheduling-debug.spec.ts
-    npx playwright test "dev-tests/pickup-debugging/pickup-scheduling-debug.spec.ts" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/pickup-scheduling-debug.spec.ts" --reporter=line
     goto end
 )
 
 if "%1"=="pickup-simple" (
     echo Running: pickup-simplified-test.spec.ts
-    npx playwright test "dev-tests/pickup-debugging/pickup-simplified-test.spec.ts" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts" --reporter=line
     goto end
 )
 
 if "%1"=="pickup-e2e" (
     echo Running: e2e-pickup-review.spec.ts
-    npx playwright test "dev-tests/pickup-debugging/e2e-pickup-review.spec.ts" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/e2e-pickup-review.spec.ts" --reporter=line
     goto end
 )
 
 if "%1"=="pickup-final" (
     echo Running: final-pickup-validation.spec.ts
-    npx playwright test "dev-tests/pickup-debugging/final-pickup-validation.spec.ts" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/final-pickup-validation.spec.ts" --reporter=line
     goto end
 )
 
 if "%1"=="pickup-all" (
     echo Running all pickup debugging tests...
-    npx playwright test "dev-tests/pickup-debugging/" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/" --reporter=line
     goto end
 )
 
 if "%1"=="review" (
     echo Running: review-page-test.spec.ts
-    npx playwright test "dev-tests/pickup-debugging/review-page-test.spec.ts" --reporter=line
+    npx playwright test "tests/dev-tests/pickup-debugging/review-page-test.spec.ts" --reporter=line
     goto end
 )
 
@@ -52,12 +52,12 @@ if "%1"=="headed" (
     )
     if "%2"=="pickup-final" (
         echo Running ^(headed^): final-pickup-validation.spec.ts
-        npx playwright test "dev-tests/pickup-debugging/final-pickup-validation.spec.ts" --headed
+        npx playwright test "tests/dev-tests/pickup-debugging/final-pickup-validation.spec.ts" --headed
         goto end
     )
     if "%2"=="pickup-simple" (
         echo Running ^(headed^): pickup-simplified-test.spec.ts
-        npx playwright test "dev-tests/pickup-debugging/pickup-simplified-test.spec.ts" --headed
+        npx playwright test "tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts" --headed
         goto end
     )
     echo Unknown headed test: %2

@@ -23,23 +23,23 @@ run_test_headed() {
 
 case "$1" in
     "pickup-debug")
-        run_test "dev-tests/pickup-debugging/pickup-scheduling-debug.spec.ts"
+        run_test "tests/dev-tests/pickup-debugging/pickup-scheduling-debug.spec.ts"
         ;;
     "pickup-simple")
-        run_test "dev-tests/pickup-debugging/pickup-simplified-test.spec.ts"
+        run_test "tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts"
         ;;
     "pickup-e2e")
-        run_test "dev-tests/pickup-debugging/e2e-pickup-review.spec.ts"
+        run_test "tests/dev-tests/pickup-debugging/e2e-pickup-review.spec.ts"
         ;;
     "pickup-final")
-        run_test "dev-tests/pickup-debugging/final-pickup-validation.spec.ts"
+        run_test "tests/dev-tests/pickup-debugging/final-pickup-validation.spec.ts"
         ;;
     "pickup-all")
         echo "Running all pickup debugging tests..."
-        run_test "dev-tests/pickup-debugging/"
+        run_test "tests/dev-tests/pickup-debugging/"
         ;;
     "review")
-        run_test "dev-tests/pickup-debugging/review-page-test.spec.ts"
+        run_test "tests/dev-tests/pickup-debugging/review-page-test.spec.ts"
         ;;
     "headed")
         if [ -z "$2" ]; then
@@ -49,10 +49,10 @@ case "$1" in
         fi
         case "$2" in
             "pickup-final")
-                run_test_headed "dev-tests/pickup-debugging/final-pickup-validation.spec.ts"
+                run_test_headed "tests/dev-tests/pickup-debugging/final-pickup-validation.spec.ts"
                 ;;
             "pickup-simple")
-                run_test_headed "dev-tests/pickup-debugging/pickup-simplified-test.spec.ts"
+                run_test_headed "tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts"
                 ;;
             *)
                 echo "Unknown headed test: $2"

@@ -27,19 +27,19 @@ These tests can be run individually using Playwright **from the project root dir
 # Run from project root (c:\code\nextjs-postal-2025-07\)
 
 # Run a specific dev test
-npx playwright test dev-tests/pickup-debugging/pickup-simplified-test.spec.ts --reporter=line
+npx playwright test tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts --reporter=line
 
 # Run all pickup debugging tests
-npx playwright test dev-tests/pickup-debugging/ --reporter=line
+npx playwright test tests/dev-tests/pickup-debugging/ --reporter=line
 
 # Run with headed mode for debugging
-npx playwright test dev-tests/pickup-debugging/final-pickup-validation.spec.ts --headed
+npx playwright test tests/dev-tests/pickup-debugging/final-pickup-validation.spec.ts --headed
 
 # Run specific browser projects (optional)
-npx playwright test dev-tests/pickup-debugging/pickup-simplified-test.spec.ts --project=chromium --reporter=line
+npx playwright test tests/dev-tests/pickup-debugging/pickup-simplified-test.spec.ts --project=chromium --reporter=line
 ```
 
-**Note**: Make sure to run these commands from the project root directory, not from within the `dev-tests` folder, as Playwright needs access to the main configuration file.
+**Note**: Make sure to run these commands from the project root directory, not from within the `tests/dev-tests` folder, as Playwright needs access to the main configuration file.
 
 ## Purpose
 
